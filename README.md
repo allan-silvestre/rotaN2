@@ -1,7 +1,7 @@
 # <h2>rotaN2<h2>
 
 <h2>Projeto de controle de rota de equipe de suporte N2.<br>
-<font color="red">obs: (ainda em desenvolvimento, a screen apresentada também não é a versão final)</font><h2><br>
+obs: (ainda em desenvolvimento, a screen apresentada também não é a versão final)<br>
 O app funciona para controle de quilometragem, registro de viagens e atendimentos realizados, além de relatorio de custos e valores a receber.<h2><br><br>
 
 <h2>Sobre o app<br>
