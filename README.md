@@ -1,8 +1,8 @@
-# rotaN2
+# <h2>rotaN2<h2>
 
-Projeto de controle de rota de equipe de suporte N2.
+<h2>Projeto de controle de rota de equipe de suporte N2.<h2>
 
-O app funciona para controle de quilometragem, registrosdas viagens, atendimentos realizados e valores a receberde reembolso.
+<h3>O app funciona para controle de quilometragem, registrosdas viagens, atendimentos realizados e valores a receberde reembolso.
 
 sobre o app obs: (ainda em desenvolvimento)
 Linguagem: Kotlin
@@ -12,4 +12,8 @@ RealDataBase: para armazezamento online dos dados
 Room: para persistência de dados.
 Works manager: para gerenciamento das tarefas realizados offline.
 Coroutinas: para sincronização dos dados e gerenciamento de tarefas mais pesadas.
-Junit e mockito: para testes unitários.
+Junit e mockito: para testes unitários.<h3>
+
+<div>
+<img  alt="screen" src="https://github.com/allan-silvestre/rotaN2/assets/55851020/816b8792-a36e-4cb8-a4cd-9b9911ae3f87.jpg">
+</div>
