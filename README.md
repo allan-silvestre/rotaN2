@@ -2,10 +2,10 @@
 
 <h2>Projeto de controle de rota de equipe de suporte N2.<h2>
 
-<h4>O app funciona para controle de quilometragem, registrosdas viagens, atendimentos realizados e valores a receberde reembolso.<br><br>
-
-sobre o app obs: (ainda em desenvolvimento, a screen apresentada também não é a versão final)<br>
-Linguagem: Kotlin<br>
+<h4>O app funciona para controle de quilometragem, registro de viagens e atendimentos realizados, além de relatorio de custos e valores a receber.<h4><br><br>
+<h2 color: red>obs: (ainda em desenvolvimento, a screen apresentada também não é a versão final)<h2><br><br>
+<h2>Sobre o app<h2><br>
+<h4>Linguagem: Kotlin<br>
 UI: Jetpack compose<br>
 Firabase auth: para autenticação de usuários<br>
 RealDataBase: para armazezamento online dos dados<br>
