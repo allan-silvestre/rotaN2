@@ -15,5 +15,5 @@ Coroutinas: para sincronização dos dados e gerenciamento de tarefas mais pesad
 Junit e mockito: para testes unitários.<h4>
 
 <div>
-<img  alt="screen" src="https://github.com/allan-silvestre/rotaN2/assets/55851020/816b8792-a36e-4cb8-a4cd-9b9911ae3f87.jpg" height="1080" width="720">
+<img  alt="screen" src="https://github.com/allan-silvestre/rotaN2/assets/55851020/816b8792-a36e-4cb8-a4cd-9b9911ae3f87.jpg" height="800" width="350">
 </div>
