@@ -3,6 +3,8 @@ package com.ags.controlekm.database.Models
 import androidx.annotation.NonNull
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
 import java.util.UUID
 
 @Entity

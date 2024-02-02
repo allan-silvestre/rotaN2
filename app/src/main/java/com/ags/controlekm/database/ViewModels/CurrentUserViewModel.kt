@@ -63,6 +63,7 @@ class CurrentUserViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
+    // FAZ DOWNLOAD DOS DADOS DO USUÁRIO ATUAL FIREBASE PARA O ROOM
     fun getCurrentUserData(id: String, onDataChanged: (CurrentUser) -> Unit) {
         val userRef: DatabaseReference =
             FirebaseDatabase.getInstance().reference

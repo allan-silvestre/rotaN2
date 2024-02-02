@@ -51,6 +51,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -64,6 +65,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.ags.controlekm.R
 import com.ags.controlekm.components.FormularioOutlinedTextField
 import com.ags.controlekm.components.FormularioTextField
 import com.ags.controlekm.components.FormularioTextFieldMenu
@@ -71,10 +73,10 @@ import com.ags.controlekm.database.FirebaseServices.CurrentUserServices
 import com.ags.controlekm.database.Models.CurrentUser
 import com.ags.controlekm.database.Models.EnderecoAtendimento
 import com.ags.controlekm.database.Models.ViagemSuporteTecnico
+import com.ags.controlekm.database.ViewModels.CurrentUserViewModel
 import com.ags.controlekm.database.ViewModels.EnderecoAtendimentoViewModel
-import com.ags.controlekm.database.ViewModels.LoginViewModel
 import com.ags.controlekm.database.ViewModels.ViagemSuporteTecnicoViewModel
-import com.ags.controlekm.functions.navigateSingleTopTo
+import com.ags.controlekm.functions.reiniciarTela
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -87,7 +89,7 @@ import java.util.UUID
 @Composable
 fun Home(
     navController: NavHostController,
-    loginViewModel: LoginViewModel = viewModel(),
+    currentUserViewModel: CurrentUserViewModel = viewModel(),
     enderecoAtendimentoViewModel: EnderecoAtendimentoViewModel = viewModel(),
     viagemSuporteTecnicoViewModel: ViagemSuporteTecnicoViewModel = viewModel(),
 ) {
@@ -97,7 +99,7 @@ fun Home(
 
     var currentUser by rememberSaveable { mutableStateOf(FirebaseAuth.getInstance().currentUser) }
 
-    val userLoggedData by loginViewModel.currentUserData.collectAsState(null)
+    val userLoggedData by currentUserViewModel.currentUserData.collectAsState(null)
 
     val currentUserServices = CurrentUserServices(currentUser?.uid.toString())
 
@@ -120,7 +122,7 @@ fun Home(
         }
     }
 
-    var time by remember { mutableStateOf("00:00:00") }
+    var hora by remember { mutableStateOf("00:00:00") }
     var data by remember { mutableStateOf("00/00/0000") }
 
     val handler = remember { Handler(Looper.getMainLooper()) }
@@ -136,13 +138,14 @@ fun Home(
                     data = dateFormat.format(currentTime)
 
                     val timeFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
-                    time = timeFormat.format(currentTime)
+                    hora = timeFormat.format(currentTime)
                 }
             }
         }
     }
 
     val context = LocalContext.current
+    val title = stringResource(R.string.home)
 
     var visibleFinalizarDialog by remember { mutableStateOf(false) }
     var visibleFinalizarOpcoes by remember { mutableStateOf(true) }
@@ -471,7 +474,7 @@ fun Home(
                                         Spacer(modifier = Modifier.width(12.dp))
                                         Text(
                                             modifier = Modifier.weight(0.4f),
-                                            text = "Hora: ${time}\n" + "Data: ${data}",
+                                            text = "Hora: ${hora}\n" + "Data: ${data}",
                                             fontSize = 11.sp,
                                             fontWeight = FontWeight.SemiBold,
                                             //textAlign = TextAlign.Center
@@ -536,7 +539,7 @@ fun Home(
                                         Spacer(modifier = Modifier.width(12.dp))
                                         Text(
                                             modifier = Modifier.weight(0.4f),
-                                            text = "Hora: ${time}\n" + "Data: ${data}",
+                                            text = "Hora: ${hora}\n" + "Data: ${data}",
                                             fontSize = 11.sp,
                                             fontWeight = FontWeight.SemiBold,
                                             //textAlign = TextAlign.Center
@@ -763,11 +766,11 @@ fun Home(
                                                         ),
                                                         onClick = {
                                                             atendimento.dataConclusao = data
-                                                            atendimento.horaConclusao = time
+                                                            atendimento.horaConclusao = hora
 
                                                             atendimento.descricao = descricao
                                                             atendimento.dataSaidaRetorno = data
-                                                            atendimento.horaSaidaRetorno = time
+                                                            atendimento.horaSaidaRetorno = hora
                                                             atendimento.localRetorno = localFinalizarAtendimento
 
                                                             atendimento.statusService =
@@ -785,7 +788,7 @@ fun Home(
                                                             visibleNovoAtendimento = false
                                                             textTituloFinalizarAtendimento =
                                                                 "Qual seu proximo passo?"
-                                                            reiniciarTela(navController)
+                                                            reiniciarTela(title, navController)
 
                                                         }) {
                                                         Text(
@@ -915,7 +918,7 @@ fun Home(
                                                         Spacer(modifier = Modifier.width(12.dp))
                                                         Text(
                                                             modifier = Modifier.weight(0.4f),
-                                                            text = "Hora: ${time}\n" + "Data: ${data}",
+                                                            text = "Hora: ${hora}\n" + "Data: ${data}",
                                                             fontSize = 11.sp,
                                                             fontWeight = FontWeight.SemiBold,
                                                             //textAlign = TextAlign.Center
@@ -934,7 +937,7 @@ fun Home(
                                                         onClick = {
                                                             // FINALIZA O ATENDIMENTO ATUAL
                                                             atendimento.dataConclusao = data
-                                                            atendimento.horaConclusao = time
+                                                            atendimento.horaConclusao = hora
                                                             atendimento.descricao = descricao
                                                             atendimento.statusService = "Finalizado"
                                                             textStatus = ""
@@ -953,7 +956,7 @@ fun Home(
                                                                         if (localSaidaError && localAtendimentoError && kmSaidaError) {
                                                                             atendimento.id = UUID.randomUUID().toString()
                                                                             atendimento.dataSaida = data
-                                                                            atendimento.horaSaida = time
+                                                                            atendimento.horaSaida = hora
                                                                             atendimento.localSaida = localSaida
                                                                             atendimento.localAtendimento = localAtendimento
                                                                             atendimento.kmSaida = kmSaida
@@ -963,7 +966,7 @@ fun Home(
                                                                             atendimento.statusService = "Em rota"
                                                                             coroutineScope.launch(Dispatchers.IO) {
                                                                                 viagemSuporteTecnicoViewModel.insert(atendimento)
-                                                                                loginViewModel.insert(
+                                                                                currentUserViewModel.insert(
                                                                                     CurrentUser(
                                                                                         id = userLoggedData?.id.toString(),
                                                                                         ultimoKm = kmSaida,
@@ -971,7 +974,7 @@ fun Home(
                                                                                 )
                                                                                 currentUserServices.addUltimoKm(kmSaida)
                                                                             }
-                                                                            reiniciarTela(navController)
+                                                                            reiniciarTela(title, navController)
                                                                         } else {
                                                                             Toast.makeText(
                                                                                 context,
@@ -1004,7 +1007,7 @@ fun Home(
                                                             visibleRetornar = false
                                                             visibleNovoAtendimento = false
                                                             textTituloFinalizarAtendimento = "Finalizar atendimento"
-                                                            reiniciarTela(navController)
+                                                            reiniciarTela(title, navController)
 
                                                         }) {
                                                         Text(
@@ -1038,64 +1041,16 @@ fun Home(
                     onClick = {
                         when (countContent) {
                             1 -> {
-                                if (enderecosList.contains(localSaida) && enderecosList.contains(
-                                        localAtendimento
-                                    ) && kmSaida.isNotEmpty()
-                                ) {
-                                    if (localSaida.equals(localAtendimento)) {
-                                        Toast.makeText(
-                                            context,
-                                            "O local de saída não pode ser igual ao local do atendimento",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    } else {
-                                        if (kmSaida.toInt() > userLoggedData?.ultimoKm!!.toInt()) {
-                                            kmChegadaError = true
-                                            if (localSaidaError && localAtendimentoError && kmSaidaError) {
-                                                atendimento.dataSaida = data
-                                                atendimento.horaSaida = time
-                                                atendimento.localSaida = localSaida
-                                                atendimento.localAtendimento = localAtendimento
-                                                atendimento.kmSaida = kmSaida
-                                                atendimento.imgPerfil = userLoggedData?.imagem
-                                                atendimento.tecnicoId = currentUser?.uid
-                                                atendimento.tecnicoNome = "${userLoggedData?.nome} ${userLoggedData?.sobrenome}"
-                                                atendimento.statusService = "Em rota"
-                                                coroutineScope.launch(Dispatchers.IO) {
-                                                    viagemSuporteTecnicoViewModel.insert(atendimento)
-                                                    loginViewModel.update(
-                                                        CurrentUser(
-                                                            id = userLoggedData?.id.toString(),
-                                                            ultimoKm = kmSaida,
-                                                        )
-                                                    )
-                                                    currentUserServices.addUltimoKm(kmSaida)
-                                                }
-                                                reiniciarTela(navController)
-                                            } else {
-                                                Toast.makeText(
-                                                    context,
-                                                    "Não foi possivel iniciar sua viagem, verifique os campos e tente novamente",
-                                                    Toast.LENGTH_SHORT
-                                                ).show()
-                                            }
-
-                                        } else {
-                                            Toast.makeText(
-                                                context,
-                                                "KM inferior ao último informado.",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                            kmChegadaError = false
-                                        }
-                                    }
-                                } else {
-                                    Toast.makeText(
-                                        context,
-                                        "Não foi possivel iniciar sua viagem, verifique os campos e tente novamente",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
+                                viagemSuporteTecnicoViewModel.iniciarViagem(
+                                    localSaida = localSaida,
+                                    localAtendimento = localAtendimento,
+                                    kmSaida = kmSaida,
+                                    ultimoKm = userLoggedData?.ultimoKm.toString(),
+                                    data = data,
+                                    hora = hora,
+                                    title = title,
+                                    navController = navController
+                                )
                             }
 
                             2 -> {
@@ -1106,13 +1061,13 @@ fun Home(
                                     if (kmChegada.toInt() > userLoggedData?.ultimoKm!!.toInt()) {
                                         if (atendimento.statusService.equals("Em rota")) {
                                             atendimento.dataChegada = data
-                                            atendimento.horaChegada = time
+                                            atendimento.horaChegada = hora
                                             atendimento.kmChegada = kmChegada
                                             atendimento.kmRodado = (kmChegada.toInt() - atendimento.kmSaida!!.toInt()).toString()
                                             atendimento.statusService = "Em andamento"
                                             coroutineScope.launch(Dispatchers.IO) {
                                                 viagemSuporteTecnicoViewModel.update(atendimento)
-                                                loginViewModel.update(
+                                                currentUserViewModel.update(
                                                     CurrentUser(
                                                         id = userLoggedData?.id.toString(),
                                                         ultimoKm = kmChegada,
@@ -1120,17 +1075,17 @@ fun Home(
                                                 )
                                                 currentUserServices.addUltimoKm(kmChegada)
                                             }
-                                            reiniciarTela(navController)
+                                            reiniciarTela(title, navController)
                                         } else {
                                             atendimento.dataChegadaRetorno = data
-                                            atendimento.horaChegadaRetorno = time
+                                            atendimento.horaChegadaRetorno = hora
                                             atendimento.kmChegada = kmChegada
                                             atendimento.statusService = "Finalizado"
                                             currentUserServices.addUltimoKm(kmChegada)
                                             atendimento.kmRodado = (kmChegada.toInt() - atendimento.kmSaida!!.toInt()).toString()
                                             coroutineScope.launch(Dispatchers.IO) {
                                                 viagemSuporteTecnicoViewModel.update(atendimento)
-                                                loginViewModel.update(
+                                                currentUserViewModel.update(
                                                     CurrentUser(
                                                         id = userLoggedData?.id.toString(),
                                                         ultimoKm = kmChegada,
@@ -1140,7 +1095,7 @@ fun Home(
                                                 currentUserServices.addUltimoKm(kmChegada)
                                                 currentUserServices.addKmBackup(kmChegada)
                                             }
-                                            reiniciarTela(navController)
+                                            reiniciarTela(title, navController)
                                         }
                                     } else {
                                         Toast.makeText(
@@ -1183,7 +1138,7 @@ fun Home(
 
                 // NO ROOM
                 // DEFINE O VALOR DO (ULTIMO KM) DO USUÁRIO PARA O ULTIMO INFORMADO AO CONCLUIR A ULTIMA VIAGEM
-                loginViewModel.update(
+                currentUserViewModel.update(
                     CurrentUser(
                         id = userLoggedData?.id.toString(),
                         ultimoKm = userLoggedData?.kmBackup.toString(),
@@ -1193,7 +1148,7 @@ fun Home(
                 // DEFINE O VALOR DO (ULTIMO KM) DO USUÁRIO PARA O ULTIMO INFORMADO AO CONCLUIR A ULTIMA VIAGEM
                 currentUserServices.addUltimoKm(userLoggedData?.kmBackup.toString())
             }
-            reiniciarTela(navController)
+            reiniciarTela(title, navController)
         }) {
             Text(text = "Cancelar atendimento")
         }
@@ -1212,17 +1167,11 @@ fun Home(
                     )
                 }
             }
-            reiniciarTela(navController)
+            reiniciarTela(title, navController)
         }) {
             Text(text = "Cancelar retorno")
         }
     }
-}
-
-
-fun reiniciarTela(navController: NavHostController) {
-    navController.popBackStack()
-    navController.navigateSingleTopTo("home")
 }
 
 @Composable
@@ -1243,5 +1192,9 @@ fun FinalizarAtendimentoDialog(
             content()
         }
     }
+
+}
+
+fun iniciarViagem(){
 
 }

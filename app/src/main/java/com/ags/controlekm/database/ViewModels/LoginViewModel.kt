@@ -76,41 +76,4 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
-
-    fun insert(currentUser: CurrentUser) {
-        viewModelScope.launch {
-            repository.insert(currentUser)
-        }
-    }
-
-    fun update(currentUser: CurrentUser) {
-        viewModelScope.launch {
-            repository.update(currentUser)
-        }
-    }
-
-    fun delete(currentUser: CurrentUser) {
-        viewModelScope.launch {
-            repository.delete(currentUser)
-        }
-    }
-    /**
-    fun getUserLoggedData(userId: String, onDataChanged: (CurrentUser) -> Unit) {
-    val userRef = ""
-    val valueEventListener = object : ValueEventListener {
-    override fun onDataChange(snapshot: DataSnapshot) {
-    val userData = snapshot.getValue(CurrentUser::class.java)
-    userData?.let { onDataChanged(it) }
-    }
-
-    override fun onCancelled(error: DatabaseError) {
-    // Handle errors, se necessário
-    }
-    }
-
-    // Adiciona o listener
-    //userRef.addValueEventListener(valueEventListener)
-
-    }
-     **/
 }
