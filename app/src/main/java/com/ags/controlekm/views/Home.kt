@@ -85,7 +85,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
-import java.util.UUID
 
 @Composable
 fun Home(
@@ -161,18 +160,17 @@ fun Home(
     var kmChegada by remember { mutableStateOf("") }
     var kmChegadaError by remember { mutableStateOf(true) }
 
-    var descricao by remember { mutableStateOf("") }
-    var descricaoError by remember { mutableStateOf(true) }
+    var resumoAtendimento by remember { mutableStateOf("") }
+    var resumoAtendimentoError by remember { mutableStateOf(true) }
 
     var expandedSaida by remember { mutableStateOf(false) }
     var expandedAtendimento by remember { mutableStateOf(false) }
     var expandedlocalFinalizarAtendimento by remember { mutableStateOf(false) }
+
     var localSaida by remember { mutableStateOf("") }
     var localSaidaError by remember { mutableStateOf(true) }
     var localAtendimento by remember { mutableStateOf("") }
     var localAtendimentoError by remember { mutableStateOf(true) }
-    var localFinalizarAtendimento by remember { mutableStateOf("") }
-    var localFinalizarAtendimentoError by remember { mutableStateOf(true) }
 
     var textFieldSize by remember { mutableStateOf(Size.Zero) }
 
@@ -181,7 +179,8 @@ fun Home(
 
     var textTituloFinalizarAtendimento by remember { mutableStateOf("Finalizar atendimento") }
 
-    var atendimento by remember { mutableStateOf(ViagemSuporteTecnico()) }
+    var novoAtendimento by remember { mutableStateOf(ViagemSuporteTecnico()) }
+    var atendimentoAtual by remember { mutableStateOf(ViagemSuporteTecnico()) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Box(
@@ -238,7 +237,7 @@ fun Home(
                                         viagemSuporte.forEach {
                                             if (it.tecnicoId!!.contains(currentUser?.uid.toString())) {
                                                 if (it.statusService != "Finalizado") {
-                                                    atendimento = it
+                                                    atendimentoAtual = it
                                                     when (it.statusService) {
                                                         "Em rota" -> {
                                                             countContent = 2
@@ -485,15 +484,15 @@ fun Home(
                             }
 
                             2 -> {
-                                if (atendimento.statusService.equals("Em rota")) {
+                                if (atendimentoAtual.statusService.equals("Em rota")) {
                                     textStatus =
-                                        "${atendimento.statusService} entre  ${atendimento.localSaida} \n e ${atendimento.localAtendimento}"
+                                        "${atendimentoAtual.statusService} entre  ${atendimentoAtual.localSaida} \n e ${atendimentoAtual.localAtendimento}"
                                     textButton = "Confirmar chegada e iniciar o atendimento"
                                 }
 
-                                if (atendimento.statusService.equals("Em rota, retornando")) {
+                                if (atendimentoAtual.statusService.equals("Em rota, retornando")) {
                                     textStatus =
-                                        "${atendimento.statusService} de ${atendimento.localAtendimento} \n para ${atendimento.localRetorno}"
+                                        "${atendimentoAtual.statusService} de ${atendimentoAtual.localAtendimento} \n para ${atendimentoAtual.localRetorno}"
                                     textButton = "Confirmar chegada"
                                 }
                                 Column(
@@ -571,22 +570,22 @@ fun Home(
                                     )
                                     FormularioOutlinedTextField(
                                         readOnly = false,
-                                        value = descricao,
-                                        onValueChange = { descricao = it.take(50) },
+                                        value = resumoAtendimento,
+                                        onValueChange = { resumoAtendimento = it.take(50) },
                                         label = "Resumo do atendimento",
                                         visualTransformation = VisualTransformation.None,
                                         keyboardType = KeyboardType.Text,
                                         imeAction = ImeAction.Next,
                                         capitalization = KeyboardCapitalization.Sentences,
-                                        erro = descricaoError,
+                                        erro = resumoAtendimentoError,
                                         erroMensagem = ""
                                     )
                                 }
 
-                                if (visibleFinalizarDialog) {
+                                if (visibleFinalizarDialog == true) {
                                     FinalizarAtendimentoDialog(
                                         onDismissRequest = {
-                                            visibleFinalizarDialog = false
+                                            //visibleFinalizarDialog = false
                                             visibleFinalizarOpcoes = false
                                             visibleRetornar = false
                                             visibleNovoAtendimento = false
@@ -641,8 +640,8 @@ fun Home(
                                                                 end = 6.dp
                                                             ),
                                                         shape = RoundedCornerShape(
-                                                            topStart = 5.dp,
-                                                            topEnd = 5.dp,
+                                                            topStart = 0.dp,
+                                                            topEnd = 0.dp,
                                                             bottomStart = 5.dp,
                                                             bottomEnd = 5.dp
                                                         ),
@@ -680,21 +679,21 @@ fun Home(
                                                                         coordinates.size.toSize()
                                                                 },
                                                             readOnly = false,
-                                                            value = localFinalizarAtendimento,
+                                                            value = localAtendimento,
                                                             trailingIconVector = Icons.Filled.ArrowDropDown,
                                                             trailingOnClick = {
                                                                 expandedlocalFinalizarAtendimento = !expandedlocalFinalizarAtendimento
                                                             },
                                                             onValueChange = {
                                                                 expandedlocalFinalizarAtendimento = true
-                                                                localFinalizarAtendimento = it
+                                                                localAtendimento = it
                                                             },
                                                             label = "Retornar para",
                                                             visualTransformation = VisualTransformation.None,
                                                             keyboardType = KeyboardType.Text,
                                                             imeAction = ImeAction.Next,
                                                             capitalization = KeyboardCapitalization.None,
-                                                            erro = localFinalizarAtendimentoError,
+                                                            erro = localAtendimentoError,
                                                             erroMensagem = ""
                                                         )
                                                         DropdownMenu(
@@ -709,12 +708,12 @@ fun Home(
                                                                     .width(300.dp)
                                                                     .height(195.dp)
                                                             ) {
-                                                                if (localFinalizarAtendimento.isNotEmpty()) {
+                                                                if (localAtendimento.isNotEmpty()) {
                                                                     items(
                                                                         enderecosList.filter {
                                                                             it.lowercase()
                                                                                 .contains(
-                                                                                    localFinalizarAtendimento.lowercase()
+                                                                                    localAtendimento.lowercase()
                                                                                 ) || it.lowercase()
                                                                                 .contains("others")
                                                                         }.sorted()
@@ -728,7 +727,7 @@ fun Home(
                                                                                 )
                                                                             },
                                                                             onClick = {
-                                                                                localFinalizarAtendimento = it
+                                                                                localAtendimento = it
                                                                                 expandedlocalFinalizarAtendimento =
                                                                                     false
                                                                             })
@@ -746,7 +745,7 @@ fun Home(
                                                                                 )
                                                                             },
                                                                             onClick = {
-                                                                                localFinalizarAtendimento = it
+                                                                                localAtendimento = it
                                                                                 expandedlocalFinalizarAtendimento =
                                                                                     false
                                                                             })
@@ -760,36 +759,26 @@ fun Home(
                                                             .fillMaxWidth()
                                                             .padding(start = 6.dp, end = 6.dp),
                                                         shape = RoundedCornerShape(
-                                                            topStart = 5.dp,
-                                                            topEnd = 5.dp,
+                                                            topStart = 0.dp,
+                                                            topEnd = 0.dp,
                                                             bottomStart = 5.dp,
                                                             bottomEnd = 5.dp
                                                         ),
                                                         onClick = {
-                                                            atendimento.dataConclusao = data
-                                                            atendimento.horaConclusao = hora
-
-                                                            atendimento.descricao = descricao
-                                                            atendimento.dataSaidaRetorno = data
-                                                            atendimento.horaSaidaRetorno = hora
-                                                            atendimento.localRetorno = localFinalizarAtendimento
-
-                                                            atendimento.statusService =
-                                                                "Em rota, retornando"
-                                                            textStatus = ""
-                                                            coroutineScope.launch(Dispatchers.IO) {
-                                                                viagemSuporteTecnicoViewModel.update(
-                                                                    atendimento
-                                                                )
-                                                            }
-
+                                                            viagemSuporteTecnicoViewModel.iniciarRetorno(
+                                                                atendimento = atendimentoAtual,
+                                                                localRetorno = localAtendimento,
+                                                                resumoAtendimento = resumoAtendimento,
+                                                                data = data,
+                                                                hora = hora,
+                                                                route = title,
+                                                                navController = navController
+                                                            )
                                                             visibleFinalizarDialog = false
                                                             visibleFinalizarOpcoes = false
                                                             visibleRetornar = false
                                                             visibleNovoAtendimento = false
-                                                            textTituloFinalizarAtendimento =
-                                                                "Qual seu proximo passo?"
-                                                            reiniciarTela(title, navController)
+                                                            textTituloFinalizarAtendimento = "Finalizar atendimento"
 
                                                         }) {
                                                         Text(
@@ -820,21 +809,21 @@ fun Home(
                                                                         coordinates.size.toSize()
                                                                 },
                                                             readOnly = false,
-                                                            value = localFinalizarAtendimento,
+                                                            value = localAtendimento,
                                                             trailingIconVector = Icons.Filled.ArrowDropDown,
                                                             trailingOnClick = {
                                                                 expandedlocalFinalizarAtendimento = !expandedlocalFinalizarAtendimento
                                                             },
                                                             onValueChange = {
                                                                 expandedlocalFinalizarAtendimento = true
-                                                                localFinalizarAtendimento = it
+                                                                localAtendimento = it
                                                             },
                                                             label = "Local do atendimento",
                                                             visualTransformation = VisualTransformation.None,
                                                             keyboardType = KeyboardType.Text,
                                                             imeAction = ImeAction.Next,
                                                             capitalization = KeyboardCapitalization.None,
-                                                            erro = localFinalizarAtendimentoError,
+                                                            erro = localAtendimentoError,
                                                             erroMensagem = ""
                                                         )
                                                         DropdownMenu(
@@ -847,12 +836,12 @@ fun Home(
                                                                     .width(300.dp)
                                                                     .height(195.dp)
                                                             ) {
-                                                                if (localFinalizarAtendimento.isNotEmpty()) {
+                                                                if (localAtendimento.isNotEmpty()) {
                                                                     items(
                                                                         enderecosList.filter {
                                                                             it.lowercase()
                                                                                 .contains(
-                                                                                    localFinalizarAtendimento.lowercase()
+                                                                                    localAtendimento.lowercase()
                                                                                 ) || it.lowercase()
                                                                                 .contains("others")
                                                                         }.sorted()
@@ -866,9 +855,8 @@ fun Home(
                                                                                 )
                                                                             },
                                                                             onClick = {
-                                                                                localFinalizarAtendimento = it
-                                                                                expandedlocalFinalizarAtendimento =
-                                                                                    false
+                                                                                localAtendimento = it
+                                                                                expandedlocalFinalizarAtendimento = false
                                                                             })
                                                                     }
                                                                 } else {
@@ -884,7 +872,7 @@ fun Home(
                                                                                 )
                                                                             },
                                                                             onClick = {
-                                                                                localFinalizarAtendimento = it
+                                                                                localAtendimento = it
                                                                                 expandedlocalFinalizarAtendimento =
                                                                                     false
                                                                             })
@@ -930,80 +918,37 @@ fun Home(
                                                             .fillMaxWidth()
                                                             .padding(start = 6.dp, end = 6.dp),
                                                         shape = RoundedCornerShape(
-                                                            topStart = 5.dp,
-                                                            topEnd = 5.dp,
+                                                            topStart = 0.dp,
+                                                            topEnd = 0.dp,
                                                             bottomStart = 5.dp,
                                                             bottomEnd = 5.dp
                                                         ),
                                                         onClick = {
-                                                            // FINALIZA O ATENDIMENTO ATUAL
-                                                            atendimento.dataConclusao = data
-                                                            atendimento.horaConclusao = hora
-                                                            atendimento.descricao = descricao
-                                                            atendimento.statusService = "Finalizado"
-                                                            textStatus = ""
-                                                            coroutineScope.launch(Dispatchers.IO) {
-                                                                viagemSuporteTecnicoViewModel.update(atendimento)
-                                                            }
-                                                            // INICIA O NOVO ATENDIMENTO AO FINALIZAR O ANTERIOR
-                                                            // ( AINDA FALTA REAJUSTAR O CÓDIGO )
-                                                            if (enderecosList.contains(localSaida) && kmSaida.isNotEmpty()) {
-                                                                localAtendimento = atendimento.localAtendimento.toString()
-                                                                if (localSaida.equals(localAtendimento)) {
-                                                                    Toast.makeText(context, "O local de saída não pode ser igual ao local do atendimento", Toast.LENGTH_SHORT).show()
-                                                                } else {
-                                                                    if (kmSaida.toInt() > userLoggedData?.ultimoKm!!.toInt()) {
-                                                                        kmChegadaError = true
-                                                                        if (localSaidaError && localAtendimentoError && kmSaidaError) {
-                                                                            atendimento.id = UUID.randomUUID().toString()
-                                                                            atendimento.dataSaida = data
-                                                                            atendimento.horaSaida = hora
-                                                                            atendimento.localSaida = localSaida
-                                                                            atendimento.localAtendimento = localAtendimento
-                                                                            atendimento.kmSaida = kmSaida
-                                                                            atendimento.imgPerfil = userLoggedData?.imagem
-                                                                            atendimento.tecnicoId = currentUser?.uid
-                                                                            atendimento.tecnicoNome = "${userLoggedData?.nome} ${userLoggedData?.sobrenome}"
-                                                                            atendimento.statusService = "Em rota"
-                                                                            coroutineScope.launch(Dispatchers.IO) {
-                                                                                viagemSuporteTecnicoViewModel.insert(atendimento)
-                                                                                currentUserViewModel.insert(
-                                                                                    CurrentUser(
-                                                                                        id = userLoggedData?.id.toString(),
-                                                                                        ultimoKm = kmSaida,
-                                                                                    )
-                                                                                )
-                                                                                currentUserServices.addUltimoKm(kmSaida)
-                                                                            }
-                                                                            reiniciarTela(title, navController)
-                                                                        } else {
-                                                                            Toast.makeText(
-                                                                                context,
-                                                                                "Não foi possivel iniciar sua viagem, verifique os campos e tente novamente",
-                                                                                Toast.LENGTH_SHORT
-                                                                            ).show()
-                                                                        }
+                                                            viagemSuporteTecnicoViewModel.iniciarViagem(
+                                                                currentUserViewModel = currentUserViewModel,
+                                                                currentUserServices = currentUserServices,
+                                                                userLoggedData = userLoggedData,
+                                                                novoAtendimento = novoAtendimento,
+                                                                localSaida = atendimentoAtual.localAtendimento.toString(),
+                                                                localAtendimento = localAtendimento,
+                                                                kmSaida = kmSaida,
+                                                                data = data,
+                                                                hora = hora,
+                                                                route = title,
+                                                                navController = navController
+                                                            )
 
-                                                                    } else {
-                                                                        Toast.makeText(
-                                                                            context,
-                                                                            "KM inferior ao último informado.",
-                                                                            Toast.LENGTH_SHORT
-                                                                        ).show()
-                                                                        kmChegadaError = false
-                                                                    }
-                                                                }
-                                                            } else {
-                                                                Toast.makeText(
-                                                                    context,
-                                                                    "Não foi possivel iniciar sua viagem, verifique os campos e tente novamente",
-                                                                    Toast.LENGTH_SHORT
-                                                                ).show()
-                                                            }
+                                                            viagemSuporteTecnicoViewModel.finalizarAtendimento(
+                                                                currentUserViewModel = currentUserViewModel,
+                                                                currentUserServices = currentUserServices,
+                                                                userLoggedData = userLoggedData,
+                                                                atendimentoAtual = atendimentoAtual,
+                                                                resumoAtendimento = resumoAtendimento,
+                                                                data = data,
+                                                                hora = hora,
+                                                            )
 
-
-                                                            // RESETE DE  VARIAVEIS
-                                                            visibleFinalizarDialog = false
+                                                           // visibleFinalizarDialog = false
                                                             visibleFinalizarOpcoes = false
                                                             visibleRetornar = false
                                                             visibleNovoAtendimento = false
@@ -1046,11 +991,10 @@ fun Home(
                                     currentUserViewModel = currentUserViewModel,
                                     currentUserServices = currentUserServices,
                                     userLoggedData = userLoggedData,
-                                    atendimento = atendimento,
+                                    novoAtendimento = novoAtendimento,
                                     localSaida = localSaida,
                                     localAtendimento = localAtendimento,
                                     kmSaida = kmSaida,
-                                    ultimoKm = userLoggedData?.ultimoKm.toString(),
                                     data = data,
                                     hora = hora,
                                     route = title,
@@ -1062,9 +1006,8 @@ fun Home(
                                     currentUserViewModel = currentUserViewModel,
                                     currentUserServices = currentUserServices,
                                     userLoggedData = userLoggedData,
-                                    atendimento = atendimento,
+                                    atendimentoAtual = atendimentoAtual,
                                     kmChegada = kmChegada,
-                                    ultimoKm = userLoggedData?.ultimoKm.toString(),
                                     data = data,
                                     hora = hora,
                                     route = title,
@@ -1073,12 +1016,12 @@ fun Home(
                             }
 
                             3 -> {
-                                if (descricao.isNotEmpty() && descricao.length > 5) {
-                                    descricaoError = true
+                                if (resumoAtendimento.isNotEmpty() && resumoAtendimento.length > 5) {
+                                    resumoAtendimentoError = true
                                     visibleFinalizarDialog = true
                                     visibleFinalizarOpcoes = true
                                 } else {
-                                    descricaoError = false
+                                    resumoAtendimentoError = false
                                     Toast.makeText(
                                         context,
                                         "Descrição em branco ou muito curta.",
@@ -1098,7 +1041,7 @@ fun Home(
         TextButton(onClick = {
             coroutineScope.launch(Dispatchers.IO) {
                 // DELETA O ATENDIMENTO ATUAL DA TABELA
-                viagemSuporteTecnicoViewModel.delete(ViagemSuporteTecnico(atendimento.id))
+                viagemSuporteTecnicoViewModel.delete(ViagemSuporteTecnico(atendimentoAtual.id))
 
                 // NO ROOM
                 // DEFINE O VALOR DO (ULTIMO KM) DO USUÁRIO PARA O ULTIMO INFORMADO AO CONCLUIR A ULTIMA VIAGEM
@@ -1119,15 +1062,15 @@ fun Home(
 
         TextButton(onClick = {
             coroutineScope.launch(Dispatchers.IO) {
-                atendimento.dataSaidaRetorno = ""
-                atendimento.horaSaidaRetorno = ""
-                atendimento.localRetorno = ""
+                atendimentoAtual.dataSaidaRetorno = ""
+                atendimentoAtual.horaSaidaRetorno = ""
+                atendimentoAtual.localRetorno = ""
 
-                atendimento.statusService = "Em andamento"
+                atendimentoAtual.statusService = "Em andamento"
                 textStatus = ""
                 coroutineScope.launch(Dispatchers.IO) {
                     viagemSuporteTecnicoViewModel.update(
-                        atendimento
+                        atendimentoAtual
                     )
                 }
             }

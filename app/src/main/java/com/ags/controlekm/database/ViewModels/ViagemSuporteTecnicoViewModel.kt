@@ -5,7 +5,6 @@ import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.ags.controlekm.database.AppDatabase
 import com.ags.controlekm.database.FirebaseServices.CurrentUserServices
@@ -21,6 +20,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 
 class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel(application) {
@@ -36,11 +36,17 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
     val allViagemSuporteTecnico: Flow<List<ViagemSuporteTecnico>>
     private val viagemSuporteTecnicoServices: ViagemSuporteTecnicoServices
 
+    // FINALIZAR ATENDIMENTO
+    var visibleFinalizarDialog: Flow<Boolean>
+    var visibleFinalizarOpcoes = mutableStateOf(false)
+
     init {
         val viagemSuporteTecnicoDao = AppDatabase.getDatabase(application).viagemSuporteTecnicoDao()
         this.repository = ViagemSuporteTecnicoRepository(viagemSuporteTecnicoDao)
         allViagemSuporteTecnico = repository.allViagemSuporteTecnico
         viagemSuporteTecnicoServices = ViagemSuporteTecnicoServices()
+
+        visibleFinalizarDialog = flowOf(false)
 
         databaseReference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -88,11 +94,10 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
         currentUserViewModel: CurrentUserViewModel,
         currentUserServices: CurrentUserServices,
         userLoggedData: CurrentUser?,
-        atendimento: ViagemSuporteTecnico,
+        novoAtendimento: ViagemSuporteTecnico,
         localSaida: String,
         localAtendimento: String,
         kmSaida: String,
-        ultimoKm: String,
         data: String,
         hora: String,
         route: String,
@@ -110,20 +115,20 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
                 Toast.LENGTH_SHORT
             ).show()
             // VERIFICA SE O KM INFORMADO É VALIDO DE ACORDO COM O ULTIMO KM INFORMADO
-        } else if (kmSaida <= ultimoKm) {
+        } else if (kmSaida.toInt() < userLoggedData?.ultimoKm!!.toInt()) {
             Toast.makeText(context, "O KM não pode ser inferior ao último informado", Toast.LENGTH_SHORT).show()
         } else {
-            atendimento.dataSaida = data
-            atendimento.horaSaida = hora
-            atendimento.localSaida = localSaida
-            atendimento.localAtendimento = localAtendimento
-            atendimento.kmSaida = kmSaida
-            atendimento.tecnicoId = userLoggedData?.id
-            atendimento.tecnicoNome = "${userLoggedData?.nome} ${userLoggedData?.sobrenome}"
-            atendimento.imgPerfil = userLoggedData?.imagem
-            atendimento.statusService = "Em rota"
+            novoAtendimento.dataSaida = data
+            novoAtendimento.horaSaida = hora
+            novoAtendimento.localSaida = localSaida
+            novoAtendimento.localAtendimento = localAtendimento
+            novoAtendimento.kmSaida = kmSaida
+            novoAtendimento.tecnicoId = userLoggedData?.id
+            novoAtendimento.tecnicoNome = "${userLoggedData?.nome} ${userLoggedData?.sobrenome}"
+            novoAtendimento.imgPerfil = userLoggedData?.imagem
+            novoAtendimento.statusService = "Em rota"
             viewModelScope.launch(Dispatchers.IO) {
-                insert(atendimento)
+                insert(novoAtendimento)
                 currentUserViewModel.update(
                     CurrentUser(
                         id = userLoggedData?.id.toString(),
@@ -141,9 +146,8 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
         currentUserViewModel: CurrentUserViewModel,
         currentUserServices: CurrentUserServices,
         userLoggedData: CurrentUser?,
-        atendimento: ViagemSuporteTecnico,
+        atendimentoAtual: ViagemSuporteTecnico,
         kmChegada: String,
-        ultimoKm: String,
         data: String,
         hora: String,
         route: String,
@@ -153,17 +157,17 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
         if( kmChegada.isEmpty() ) {
             Toast.makeText(context, "Você precisa informar o KM ao chegar no local de atendimento para continuar", Toast.LENGTH_SHORT).show()
         // VERIFICA SE O KM INFORMADO É VALIDO DE ACORDO COM O ULTIMO KM INFORMADO
-        } else if( kmChegada <= ultimoKm ) {
+        } else if( kmChegada.toInt() < userLoggedData?.ultimoKm!!.toInt() ) {
             Toast.makeText(context, "O KM não pode ser inferior ao último informado", Toast.LENGTH_SHORT).show()
         } else {
-            if ( atendimento.statusService.equals("Em rota") ) {
-                atendimento.dataChegada = data
-                atendimento.horaChegada = hora
-                atendimento.kmChegada = kmChegada
-                atendimento.kmRodado = (kmChegada.toInt() - atendimento.kmSaida!!.toInt()).toString()
-                atendimento.statusService = "Em andamento"
+            if ( atendimentoAtual.statusService.equals("Em rota") ) {
+                atendimentoAtual.dataChegada = data
+                atendimentoAtual.horaChegada = hora
+                atendimentoAtual.kmChegada = kmChegada
+                atendimentoAtual.kmRodado = (kmChegada.toInt() - atendimentoAtual.kmSaida!!.toInt()).toString()
+                atendimentoAtual.statusService = "Em andamento"
                 viewModelScope.launch(Dispatchers.IO) {
-                    update(atendimento)
+                    update(atendimentoAtual)
                     currentUserViewModel.update(
                         CurrentUser(
                             id = userLoggedData?.id.toString(),
@@ -172,15 +176,15 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
                     )
                     currentUserServices.addUltimoKm(kmChegada)
                 }
-            } else if( atendimento.statusService.equals("Em rota, retornando") ) {
-                atendimento.dataChegadaRetorno = data
-                atendimento.horaChegadaRetorno = hora
-                atendimento.kmChegada = kmChegada
-                atendimento.statusService = "Finalizado"
+            } else if( atendimentoAtual.statusService.equals("Em rota, retornando") ) {
+                atendimentoAtual.dataChegadaRetorno = data
+                atendimentoAtual.horaChegadaRetorno = hora
+                atendimentoAtual.kmChegada = kmChegada
+                atendimentoAtual.statusService = "Finalizado"
                 currentUserServices.addUltimoKm(kmChegada)
-                atendimento.kmRodado = (kmChegada.toInt() - atendimento.kmSaida!!.toInt()).toString()
+                atendimentoAtual.kmRodado = (kmChegada.toInt() - atendimentoAtual.kmSaida!!.toInt()).toString()
                 viewModelScope.launch(Dispatchers.IO) {
-                    update(atendimento)
+                    update(atendimentoAtual)
                     currentUserViewModel.update(
                         CurrentUser(
                             id = userLoggedData?.id.toString(),
@@ -196,8 +200,54 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
         }
     }
 
-    fun finalizarAtendimento() {
+    fun iniciarRetorno(
+        atendimento: ViagemSuporteTecnico,
+        localRetorno: String,
+        resumoAtendimento: String,
+        data: String,
+        hora: String,
+        route: String,
+        navController: NavHostController
+    ){
+        atendimento.dataConclusao = data
+        atendimento.horaConclusao = hora
 
+        atendimento.descricao = resumoAtendimento
+        atendimento.dataSaidaRetorno = data
+        atendimento.horaSaidaRetorno = hora
+        atendimento.localRetorno = localRetorno
+        atendimento.statusService = "Em rota, retornando"
+
+        viewModelScope.launch(Dispatchers.IO) {
+            update(atendimento)
+        }
+
+        reiniciarTela(route, navController)
     }
 
+    fun finalizarAtendimento(
+        currentUserViewModel: CurrentUserViewModel,
+        currentUserServices: CurrentUserServices,
+        userLoggedData: CurrentUser?,
+        atendimentoAtual: ViagemSuporteTecnico,
+        resumoAtendimento: String,
+        data: String,
+        hora: String,
+    ) {
+        // FINALIZA O ATENDIMENTO ATUAL
+        atendimentoAtual.dataConclusao = data
+        atendimentoAtual.horaConclusao = hora
+        atendimentoAtual.descricao = resumoAtendimento
+        atendimentoAtual.statusService = "Finalizado"
+        viewModelScope.launch(Dispatchers.IO) {
+            update(atendimentoAtual)
+            currentUserViewModel.update(
+                CurrentUser(
+                    id = userLoggedData?.id.toString(),
+                    kmBackup = userLoggedData?.ultimoKm.toString()
+                )
+            )
+            currentUserServices.addKmBackup(userLoggedData?.ultimoKm.toString())
+        }
+    }
 }
