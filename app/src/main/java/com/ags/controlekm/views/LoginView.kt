@@ -73,8 +73,6 @@ fun LoginView(
 
     val loginIsCompleted by loginViewModel.authResult.collectAsState(false)
 
-    val userLoggedData by loginViewModel.currentUserData.collectAsState(null)
-
     DisposableEffect(currentUser?.uid) {
         FirebaseAuth.getInstance().addAuthStateListener { firebaseAuth ->
             currentUser = firebaseAuth.currentUser
@@ -98,8 +96,6 @@ fun LoginView(
     val espacoEntreCampos = 6.dp
 
     var buttonProximoVisible by rememberSaveable { mutableStateOf(false) }
-
-
 
     Column(
         modifier = Modifier

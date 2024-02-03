@@ -39,6 +39,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -95,7 +96,7 @@ fun Home(
 ) {
     val coroutineScope = rememberCoroutineScope()
 
-    var countContent by remember { mutableStateOf(0) }
+    var countContent by rememberSaveable { mutableIntStateOf(0) }
 
     var currentUser by rememberSaveable { mutableStateOf(FirebaseAuth.getInstance().currentUser) }
 
@@ -1042,70 +1043,33 @@ fun Home(
                         when (countContent) {
                             1 -> {
                                 viagemSuporteTecnicoViewModel.iniciarViagem(
+                                    currentUserViewModel = currentUserViewModel,
+                                    currentUserServices = currentUserServices,
+                                    userLoggedData = userLoggedData,
+                                    atendimento = atendimento,
                                     localSaida = localSaida,
                                     localAtendimento = localAtendimento,
                                     kmSaida = kmSaida,
                                     ultimoKm = userLoggedData?.ultimoKm.toString(),
                                     data = data,
                                     hora = hora,
-                                    title = title,
+                                    route = title,
                                     navController = navController
                                 )
                             }
-
                             2 -> {
-                                if (kmChegada.isEmpty()) {
-                                    kmChegadaError = false
-                                } else {
-                                    kmChegadaError = true
-                                    if (kmChegada.toInt() > userLoggedData?.ultimoKm!!.toInt()) {
-                                        if (atendimento.statusService.equals("Em rota")) {
-                                            atendimento.dataChegada = data
-                                            atendimento.horaChegada = hora
-                                            atendimento.kmChegada = kmChegada
-                                            atendimento.kmRodado = (kmChegada.toInt() - atendimento.kmSaida!!.toInt()).toString()
-                                            atendimento.statusService = "Em andamento"
-                                            coroutineScope.launch(Dispatchers.IO) {
-                                                viagemSuporteTecnicoViewModel.update(atendimento)
-                                                currentUserViewModel.update(
-                                                    CurrentUser(
-                                                        id = userLoggedData?.id.toString(),
-                                                        ultimoKm = kmChegada,
-                                                    )
-                                                )
-                                                currentUserServices.addUltimoKm(kmChegada)
-                                            }
-                                            reiniciarTela(title, navController)
-                                        } else {
-                                            atendimento.dataChegadaRetorno = data
-                                            atendimento.horaChegadaRetorno = hora
-                                            atendimento.kmChegada = kmChegada
-                                            atendimento.statusService = "Finalizado"
-                                            currentUserServices.addUltimoKm(kmChegada)
-                                            atendimento.kmRodado = (kmChegada.toInt() - atendimento.kmSaida!!.toInt()).toString()
-                                            coroutineScope.launch(Dispatchers.IO) {
-                                                viagemSuporteTecnicoViewModel.update(atendimento)
-                                                currentUserViewModel.update(
-                                                    CurrentUser(
-                                                        id = userLoggedData?.id.toString(),
-                                                        ultimoKm = kmChegada,
-                                                        kmBackup = kmChegada
-                                                    )
-                                                )
-                                                currentUserServices.addUltimoKm(kmChegada)
-                                                currentUserServices.addKmBackup(kmChegada)
-                                            }
-                                            reiniciarTela(title, navController)
-                                        }
-                                    } else {
-                                        Toast.makeText(
-                                            context,
-                                            "KM inferior ao último informado.",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                        kmChegadaError = false
-                                    }
-                                }
+                                viagemSuporteTecnicoViewModel.informarChegada(
+                                    currentUserViewModel = currentUserViewModel,
+                                    currentUserServices = currentUserServices,
+                                    userLoggedData = userLoggedData,
+                                    atendimento = atendimento,
+                                    kmChegada = kmChegada,
+                                    ultimoKm = userLoggedData?.ultimoKm.toString(),
+                                    data = data,
+                                    hora = hora,
+                                    route = title,
+                                    navController = navController
+                                )
                             }
 
                             3 -> {

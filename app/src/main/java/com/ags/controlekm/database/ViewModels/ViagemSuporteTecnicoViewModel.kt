@@ -13,7 +13,6 @@ import com.ags.controlekm.database.FirebaseServices.ViagemSuporteTecnicoServices
 import com.ags.controlekm.database.Models.CurrentUser
 import com.ags.controlekm.database.Models.ViagemSuporteTecnico
 import com.ags.controlekm.database.Repositorys.ViagemSuporteTecnicoRepository
-import com.ags.controlekm.functions.navigateSingleTopTo
 import com.ags.controlekm.functions.reiniciarTela
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -24,8 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
-class ViagemSuporteTecnicoViewModel(application: Application
-) : AndroidViewModel(application) {
+class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel(application) {
     var context: Application = getApplication()
 
     private val databaseReference: DatabaseReference =
@@ -38,17 +36,7 @@ class ViagemSuporteTecnicoViewModel(application: Application
     val allViagemSuporteTecnico: Flow<List<ViagemSuporteTecnico>>
     private val viagemSuporteTecnicoServices: ViagemSuporteTecnicoServices
 
-    val userLoggedData = mutableStateOf<CurrentUser?>(null)
-    val currentUserViewModel: CurrentUserViewModel = CurrentUserViewModel(context)
-    val currentUserServices: CurrentUserServices = CurrentUserServices(userLoggedData.value?.id.toString())
-
     init {
-        viewModelScope.launch {
-            currentUserViewModel.currentUserData.collect { data ->
-                userLoggedData.value = data
-            }
-        }
-
         val viagemSuporteTecnicoDao = AppDatabase.getDatabase(application).viagemSuporteTecnicoDao()
         this.repository = ViagemSuporteTecnicoRepository(viagemSuporteTecnicoDao)
         allViagemSuporteTecnico = repository.allViagemSuporteTecnico
@@ -57,7 +45,6 @@ class ViagemSuporteTecnicoViewModel(application: Application
         databaseReference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val dataList = mutableListOf<ViagemSuporteTecnico>()
-                //val dataList = mutableStateOf<List<EnderecoAtendimento>>(emptyList())
                 for (childSnapshot in snapshot.children) {
                     val data = childSnapshot.getValue(ViagemSuporteTecnico::class.java)
                     viewModelScope.launch(Dispatchers.IO) {
@@ -98,17 +85,19 @@ class ViagemSuporteTecnicoViewModel(application: Application
 
     // FUNÇÕES DE LÓGICA DE NEGOCIO
     fun iniciarViagem(
+        currentUserViewModel: CurrentUserViewModel,
+        currentUserServices: CurrentUserServices,
+        userLoggedData: CurrentUser?,
+        atendimento: ViagemSuporteTecnico,
         localSaida: String,
         localAtendimento: String,
         kmSaida: String,
         ultimoKm: String,
         data: String,
         hora: String,
-        title: String,
+        route: String,
         navController: NavHostController
     ) {
-        val atendimento = mutableStateOf(ViagemSuporteTecnico())
-
         // VERIFICA SE ALGUM CAMPO ESTA VAZIO
         if (localSaida.isEmpty() || localAtendimento.isEmpty() || kmSaida.isEmpty()) {
             Toast.makeText(context, "Preencha todos os campos para continuar", Toast.LENGTH_SHORT)
@@ -120,31 +109,95 @@ class ViagemSuporteTecnicoViewModel(application: Application
                 "O local de saida não pode ser o mesmo local do atendimento",
                 Toast.LENGTH_SHORT
             ).show()
-            // VERIFICA SE O KM DE SAIDA É VALIDO DE ACORDO COM O ULTIMO KM INFORMADO
+            // VERIFICA SE O KM INFORMADO É VALIDO DE ACORDO COM O ULTIMO KM INFORMADO
         } else if (kmSaida <= ultimoKm) {
-            Toast.makeText(context, "KM inferior ao último informado", Toast.LENGTH_SHORT).show()
-            // INICIA A VIAGEM
+            Toast.makeText(context, "O KM não pode ser inferior ao último informado", Toast.LENGTH_SHORT).show()
         } else {
-            atendimento.value.dataSaida = data
-            atendimento.value.horaSaida = hora
-            atendimento.value.localSaida = localSaida
-            atendimento.value.localAtendimento = localAtendimento
-            atendimento.value.kmSaida = kmSaida
-            atendimento.value.tecnicoId = userLoggedData.value?.id
-            atendimento.value.tecnicoNome = "${userLoggedData.value?.nome} ${userLoggedData.value?.sobrenome}"
-            atendimento.value.imgPerfil = userLoggedData.value?.imagem
-            atendimento.value.statusService = "Em rota"
+            atendimento.dataSaida = data
+            atendimento.horaSaida = hora
+            atendimento.localSaida = localSaida
+            atendimento.localAtendimento = localAtendimento
+            atendimento.kmSaida = kmSaida
+            atendimento.tecnicoId = userLoggedData?.id
+            atendimento.tecnicoNome = "${userLoggedData?.nome} ${userLoggedData?.sobrenome}"
+            atendimento.imgPerfil = userLoggedData?.imagem
+            atendimento.statusService = "Em rota"
             viewModelScope.launch(Dispatchers.IO) {
-                insert(atendimento.value)
+                insert(atendimento)
                 currentUserViewModel.update(
                     CurrentUser(
-                        id = userLoggedData.value?.id.toString(),
+                        id = userLoggedData?.id.toString(),
                         ultimoKm = kmSaida,
                     )
                 )
                 currentUserServices.addUltimoKm(kmSaida)
             }
+            reiniciarTela(route, navController)
         }
-        reiniciarTela(title, navController)
+
     }
+
+    fun informarChegada(
+        currentUserViewModel: CurrentUserViewModel,
+        currentUserServices: CurrentUserServices,
+        userLoggedData: CurrentUser?,
+        atendimento: ViagemSuporteTecnico,
+        kmChegada: String,
+        ultimoKm: String,
+        data: String,
+        hora: String,
+        route: String,
+        navController: NavHostController
+    ) {
+        // VERIFICA SE O CAMPO ESTA VAZIO
+        if( kmChegada.isEmpty() ) {
+            Toast.makeText(context, "Você precisa informar o KM ao chegar no local de atendimento para continuar", Toast.LENGTH_SHORT).show()
+        // VERIFICA SE O KM INFORMADO É VALIDO DE ACORDO COM O ULTIMO KM INFORMADO
+        } else if( kmChegada <= ultimoKm ) {
+            Toast.makeText(context, "O KM não pode ser inferior ao último informado", Toast.LENGTH_SHORT).show()
+        } else {
+            if ( atendimento.statusService.equals("Em rota") ) {
+                atendimento.dataChegada = data
+                atendimento.horaChegada = hora
+                atendimento.kmChegada = kmChegada
+                atendimento.kmRodado = (kmChegada.toInt() - atendimento.kmSaida!!.toInt()).toString()
+                atendimento.statusService = "Em andamento"
+                viewModelScope.launch(Dispatchers.IO) {
+                    update(atendimento)
+                    currentUserViewModel.update(
+                        CurrentUser(
+                            id = userLoggedData?.id.toString(),
+                            ultimoKm = kmChegada,
+                        )
+                    )
+                    currentUserServices.addUltimoKm(kmChegada)
+                }
+            } else if( atendimento.statusService.equals("Em rota, retornando") ) {
+                atendimento.dataChegadaRetorno = data
+                atendimento.horaChegadaRetorno = hora
+                atendimento.kmChegada = kmChegada
+                atendimento.statusService = "Finalizado"
+                currentUserServices.addUltimoKm(kmChegada)
+                atendimento.kmRodado = (kmChegada.toInt() - atendimento.kmSaida!!.toInt()).toString()
+                viewModelScope.launch(Dispatchers.IO) {
+                    update(atendimento)
+                    currentUserViewModel.update(
+                        CurrentUser(
+                            id = userLoggedData?.id.toString(),
+                            ultimoKm = kmChegada,
+                            kmBackup = kmChegada
+                        )
+                    )
+                    currentUserServices.addUltimoKm(kmChegada)
+                    currentUserServices.addKmBackup(kmChegada)
+                }
+            }
+            reiniciarTela(route, navController)
+        }
+    }
+
+    fun finalizarAtendimento() {
+
+    }
+
 }
