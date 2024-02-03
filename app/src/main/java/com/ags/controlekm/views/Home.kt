@@ -4,7 +4,6 @@ import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -62,14 +61,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
-import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.ags.controlekm.R
-import com.ags.controlekm.components.FormularioOutlinedTextField
-import com.ags.controlekm.components.FormularioTextField
-import com.ags.controlekm.components.FormularioTextFieldMenu
+import com.ags.controlekm.components.Dialog.FinalizarAtendimentoDialog
+import com.ags.controlekm.components.TextField.FormularioOutlinedTextField
+import com.ags.controlekm.components.TextField.FormularioTextField
+import com.ags.controlekm.components.TextField.FormularioTextFieldMenu
 import com.ags.controlekm.database.FirebaseServices.CurrentUserServices
 import com.ags.controlekm.database.Models.CurrentUser
 import com.ags.controlekm.database.Models.EnderecoAtendimento
@@ -145,12 +144,13 @@ fun Home(
     }
 
     val context = LocalContext.current
-    val title = stringResource(R.string.home)
+    val route = stringResource(R.string.home)
 
-    var visibleFinalizarDialog by remember { mutableStateOf(false) }
     var visibleFinalizarOpcoes by remember { mutableStateOf(true) }
     var visibleRetornar by remember { mutableStateOf(false) }
     var visibleNovoAtendimento by remember { mutableStateOf(false) }
+
+    var textTituloFinalizarAtendimento by remember { mutableStateOf("Finalizar atendimento") }
 
     val progressIndicator = remember { mutableStateOf(false) }
 
@@ -165,19 +165,20 @@ fun Home(
 
     var expandedSaida by remember { mutableStateOf(false) }
     var expandedAtendimento by remember { mutableStateOf(false) }
-    var expandedlocalFinalizarAtendimento by remember { mutableStateOf(false) }
 
     var localSaida by remember { mutableStateOf("") }
     var localSaidaError by remember { mutableStateOf(true) }
     var localAtendimento by remember { mutableStateOf("") }
     var localAtendimentoError by remember { mutableStateOf(true) }
+    var local by remember { mutableStateOf("") }
+    var localError by remember { mutableStateOf(true) }
 
     var textFieldSize by remember { mutableStateOf(Size.Zero) }
 
     var textStatus by remember { mutableStateOf("") }
     var textButton by remember { mutableStateOf("") }
 
-    var textTituloFinalizarAtendimento by remember { mutableStateOf("Finalizar atendimento") }
+    var visibleFinalizarDialog by remember { mutableStateOf(false) }
 
     var novoAtendimento by remember { mutableStateOf(ViagemSuporteTecnico()) }
     var atendimentoAtual by remember { mutableStateOf(ViagemSuporteTecnico()) }
@@ -391,7 +392,6 @@ fun Home(
                                             erro = localAtendimentoError,
                                             erroMensagem = ""
                                         )
-
                                         DropdownMenu(
                                             modifier = Modifier.wrapContentSize(),
                                             expanded = expandedAtendimento,
@@ -581,392 +581,51 @@ fun Home(
                                         erroMensagem = ""
                                     )
                                 }
-
-                                if (visibleFinalizarDialog == true) {
+                                if (visibleFinalizarDialog) {
                                     FinalizarAtendimentoDialog(
+                                        atendimentoAtual = atendimentoAtual,
+                                        resumoAtendimento = resumoAtendimento,
+                                        kmSaida = kmSaida,
+                                        data = data,
+                                        hora = hora,
                                         onDismissRequest = {
-                                            //visibleFinalizarDialog = false
+                                            visibleFinalizarDialog = false
+                                        },
+                                        iniciarViagem = {
+                                            viagemSuporteTecnicoViewModel.iniciarViagem(
+                                                currentUserViewModel = currentUserViewModel,
+                                                currentUserServices = currentUserServices,
+                                                userLoggedData = userLoggedData,
+                                                novoAtendimento = novoAtendimento,
+                                                localSaida = atendimentoAtual.localAtendimento.toString(),
+                                                localAtendimento = localAtendimento,
+                                                kmSaida = kmSaida,
+                                                data = data,
+                                                hora = hora,
+                                                route = route,
+                                                navController = navController
+                                            )
+                                        },
+                                        finalizarAtendimento = {
+                                            viagemSuporteTecnicoViewModel.finalizarAtendimento(
+                                                currentUserViewModel = currentUserViewModel,
+                                                currentUserServices = currentUserServices,
+                                                userLoggedData = userLoggedData,
+                                                atendimentoAtual = atendimentoAtual,
+                                                resumoAtendimento = resumoAtendimento,
+                                                data = data,
+                                                hora = hora,
+                                            )
+
+                                            visibleFinalizarDialog = false
                                             visibleFinalizarOpcoes = false
                                             visibleRetornar = false
                                             visibleNovoAtendimento = false
                                             textTituloFinalizarAtendimento = "Finalizar atendimento"
-                                        }) {
-                                        Column(
-                                            modifier = Modifier,
-                                            verticalArrangement = Arrangement.Center,
-                                            horizontalAlignment = Alignment.CenterHorizontally
-                                        ) {
-                                            Text(
-                                                modifier = Modifier.padding(20.dp),
-                                                text = textTituloFinalizarAtendimento,
-                                                fontWeight = FontWeight.SemiBold,
-                                            )
-                                            // OPÇÕES FINALIZAR ATENDIMENTO
-                                            AnimatedVisibility(visibleFinalizarOpcoes) {
-                                                Column(
-                                                    modifier = Modifier,
-                                                    verticalArrangement = Arrangement.Center,
-                                                    horizontalAlignment = Alignment.CenterHorizontally
-                                                ) {
-                                                    Button(
-                                                        modifier = Modifier
-                                                            .fillMaxWidth()
-                                                            .padding(start = 6.dp, end = 6.dp),
-                                                        shape = RoundedCornerShape(
-                                                            topStart = 5.dp,
-                                                            topEnd = 5.dp,
-                                                            bottomStart = 5.dp,
-                                                            bottomEnd = 5.dp
-                                                        ),
-                                                        onClick = {
-                                                            textTituloFinalizarAtendimento = "Para onde vai retornar?"
-                                                            visibleRetornar = true
-                                                            visibleNovoAtendimento = false
-                                                            visibleFinalizarOpcoes = false
-                                                        }) {
-                                                        Text(
-                                                            modifier = Modifier,
-                                                            text = "Retornar",
-                                                            fontWeight = FontWeight.SemiBold,
-                                                            textAlign = TextAlign.Center
-                                                        )
-                                                    }
-                                                    Button(
-                                                        modifier = Modifier
-                                                            .fillMaxWidth()
-                                                            .padding(
-                                                                bottom = 2.dp,
-                                                                start = 6.dp,
-                                                                end = 6.dp
-                                                            ),
-                                                        shape = RoundedCornerShape(
-                                                            topStart = 0.dp,
-                                                            topEnd = 0.dp,
-                                                            bottomStart = 5.dp,
-                                                            bottomEnd = 5.dp
-                                                        ),
-                                                        onClick = {
-                                                            textTituloFinalizarAtendimento = "Qual o local do novo atendimento?"
-                                                            visibleNovoAtendimento = true
-                                                            visibleRetornar = false
-                                                            visibleFinalizarOpcoes = false
-                                                        }) {
-                                                        Text(
-                                                            modifier = Modifier,
-                                                            text = "Novo atendimento",
-                                                            fontWeight = FontWeight.SemiBold,
-                                                            textAlign = TextAlign.Center
-                                                        )
-                                                    }
-                                                }
-                                            }
-                                            // SELECIONAR CIDADE DE RETORNO
-                                            AnimatedVisibility(visible = visibleRetornar) {
-                                                Column(modifier = Modifier.fillMaxWidth()) {
-                                                    Row(
-                                                        modifier = Modifier.fillMaxWidth(),
-                                                        verticalAlignment = Alignment.CenterVertically
-                                                    ) {
-                                                        Icon(
-                                                            modifier = Modifier.size(18.dp),
-                                                            imageVector = Icons.Outlined.TravelExplore,
-                                                            contentDescription = ""
-                                                        )
-                                                        FormularioTextFieldMenu(
-                                                            modifier = Modifier
-                                                                .onGloballyPositioned { coordinates ->
-                                                                    textFieldSize =
-                                                                        coordinates.size.toSize()
-                                                                },
-                                                            readOnly = false,
-                                                            value = localAtendimento,
-                                                            trailingIconVector = Icons.Filled.ArrowDropDown,
-                                                            trailingOnClick = {
-                                                                expandedlocalFinalizarAtendimento = !expandedlocalFinalizarAtendimento
-                                                            },
-                                                            onValueChange = {
-                                                                expandedlocalFinalizarAtendimento = true
-                                                                localAtendimento = it
-                                                            },
-                                                            label = "Retornar para",
-                                                            visualTransformation = VisualTransformation.None,
-                                                            keyboardType = KeyboardType.Text,
-                                                            imeAction = ImeAction.Next,
-                                                            capitalization = KeyboardCapitalization.None,
-                                                            erro = localAtendimentoError,
-                                                            erroMensagem = ""
-                                                        )
-                                                        DropdownMenu(
-                                                            modifier = Modifier.wrapContentSize(),
-                                                            expanded = expandedlocalFinalizarAtendimento,
-                                                            properties = PopupProperties(focusable = false),
-                                                            onDismissRequest = {
-                                                                expandedlocalFinalizarAtendimento = false
-                                                            }) {
-                                                            LazyColumn(
-                                                                modifier = Modifier
-                                                                    .width(300.dp)
-                                                                    .height(195.dp)
-                                                            ) {
-                                                                if (localAtendimento.isNotEmpty()) {
-                                                                    items(
-                                                                        enderecosList.filter {
-                                                                            it.lowercase()
-                                                                                .contains(
-                                                                                    localAtendimento.lowercase()
-                                                                                ) || it.lowercase()
-                                                                                .contains("others")
-                                                                        }.sorted()
-                                                                    ) {
-                                                                        DropdownMenuItem(
-                                                                            text = {
-                                                                                Text(
-                                                                                    text = it,
-                                                                                    fontSize = 12.sp,
-                                                                                    fontWeight = FontWeight.SemiBold
-                                                                                )
-                                                                            },
-                                                                            onClick = {
-                                                                                localAtendimento = it
-                                                                                expandedlocalFinalizarAtendimento =
-                                                                                    false
-                                                                            })
-                                                                    }
-                                                                } else {
-                                                                    items(
-                                                                        enderecosList.sorted()
-                                                                    ) {
-                                                                        DropdownMenuItem(
-                                                                            text = {
-                                                                                Text(
-                                                                                    text = it,
-                                                                                    fontSize = 12.sp,
-                                                                                    fontWeight = FontWeight.SemiBold
-                                                                                )
-                                                                            },
-                                                                            onClick = {
-                                                                                localAtendimento = it
-                                                                                expandedlocalFinalizarAtendimento =
-                                                                                    false
-                                                                            })
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                    Button(
-                                                        modifier = Modifier
-                                                            .fillMaxWidth()
-                                                            .padding(start = 6.dp, end = 6.dp),
-                                                        shape = RoundedCornerShape(
-                                                            topStart = 0.dp,
-                                                            topEnd = 0.dp,
-                                                            bottomStart = 5.dp,
-                                                            bottomEnd = 5.dp
-                                                        ),
-                                                        onClick = {
-                                                            viagemSuporteTecnicoViewModel.iniciarRetorno(
-                                                                atendimento = atendimentoAtual,
-                                                                localRetorno = localAtendimento,
-                                                                resumoAtendimento = resumoAtendimento,
-                                                                data = data,
-                                                                hora = hora,
-                                                                route = title,
-                                                                navController = navController
-                                                            )
-                                                            visibleFinalizarDialog = false
-                                                            visibleFinalizarOpcoes = false
-                                                            visibleRetornar = false
-                                                            visibleNovoAtendimento = false
-                                                            textTituloFinalizarAtendimento = "Finalizar atendimento"
-
-                                                        }) {
-                                                        Text(
-                                                            modifier = Modifier,
-                                                            text = "Iniciar percurso",
-                                                            fontWeight = FontWeight.SemiBold,
-                                                            textAlign = TextAlign.Center
-                                                        )
-                                                    }
-                                                }
-                                            }
-                                            // INICIAR UM NOVO ATENDIMENTO
-                                            AnimatedVisibility(visible = visibleNovoAtendimento) {
-                                                Column(modifier = Modifier.fillMaxWidth()) {
-                                                    Row(
-                                                        modifier = Modifier.fillMaxWidth(),
-                                                        verticalAlignment = Alignment.CenterVertically
-                                                    ) {
-                                                        Icon(
-                                                            modifier = Modifier.size(18.dp),
-                                                            imageVector = Icons.Outlined.TravelExplore,
-                                                            contentDescription = ""
-                                                        )
-                                                        FormularioTextFieldMenu(
-                                                            modifier = Modifier
-                                                                .onGloballyPositioned { coordinates ->
-                                                                    textFieldSize =
-                                                                        coordinates.size.toSize()
-                                                                },
-                                                            readOnly = false,
-                                                            value = localAtendimento,
-                                                            trailingIconVector = Icons.Filled.ArrowDropDown,
-                                                            trailingOnClick = {
-                                                                expandedlocalFinalizarAtendimento = !expandedlocalFinalizarAtendimento
-                                                            },
-                                                            onValueChange = {
-                                                                expandedlocalFinalizarAtendimento = true
-                                                                localAtendimento = it
-                                                            },
-                                                            label = "Local do atendimento",
-                                                            visualTransformation = VisualTransformation.None,
-                                                            keyboardType = KeyboardType.Text,
-                                                            imeAction = ImeAction.Next,
-                                                            capitalization = KeyboardCapitalization.None,
-                                                            erro = localAtendimentoError,
-                                                            erroMensagem = ""
-                                                        )
-                                                        DropdownMenu(
-                                                            modifier = Modifier.wrapContentSize(),
-                                                            expanded = expandedlocalFinalizarAtendimento,
-                                                            properties = PopupProperties(focusable = false),
-                                                            onDismissRequest = { expandedlocalFinalizarAtendimento = false }) {
-                                                            LazyColumn(
-                                                                modifier = Modifier
-                                                                    .width(300.dp)
-                                                                    .height(195.dp)
-                                                            ) {
-                                                                if (localAtendimento.isNotEmpty()) {
-                                                                    items(
-                                                                        enderecosList.filter {
-                                                                            it.lowercase()
-                                                                                .contains(
-                                                                                    localAtendimento.lowercase()
-                                                                                ) || it.lowercase()
-                                                                                .contains("others")
-                                                                        }.sorted()
-                                                                    ) {
-                                                                        DropdownMenuItem(
-                                                                            text = {
-                                                                                Text(
-                                                                                    text = it,
-                                                                                    fontSize = 12.sp,
-                                                                                    fontWeight = FontWeight.SemiBold
-                                                                                )
-                                                                            },
-                                                                            onClick = {
-                                                                                localAtendimento = it
-                                                                                expandedlocalFinalizarAtendimento = false
-                                                                            })
-                                                                    }
-                                                                } else {
-                                                                    items(
-                                                                        enderecosList.sorted()
-                                                                    ) {
-                                                                        DropdownMenuItem(
-                                                                            text = {
-                                                                                Text(
-                                                                                    text = it,
-                                                                                    fontSize = 12.sp,
-                                                                                    fontWeight = FontWeight.SemiBold
-                                                                                )
-                                                                            },
-                                                                            onClick = {
-                                                                                localAtendimento = it
-                                                                                expandedlocalFinalizarAtendimento =
-                                                                                    false
-                                                                            })
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                    Row(
-                                                        modifier = Modifier.fillMaxWidth(),
-                                                        verticalAlignment = Alignment.CenterVertically,
-                                                        horizontalArrangement = Arrangement.SpaceBetween
-                                                    ) {
-                                                        Icon(
-                                                            modifier = Modifier.size(18.dp),
-                                                            imageVector = Icons.Outlined.TimeToLeave,
-                                                            contentDescription = ""
-                                                        )
-                                                        FormularioTextField(
-                                                            modifier = Modifier.weight(0.7f),
-                                                            readOnly = false,
-                                                            value = kmSaida,
-                                                            onValueChange = { kmSaida = it.take(6) },
-                                                            label = "KM da Saida",
-                                                            visualTransformation = VisualTransformation.None,
-                                                            keyboardType = KeyboardType.Number,
-                                                            imeAction = ImeAction.Next,
-                                                            capitalization = KeyboardCapitalization.None,
-                                                            erro = kmSaidaError,
-                                                            erroMensagem = ""
-                                                        )
-                                                        Spacer(modifier = Modifier.width(12.dp))
-                                                        Text(
-                                                            modifier = Modifier.weight(0.4f),
-                                                            text = "Hora: ${hora}\n" + "Data: ${data}",
-                                                            fontSize = 11.sp,
-                                                            fontWeight = FontWeight.SemiBold,
-                                                            //textAlign = TextAlign.Center
-                                                        )
-                                                    }
-                                                    Button(
-                                                        modifier = Modifier
-                                                            .fillMaxWidth()
-                                                            .padding(start = 6.dp, end = 6.dp),
-                                                        shape = RoundedCornerShape(
-                                                            topStart = 0.dp,
-                                                            topEnd = 0.dp,
-                                                            bottomStart = 5.dp,
-                                                            bottomEnd = 5.dp
-                                                        ),
-                                                        onClick = {
-                                                            viagemSuporteTecnicoViewModel.iniciarViagem(
-                                                                currentUserViewModel = currentUserViewModel,
-                                                                currentUserServices = currentUserServices,
-                                                                userLoggedData = userLoggedData,
-                                                                novoAtendimento = novoAtendimento,
-                                                                localSaida = atendimentoAtual.localAtendimento.toString(),
-                                                                localAtendimento = localAtendimento,
-                                                                kmSaida = kmSaida,
-                                                                data = data,
-                                                                hora = hora,
-                                                                route = title,
-                                                                navController = navController
-                                                            )
-
-                                                            viagemSuporteTecnicoViewModel.finalizarAtendimento(
-                                                                currentUserViewModel = currentUserViewModel,
-                                                                currentUserServices = currentUserServices,
-                                                                userLoggedData = userLoggedData,
-                                                                atendimentoAtual = atendimentoAtual,
-                                                                resumoAtendimento = resumoAtendimento,
-                                                                data = data,
-                                                                hora = hora,
-                                                            )
-
-                                                           // visibleFinalizarDialog = false
-                                                            visibleFinalizarOpcoes = false
-                                                            visibleRetornar = false
-                                                            visibleNovoAtendimento = false
-                                                            textTituloFinalizarAtendimento = "Finalizar atendimento"
-                                                            reiniciarTela(title, navController)
-
-                                                        }) {
-                                                        Text(
-                                                            modifier = Modifier,
-                                                            text = "Iniciar percurso",
-                                                            fontWeight = FontWeight.SemiBold,
-                                                            textAlign = TextAlign.Center
-                                                        )
-                                                    }
-                                                }
-                                            }
+                                            reiniciarTela(route, navController)
                                         }
-                                    }
+
+                                    )
                                 }
                             }
                         }
@@ -997,7 +656,7 @@ fun Home(
                                     kmSaida = kmSaida,
                                     data = data,
                                     hora = hora,
-                                    route = title,
+                                    route = route,
                                     navController = navController
                                 )
                             }
@@ -1010,7 +669,7 @@ fun Home(
                                     kmChegada = kmChegada,
                                     data = data,
                                     hora = hora,
-                                    route = title,
+                                    route = route,
                                     navController = navController
                                 )
                             }
@@ -1055,7 +714,7 @@ fun Home(
                 // DEFINE O VALOR DO (ULTIMO KM) DO USUÁRIO PARA O ULTIMO INFORMADO AO CONCLUIR A ULTIMA VIAGEM
                 currentUserServices.addUltimoKm(userLoggedData?.kmBackup.toString())
             }
-            reiniciarTela(title, navController)
+            reiniciarTela(route, navController)
         }) {
             Text(text = "Cancelar atendimento")
         }
@@ -1074,34 +733,9 @@ fun Home(
                     )
                 }
             }
-            reiniciarTela(title, navController)
+            reiniciarTela(route, navController)
         }) {
             Text(text = "Cancelar retorno")
         }
     }
-}
-
-@Composable
-fun FinalizarAtendimentoDialog(
-    onDismissRequest: () -> Unit,
-    content: @Composable () -> Unit
-) {
-    Dialog(
-        onDismissRequest = { onDismissRequest() }
-    ) {
-        Card(
-            modifier = Modifier
-                .wrapContentSize(),
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 5.dp
-            ),
-        ) {
-            content()
-        }
-    }
-
-}
-
-fun iniciarViagem(){
-
 }

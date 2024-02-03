@@ -1,4 +1,4 @@
-package com.ags.controlekm.components
+package com.ags.controlekm.components.Cards
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

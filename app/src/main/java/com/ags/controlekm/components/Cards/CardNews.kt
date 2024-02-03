@@ -1,4 +1,4 @@
-package com.ags.controlekm.components
+package com.ags.controlekm.components.Cards
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize

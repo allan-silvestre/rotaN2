@@ -82,10 +82,8 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.rememberImagePainter
 import com.ags.controlekm.R
-import com.ags.controlekm.components.DialogEmailVerifield
-import com.ags.controlekm.database.FirebaseServices.CurrentUserServices
+import com.ags.controlekm.components.Dialog.DialogEmailVerifield
 import com.ags.controlekm.database.ViewModels.CurrentUserViewModel
-import com.ags.controlekm.database.ViewModels.LoginViewModel
 import com.ags.controlekm.functions.navigateSingleTopTo
 import com.ags.controlekm.objects.BottomNavigationItem
 import com.ags.controlekm.objects.MenuItem

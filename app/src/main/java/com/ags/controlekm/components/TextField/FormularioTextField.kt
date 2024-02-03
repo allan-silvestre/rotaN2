@@ -1,14 +1,13 @@
-package com.ags.controlekm.components
+package com.ags.controlekm.components.TextField
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -18,7 +17,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -32,12 +30,9 @@ import androidx.compose.ui.unit.sp
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun FormularioTextFieldMenu(
+fun FormularioTextField(
     modifier: Modifier = Modifier,
     readOnly: Boolean,
-    //leadingIconVector: ImageVector?,
-    trailingIconVector: ImageVector?,
-    trailingOnClick: () -> Unit,
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
@@ -54,23 +49,9 @@ fun FormularioTextFieldMenu(
     Column(modifier = modifier) {
         TextField(
             //shape = RoundedCornerShape(50.dp),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth(),
             readOnly = readOnly,
-            trailingIcon = {
-                if (trailingIconVector != null) {
-                    IconButton(
-                        onClick = {
-                            trailingOnClick()
-                        },
-                        content = {
-                            Icon(
-                                imageVector = trailingIconVector,
-                                contentDescription = "",
-                            )
-                        }
-                    )
-                }
-            },
             textStyle = TextStyle(
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -82,15 +63,12 @@ fun FormularioTextFieldMenu(
                 //unfocusedBorderColor = Color.LightGray, // Border color when not focused
                 //cursorColor = Color.DarkGray, // Cursor color
                 //containerColor = Color.White,
-                //unfocusedLabelColor = Color.Black,
-                //focusedLabelColor = Color.Black,
                 //focusedTextColor = Color.DarkGray,
                 //unfocusedTextColor = Color.DarkGray,
-                //disabledTrailingIconColor = Color.Black,
-                //unfocusedTrailingIconColor = Color.Black,
-                //focusedTrailingIconColor = Color.Black,
-                //errorTextColor = Color.Red
-
+                //unfocusedLabelColor = Color.Black,
+                //focusedLabelColor = Color.Black,
+                //focusedTextColor = Color.Black,
+                //unfocusedTextColor = Color.DarkGray
             ),
             value = value,
             visualTransformation = visualTransformation,
@@ -105,6 +83,7 @@ fun FormularioTextFieldMenu(
                     fontSize = 12.sp,
                 )
             },
+
             isError = !erro,
             keyboardOptions = KeyboardOptions(
                 keyboardType = keyboardType,
@@ -115,6 +94,7 @@ fun FormularioTextFieldMenu(
                 onNext = { focusManager.moveFocus(FocusDirection.Down) }
             )
         )
+
         if (!erro) {
             Text(
                 text = erroMensagem,
@@ -129,12 +109,9 @@ fun FormularioTextFieldMenu(
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun FormularioOutlinedTextFieldMenu(
+fun FormularioOutlinedTextField(
     modifier: Modifier = Modifier,
     readOnly: Boolean,
-    //leadingIconVector: ImageVector?,
-    trailingIconVector: ImageVector?,
-    trailingOnClick: () -> Unit,
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
@@ -151,23 +128,9 @@ fun FormularioOutlinedTextFieldMenu(
     Column(modifier = modifier) {
         OutlinedTextField(
             //shape = RoundedCornerShape(50.dp),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth(),
             readOnly = readOnly,
-            trailingIcon = {
-                if (trailingIconVector != null) {
-                    IconButton(
-                        onClick = {
-                            trailingOnClick()
-                        },
-                        content = {
-                            Icon(
-                                imageVector = trailingIconVector,
-                                contentDescription = "",
-                            )
-                        }
-                    )
-                }
-            },
             textStyle = TextStyle(
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -179,15 +142,12 @@ fun FormularioOutlinedTextFieldMenu(
                 //unfocusedBorderColor = Color.LightGray, // Border color when not focused
                 //cursorColor = Color.DarkGray, // Cursor color
                 //containerColor = Color.White,
-                //unfocusedLabelColor = Color.Black,
-                //focusedLabelColor = Color.Black,
                 //focusedTextColor = Color.DarkGray,
                 //unfocusedTextColor = Color.DarkGray,
-                //disabledTrailingIconColor = Color.Black,
-                //unfocusedTrailingIconColor = Color.Black,
-                //focusedTrailingIconColor = Color.Black,
-                //errorTextColor = Color.Red
-
+                //unfocusedLabelColor = Color.Black,
+                //focusedLabelColor = Color.Black,
+                //focusedTextColor = Color.Black,
+                //unfocusedTextColor = Color.DarkGray
             ),
             value = value,
             visualTransformation = visualTransformation,
@@ -202,6 +162,7 @@ fun FormularioOutlinedTextFieldMenu(
                     fontSize = 12.sp,
                 )
             },
+
             isError = !erro,
             keyboardOptions = KeyboardOptions(
                 keyboardType = keyboardType,
@@ -212,6 +173,7 @@ fun FormularioOutlinedTextFieldMenu(
                 onNext = { focusManager.moveFocus(FocusDirection.Down) }
             )
         )
+
         if (!erro) {
             Text(
                 text = erroMensagem,
@@ -222,3 +184,4 @@ fun FormularioOutlinedTextFieldMenu(
         }
     }
 }
+

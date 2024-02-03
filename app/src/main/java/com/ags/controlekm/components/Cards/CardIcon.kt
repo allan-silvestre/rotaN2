@@ -1,4 +1,4 @@
-package com.ags.controlekm.components
+package com.ags.controlekm.components.Cards
 
 import android.graphics.Color
 import androidx.compose.foundation.background

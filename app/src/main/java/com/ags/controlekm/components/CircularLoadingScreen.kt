@@ -27,8 +27,6 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.firebase.ui.database.paging.LoadingState
-
-
 @Composable
 fun LoadingScreen(
     isLoading: Boolean,

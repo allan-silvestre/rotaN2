@@ -75,9 +75,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.ags.controlekm.components.AlertDialogSelectImage
-import com.ags.controlekm.components.FormularioTextField
-import com.ags.controlekm.components.FormularioTextFieldMenu
+import com.ags.controlekm.components.Dialog.AlertDialogSelectImage
+import com.ags.controlekm.components.TextField.FormularioTextField
+import com.ags.controlekm.components.TextField.FormularioTextFieldMenu
 import com.ags.controlekm.database.ViewModels.UserViewModel
 import com.ags.controlekm.objects.MaskVisualTransformation
 import com.ags.controlekm.functions.UploadImage
@@ -88,7 +88,6 @@ import com.ags.controlekm.functions.VerificacaoFormatoEmail
 import com.ags.controlekm.functions.VerificacaoFormatoSenha
 import com.ags.controlekm.functions.navigateSingleTopTo
 import com.google.firebase.auth.FirebaseAuth
-import java.util.UUID
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable

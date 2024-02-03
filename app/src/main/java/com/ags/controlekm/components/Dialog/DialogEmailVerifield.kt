@@ -1,4 +1,4 @@
-package com.ags.controlekm.components
+package com.ags.controlekm.components.Dialog
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween

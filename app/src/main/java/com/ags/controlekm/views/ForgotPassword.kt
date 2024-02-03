@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -41,7 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.ags.controlekm.R
-import com.ags.controlekm.components.FormularioOutlinedTextField
+import com.ags.controlekm.components.TextField.FormularioOutlinedTextField
 import com.ags.controlekm.functions.navigateSingleTopTo
 import com.google.firebase.auth.FirebaseAuth
 
