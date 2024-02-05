@@ -1,7 +1,6 @@
 package com.ags.controlekm.database.ViewModels
 
 import android.app.Application
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,7 +9,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class executarFuncaoViewModel(application: Application) : AndroidViewModel(application) {
+class ExecutarFuncaoViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _carregando = mutableStateOf(false)
     val carregando get() = _carregando
@@ -27,6 +26,7 @@ class executarFuncaoViewModel(application: Application) : AndroidViewModel(appli
                     val resultado = withContext(Dispatchers.IO) {
                         delay(1000)
                         function()
+                        _carregando.value = false
                         "Função executada com sucesso!"
                     }
 

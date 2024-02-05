@@ -68,6 +68,8 @@ fun LoginView(
 
     val loginIsCompleted by loginViewModel.authResult.collectAsState(false)
 
+
+
     DisposableEffect(currentUser?.uid) {
         FirebaseAuth.getInstance().addAuthStateListener { firebaseAuth ->
             currentUser = firebaseAuth.currentUser

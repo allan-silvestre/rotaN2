@@ -3,7 +3,6 @@ package com.ags.controlekm.views
 import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,11 +25,9 @@ import androidx.compose.material.icons.outlined.TravelExplore
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -65,7 +62,9 @@ import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.ags.controlekm.R
+import com.ags.controlekm.components.Buttons.ButtonDefault
 import com.ags.controlekm.components.Dialog.FinalizarAtendimentoDialog
+import com.ags.controlekm.components.Progress.LoadingCircular
 import com.ags.controlekm.components.TextField.FormularioOutlinedTextField
 import com.ags.controlekm.components.TextField.FormularioTextField
 import com.ags.controlekm.components.TextField.FormularioTextFieldMenu
@@ -76,6 +75,8 @@ import com.ags.controlekm.database.Models.ViagemSuporteTecnico
 import com.ags.controlekm.database.ViewModels.CurrentUserViewModel
 import com.ags.controlekm.database.ViewModels.EnderecoAtendimentoViewModel
 import com.ags.controlekm.database.ViewModels.ViagemSuporteTecnicoViewModel
+import com.ags.controlekm.database.ViewModels.ExecutarFuncaoViewModel
+import com.ags.controlekm.functions.HomeCountContent
 import com.ags.controlekm.functions.reiniciarTela
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
@@ -91,62 +92,25 @@ fun Home(
     currentUserViewModel: CurrentUserViewModel = viewModel(),
     enderecoAtendimentoViewModel: EnderecoAtendimentoViewModel = viewModel(),
     viagemSuporteTecnicoViewModel: ViagemSuporteTecnicoViewModel = viewModel(),
+    executarFuncaoViewModel: ExecutarFuncaoViewModel = viewModel()
 ) {
+    var countContent by remember { mutableIntStateOf(0) }
+
     val coroutineScope = rememberCoroutineScope()
-
-    var countContent by rememberSaveable { mutableIntStateOf(0) }
-
-    var currentUser by rememberSaveable { mutableStateOf(FirebaseAuth.getInstance().currentUser) }
-
-    val userLoggedData by currentUserViewModel.currentUserData.collectAsState(null)
-
-    val currentUserServices = CurrentUserServices(currentUser?.uid.toString())
 
     val viagemSuporte: List<ViagemSuporteTecnico> by viagemSuporteTecnicoViewModel.allViagemSuporteTecnico.collectAsState(emptyList())
 
+    val userLoggedData by currentUserViewModel.currentUserData.collectAsState(null)
+
+    var currentUser by rememberSaveable { mutableStateOf(FirebaseAuth.getInstance().currentUser) }
+
+    val currentUserServices = CurrentUserServices(currentUser?.uid.toString())
+
     val enderecosLocal: List<EnderecoAtendimento> by enderecoAtendimentoViewModel.allEnderecoAtendimento.collectAsState(emptyList())
-
     var enderecosList by rememberSaveable { mutableStateOf<List<String>>(emptyList()) }
-
-    DisposableEffect(enderecosLocal) {
-        val coroutineScope = CoroutineScope(Dispatchers.IO)
-        val enderecos = coroutineScope.launch {
-            enderecosList = enderecosLocal.map { endereco ->
-                endereco.toStringEnderecoAtendimento()
-            }
-        }
-
-        onDispose {
-            enderecos.cancel()
-        }
-    }
-
-    var hora by remember { mutableStateOf("00:00:00") }
-    var data by remember { mutableStateOf("00/00/0000") }
-
-    val handler = remember { Handler(Looper.getMainLooper()) }
-
-    LaunchedEffect(Unit) {
-        coroutineScope.launch(Dispatchers.IO) {
-            while (true) {
-                delay(1000)
-                handler.post {
-                    val currentTime = System.currentTimeMillis()
-
-                    val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                    data = dateFormat.format(currentTime)
-
-                    val timeFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
-                    hora = timeFormat.format(currentTime)
-                }
-            }
-        }
-    }
 
     val context = LocalContext.current
     val route = stringResource(R.string.home)
-
-    val progressIndicator = remember { mutableStateOf(false) }
 
     var kmSaida by remember { mutableStateOf("") }
     var kmSaidaError by remember { mutableStateOf(true) }
@@ -174,6 +138,41 @@ fun Home(
 
     var novoAtendimento by remember { mutableStateOf(ViagemSuporteTecnico()) }
     var atendimentoAtual by remember { mutableStateOf(ViagemSuporteTecnico()) }
+
+    val handler = remember { Handler(Looper.getMainLooper()) }
+
+    var hora by remember { mutableStateOf("00:00:00") }
+    var data by remember { mutableStateOf("00/00/0000") }
+
+    DisposableEffect(enderecosLocal) {
+        val coroutineScope = CoroutineScope(Dispatchers.IO)
+        val enderecos = coroutineScope.launch {
+            enderecosList = enderecosLocal.map { endereco ->
+                endereco.toStringEnderecoAtendimento()
+            }
+        }
+
+        onDispose {
+            enderecos.cancel()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        coroutineScope.launch(Dispatchers.IO) {
+            while (true) {
+                delay(1000)
+                handler.post {
+                    val currentTime = System.currentTimeMillis()
+
+                    val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                    data = dateFormat.format(currentTime)
+
+                    val timeFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+                    hora = timeFormat.format(currentTime)
+                }
+            }
+        }
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Box(
@@ -204,394 +203,346 @@ fun Home(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    AnimatedContent(
-                        targetState = countContent,
-                        label = "",
-                    ) { targetCount ->
-                        when (targetCount) {
-                            0 -> {
-                                progressIndicator.value = true
-                                Column(
+                        if( countContent == 0 || executarFuncaoViewModel.carregando.value ) {
+                            LoadingCircular()
+                            executarFuncaoViewModel.executarFuncao(
+                                function = {
+                                    countContent = HomeCountContent(
+                                        viagemSuporte = viagemSuporte,
+                                        currentUser = currentUser,
+                                        atendimento = {atendimento -> atendimentoAtual = atendimento}
+                                    )
+                                },
+                                onExecuted = {},
+                                onError = {}
+                            )
+                        } else if (countContent == 1) {
+                            textStatus = ""
+                            textButton = "Iniciar percurso"
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                Row(
                                     modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(32.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center,
+                                        .fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    if (progressIndicator.value) {
-                                        CircularProgressIndicator(
-                                            modifier = Modifier
-                                                .size(50.dp),
-                                            color = MaterialTheme.colorScheme.secondary,
-                                            trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                                        )
-                                    }
-                                    if (viagemSuporte.isNotEmpty()) {
-                                        viagemSuporte.forEach {
-                                            if (it.tecnicoId!!.contains(currentUser?.uid.toString())) {
-                                                if (it.statusService != "Finalizado") {
-                                                    atendimentoAtual = it
-                                                    when (it.statusService) {
-                                                        "Em rota" -> {
-                                                            countContent = 2
-                                                            progressIndicator.value = false
-                                                        }
-
-                                                        "Em rota, retornando" -> {
-                                                            countContent = 2
-                                                            progressIndicator.value = false
-                                                        }
-
-                                                        "Em andamento" -> {
-                                                            countContent = 3
-                                                            progressIndicator.value = false
-                                                        }
-
-                                                    }
-                                                }
-
-                                            }
-                                        }
-                                    } else {
-                                        countContent = 1
-                                        progressIndicator.value = false
-                                    }
-                                }
-                            }
-
-                            1 -> {// INICIAR ATENDIMENTO
-                                textStatus = ""
-                                textButton = "Iniciar percurso"
-                                Column(modifier = Modifier.fillMaxWidth()) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth(),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(
-                                            modifier = Modifier.size(18.dp),
-                                            imageVector = Icons.Outlined.TravelExplore,
-                                            contentDescription = ""
-                                        )
-                                        FormularioTextFieldMenu(
-                                            modifier = Modifier
-                                                .onGloballyPositioned { coordinates ->
-                                                    textFieldSize = coordinates.size.toSize()
-                                                },
-                                            readOnly = false,
-                                            value = localSaida,
-                                            trailingIconVector = Icons.Filled.ArrowDropDown,
-                                            trailingOnClick = {
-                                                expandedSaida = !expandedSaida
-                                            },
-                                            onValueChange = {
-                                                expandedSaida = true
-                                                localSaida = it
-                                            },
-                                            label = "De (Local de saída)",
-                                            visualTransformation = VisualTransformation.None,
-                                            keyboardType = KeyboardType.Text,
-                                            imeAction = ImeAction.Next,
-                                            capitalization = KeyboardCapitalization.None,
-                                            erro = localSaidaError,
-                                            erroMensagem = ""
-                                        )
-                                        DropdownMenu(
-                                            modifier = Modifier.wrapContentSize(),
-                                            expanded = expandedSaida,
-                                            properties = PopupProperties(focusable = false),
-                                            onDismissRequest = {
-                                                expandedSaida = false
-                                            }) {
-                                            LazyColumn(
-                                                modifier = Modifier
-                                                    .width(300.dp)
-                                                    .height(195.dp)
-                                            ) {
-                                                if (localSaida.isNotEmpty()) {
-                                                    items(
-                                                        enderecosList.filter {
-                                                            it.lowercase()
-                                                                .contains(localSaida.lowercase()) || it.lowercase()
-                                                                .contains("others")
-                                                        }.sorted()
-                                                    ) {
-                                                        DropdownMenuItem(
-                                                            text = {
-                                                                Text(
-                                                                    text = it,
-                                                                    fontSize = 12.sp,
-                                                                    fontWeight = FontWeight.SemiBold
-                                                                )
-                                                            },
-                                                            onClick = {
-                                                                localSaida = it
-                                                                expandedSaida = false
-                                                            })
-                                                    }
-                                                } else {
-                                                    items(
-                                                        enderecosList.sorted()
-                                                    ) {
-                                                        DropdownMenuItem(
-                                                            text = {
-                                                                Text(
-                                                                    text = it,
-                                                                    fontSize = 12.sp,
-                                                                    fontWeight = FontWeight.SemiBold
-                                                                )
-                                                            },
-                                                            onClick = {
-                                                                localSaida = it
-                                                                expandedSaida = false
-                                                            })
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth(),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(
-                                            modifier = Modifier.size(18.dp),
-                                            imageVector = Icons.Outlined.TravelExplore,
-                                            contentDescription = ""
-                                        )
-                                        FormularioTextFieldMenu(
-                                            modifier = Modifier
-                                                .onGloballyPositioned { coordinates ->
-                                                    textFieldSize = coordinates.size.toSize()
-                                                },
-                                            readOnly = false,
-                                            value = localAtendimento,
-                                            trailingIconVector = Icons.Filled.ArrowDropDown,
-                                            trailingOnClick = {
-                                                expandedAtendimento = !expandedAtendimento
-                                            },
-                                            onValueChange = {
-                                                expandedAtendimento = true
-                                                localAtendimento = it
-                                            },
-                                            label = "Para (Local do atendimento)",
-                                            visualTransformation = VisualTransformation.None,
-                                            keyboardType = KeyboardType.Text,
-                                            imeAction = ImeAction.Next,
-                                            capitalization = KeyboardCapitalization.None,
-                                            erro = localAtendimentoError,
-                                            erroMensagem = ""
-                                        )
-                                        DropdownMenu(
-                                            modifier = Modifier.wrapContentSize(),
-                                            expanded = expandedAtendimento,
-                                            properties = PopupProperties(focusable = false),
-                                            onDismissRequest = {
-                                                expandedAtendimento = false
-                                            }) {
-                                            LazyColumn(
-                                                modifier = Modifier
-                                                    .width(300.dp)
-                                                    .height(195.dp)
-                                            ) {
-                                                if (localAtendimento.isNotEmpty()) {
-                                                    items(
-                                                        enderecosList.filter {
-                                                            it.lowercase()
-                                                                .contains(localAtendimento.lowercase()) || it.lowercase()
-                                                                .contains("others")
-                                                        }.sorted()
-                                                    ) {
-                                                        DropdownMenuItem(
-                                                            text = {
-                                                                Text(
-                                                                    text = it,
-                                                                    fontSize = 12.sp,
-                                                                    fontWeight = FontWeight.SemiBold
-                                                                )
-                                                            },
-                                                            onClick = {
-                                                                localAtendimento = it
-                                                                expandedAtendimento = false
-                                                            })
-                                                    }
-                                                } else {
-                                                    items(
-                                                        enderecosList.sorted()
-                                                    ) {
-                                                        DropdownMenuItem(
-                                                            text = {
-                                                                Text(
-                                                                    text = it,
-                                                                    fontSize = 12.sp,
-                                                                    fontWeight = FontWeight.SemiBold
-                                                                )
-                                                            },
-                                                            onClick = {
-                                                                localAtendimento = it
-                                                                expandedAtendimento = false
-                                                            })
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                    }
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth(),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        Icon(
-                                            modifier = Modifier.size(18.dp),
-                                            imageVector = Icons.Outlined.TimeToLeave,
-                                            contentDescription = ""
-                                        )
-                                        FormularioTextField(
-                                            modifier = Modifier.weight(0.7f),
-                                            readOnly = false,
-                                            value = kmSaida,
-                                            onValueChange = { kmSaida = it.take(6) },
-                                            label = "KM da saída",
-                                            visualTransformation = VisualTransformation.None,
-                                            keyboardType = KeyboardType.Number,
-                                            imeAction = ImeAction.Next,
-                                            capitalization = KeyboardCapitalization.None,
-                                            erro = kmSaidaError,
-                                            erroMensagem = ""
-                                        )
-                                        Spacer(modifier = Modifier.width(12.dp))
-                                        Text(
-                                            modifier = Modifier.weight(0.4f),
-                                            text = "Hora: ${hora}\n" + "Data: ${data}",
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.SemiBold,
-                                            //textAlign = TextAlign.Center
-                                        )
-                                    }
-                                }
-                            }
-
-                            2 -> {
-                                if (atendimentoAtual.statusService.equals("Em rota")) {
-                                    textStatus =
-                                        "${atendimentoAtual.statusService} entre  ${atendimentoAtual.localSaida} \n e ${atendimentoAtual.localAtendimento}"
-                                    textButton = "Confirmar chegada e iniciar o atendimento"
-                                }
-
-                                if (atendimentoAtual.statusService.equals("Em rota, retornando")) {
-                                    textStatus =
-                                        "${atendimentoAtual.statusService} de ${atendimentoAtual.localAtendimento} \n para ${atendimentoAtual.localRetorno}"
-                                    textButton = "Confirmar chegada"
-                                }
-                                Column(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalArrangement = Arrangement.Center,
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Text(
-                                        modifier = Modifier,
-                                        text = "Atendimento",
-                                        fontWeight = FontWeight.SemiBold,
+                                    Icon(
+                                        modifier = Modifier.size(18.dp),
+                                        imageVector = Icons.Outlined.TravelExplore,
+                                        contentDescription = ""
                                     )
-                                    Text(
-                                        modifier = Modifier.padding(10.dp),
-                                        text = textStatus,
-                                        fontWeight = FontWeight.Normal,
-                                        fontSize = 14.sp,
-                                        textAlign = TextAlign.Center
-                                    )
-                                    Row(
+                                    FormularioTextFieldMenu(
                                         modifier = Modifier
-                                            .fillMaxWidth(),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        Icon(
-                                            modifier = Modifier.size(18.dp),
-                                            imageVector = Icons.Outlined.TimeToLeave,
-                                            contentDescription = ""
-                                        )
-                                        FormularioTextField(
-                                            modifier = Modifier.weight(0.7f),
-                                            readOnly = false,
-                                            value = kmChegada,
-                                            onValueChange = { kmChegada = it.take(6) },
-                                            label = "KM da Chegada",
-                                            visualTransformation = VisualTransformation.None,
-                                            keyboardType = KeyboardType.Number,
-                                            imeAction = ImeAction.Next,
-                                            capitalization = KeyboardCapitalization.None,
-                                            erro = kmChegadaError,
-                                            erroMensagem = ""
-                                        )
-                                        Spacer(modifier = Modifier.width(12.dp))
-                                        Text(
-                                            modifier = Modifier.weight(0.4f),
-                                            text = "Hora: ${hora}\n" + "Data: ${data}",
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.SemiBold,
-                                            //textAlign = TextAlign.Center
-                                        )
-                                    }
-                                }
-                            }
-
-                            3 -> {
-                                textStatus = "Em andamento..."
-                                textButton = "Finalizar atendimento"
-                                Column(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalArrangement = Arrangement.Center,
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Text(
-                                        modifier = Modifier,
-                                        text = "Atendimento",
-                                        fontWeight = FontWeight.SemiBold,
-                                    )
-                                    Text(
-                                        modifier = Modifier.padding(30.dp),
-                                        text = textStatus,
-                                        fontWeight = FontWeight.Normal,
-                                        fontSize = 14.sp,
-                                        textAlign = TextAlign.Center
-                                    )
-                                    FormularioOutlinedTextField(
+                                            .onGloballyPositioned { coordinates ->
+                                                textFieldSize = coordinates.size.toSize()
+                                            },
                                         readOnly = false,
-                                        value = resumoAtendimento,
-                                        onValueChange = { resumoAtendimento = it.take(50) },
-                                        label = "Resumo do atendimento",
+                                        value = localSaida,
+                                        trailingIconVector = Icons.Filled.ArrowDropDown,
+                                        trailingOnClick = {
+                                            expandedSaida = !expandedSaida
+                                        },
+                                        onValueChange = {
+                                            expandedSaida = true
+                                            localSaida = it
+                                        },
+                                        label = "De (Local de saída)",
                                         visualTransformation = VisualTransformation.None,
                                         keyboardType = KeyboardType.Text,
                                         imeAction = ImeAction.Next,
-                                        capitalization = KeyboardCapitalization.Sentences,
-                                        erro = resumoAtendimentoError,
+                                        capitalization = KeyboardCapitalization.None,
+                                        erro = localSaidaError,
                                         erroMensagem = ""
                                     )
-                                }
-                                if (visibleFinalizarDialog) {
-                                    FinalizarAtendimentoDialog(
-                                        navController = navController,
-                                        currentUserServices = currentUserServices,
-                                        userLoggedData = userLoggedData,
-                                        atendimentoAtual = atendimentoAtual,
-                                        novoAtendimento = novoAtendimento,
-                                        resumoAtendimento = resumoAtendimento,
-                                        data = data,
-                                        hora = hora,
+                                    DropdownMenu(
+                                        modifier = Modifier.wrapContentSize(),
+                                        expanded = expandedSaida,
+                                        properties = PopupProperties(focusable = false),
                                         onDismissRequest = {
-                                            visibleFinalizarDialog = false
-                                        })
+                                            expandedSaida = false
+                                        }) {
+                                        LazyColumn(
+                                            modifier = Modifier
+                                                .width(300.dp)
+                                                .height(195.dp)
+                                        ) {
+                                            if (localSaida.isNotEmpty()) {
+                                                items(
+                                                    enderecosList.filter {
+                                                        it.lowercase()
+                                                            .contains(localSaida.lowercase()) || it.lowercase()
+                                                            .contains("others")
+                                                    }.sorted()
+                                                ) {
+                                                    DropdownMenuItem(
+                                                        text = {
+                                                            Text(
+                                                                text = it,
+                                                                fontSize = 12.sp,
+                                                                fontWeight = FontWeight.SemiBold
+                                                            )
+                                                        },
+                                                        onClick = {
+                                                            localSaida = it
+                                                            expandedSaida = false
+                                                        })
+                                                }
+                                            } else {
+                                                items(
+                                                    enderecosList.sorted()
+                                                ) {
+                                                    DropdownMenuItem(
+                                                        text = {
+                                                            Text(
+                                                                text = it,
+                                                                fontSize = 12.sp,
+                                                                fontWeight = FontWeight.SemiBold
+                                                            )
+                                                        },
+                                                        onClick = {
+                                                            localSaida = it
+                                                            expandedSaida = false
+                                                        })
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        modifier = Modifier.size(18.dp),
+                                        imageVector = Icons.Outlined.TravelExplore,
+                                        contentDescription = ""
+                                    )
+                                    FormularioTextFieldMenu(
+                                        modifier = Modifier
+                                            .onGloballyPositioned { coordinates ->
+                                                textFieldSize = coordinates.size.toSize()
+                                            },
+                                        readOnly = false,
+                                        value = localAtendimento,
+                                        trailingIconVector = Icons.Filled.ArrowDropDown,
+                                        trailingOnClick = {
+                                            expandedAtendimento = !expandedAtendimento
+                                        },
+                                        onValueChange = {
+                                            expandedAtendimento = true
+                                            localAtendimento = it
+                                        },
+                                        label = "Para (Local do atendimento)",
+                                        visualTransformation = VisualTransformation.None,
+                                        keyboardType = KeyboardType.Text,
+                                        imeAction = ImeAction.Next,
+                                        capitalization = KeyboardCapitalization.None,
+                                        erro = localAtendimentoError,
+                                        erroMensagem = ""
+                                    )
+                                    DropdownMenu(
+                                        modifier = Modifier.wrapContentSize(),
+                                        expanded = expandedAtendimento,
+                                        properties = PopupProperties(focusable = false),
+                                        onDismissRequest = {
+                                            expandedAtendimento = false
+                                        }) {
+                                        LazyColumn(
+                                            modifier = Modifier
+                                                .width(300.dp)
+                                                .height(195.dp)
+                                        ) {
+                                            if (localAtendimento.isNotEmpty()) {
+                                                items(
+                                                    enderecosList.filter {
+                                                        it.lowercase()
+                                                            .contains(localAtendimento.lowercase()) || it.lowercase()
+                                                            .contains("others")
+                                                    }.sorted()
+                                                ) {
+                                                    DropdownMenuItem(
+                                                        text = {
+                                                            Text(
+                                                                text = it,
+                                                                fontSize = 12.sp,
+                                                                fontWeight = FontWeight.SemiBold
+                                                            )
+                                                        },
+                                                        onClick = {
+                                                            localAtendimento = it
+                                                            expandedAtendimento = false
+                                                        })
+                                                }
+                                            } else {
+                                                items(
+                                                    enderecosList.sorted()
+                                                ) {
+                                                    DropdownMenuItem(
+                                                        text = {
+                                                            Text(
+                                                                text = it,
+                                                                fontSize = 12.sp,
+                                                                fontWeight = FontWeight.SemiBold
+                                                            )
+                                                        },
+                                                        onClick = {
+                                                            localAtendimento = it
+                                                            expandedAtendimento = false
+                                                        })
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                }
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Icon(
+                                        modifier = Modifier.size(18.dp),
+                                        imageVector = Icons.Outlined.TimeToLeave,
+                                        contentDescription = ""
+                                    )
+                                    FormularioTextField(
+                                        modifier = Modifier.weight(0.7f),
+                                        readOnly = false,
+                                        value = kmSaida,
+                                        onValueChange = { kmSaida = it.take(6) },
+                                        label = "KM da saída",
+                                        visualTransformation = VisualTransformation.None,
+                                        keyboardType = KeyboardType.Number,
+                                        imeAction = ImeAction.Next,
+                                        capitalization = KeyboardCapitalization.None,
+                                        erro = kmSaidaError,
+                                        erroMensagem = ""
+                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Text(
+                                        modifier = Modifier.weight(0.4f),
+                                        text = "Hora: ${hora}\n" + "Data: ${data}",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        //textAlign = TextAlign.Center
+                                    )
+                                }
+                            }
+                        } else if (countContent == 2) {
+                            if (atendimentoAtual.statusService.equals("Em rota")) {
+                                textStatus =
+                                    "${atendimentoAtual.statusService} entre ${atendimentoAtual.localSaida} \n e ${atendimentoAtual.localAtendimento}"
+                                textButton = "Confirmar chegada e iniciar o atendimento"
+                            }
+                            if (atendimentoAtual.statusService.equals("Em rota, retornando")) {
+                                textStatus =
+                                    "${atendimentoAtual.statusService} de ${atendimentoAtual.localAtendimento} \n para ${atendimentoAtual.localRetorno}"
+                                textButton = "Confirmar chegada"
+                            }
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    modifier = Modifier,
+                                    text = "Atendimento",
+                                    fontWeight = FontWeight.SemiBold,
+                                )
+                                Text(
+                                    modifier = Modifier.padding(10.dp),
+                                    text = textStatus,
+                                    fontWeight = FontWeight.Normal,
+                                    fontSize = 14.sp,
+                                    textAlign = TextAlign.Center
+                                )
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Icon(
+                                        modifier = Modifier.size(18.dp),
+                                        imageVector = Icons.Outlined.TimeToLeave,
+                                        contentDescription = ""
+                                    )
+                                    FormularioTextField(
+                                        modifier = Modifier.weight(0.7f),
+                                        readOnly = false,
+                                        value = kmChegada,
+                                        onValueChange = { kmChegada = it.take(6) },
+                                        label = "KM da Chegada",
+                                        visualTransformation = VisualTransformation.None,
+                                        keyboardType = KeyboardType.Number,
+                                        imeAction = ImeAction.Next,
+                                        capitalization = KeyboardCapitalization.None,
+                                        erro = kmChegadaError,
+                                        erroMensagem = ""
+                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Text(
+                                        modifier = Modifier.weight(0.4f),
+                                        text = "Hora: ${hora}\n" + "Data: ${data}",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        //textAlign = TextAlign.Center
+                                    )
                                 }
                             }
                         }
-                    }
-                }
+                        else if (countContent == 3) {
+                            textStatus = "Em andamento..."
+                            textButton = "Finalizar atendimento"
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    modifier = Modifier,
+                                    text = "Atendimento",
+                                    fontWeight = FontWeight.SemiBold,
+                                )
+                                Text(
+                                    modifier = Modifier.padding(30.dp),
+                                    text = textStatus,
+                                    fontWeight = FontWeight.Normal,
+                                    fontSize = 14.sp,
+                                    textAlign = TextAlign.Center
+                                )
+                                FormularioOutlinedTextField(
+                                    readOnly = false,
+                                    value = resumoAtendimento,
+                                    onValueChange = { resumoAtendimento = it.take(50) },
+                                    label = "Resumo do atendimento",
+                                    visualTransformation = VisualTransformation.None,
+                                    keyboardType = KeyboardType.Text,
+                                    imeAction = ImeAction.Next,
+                                    capitalization = KeyboardCapitalization.Sentences,
+                                    erro = resumoAtendimentoError,
+                                    erroMensagem = ""
+                                )
+                            }
+                            if (visibleFinalizarDialog) {
+                                FinalizarAtendimentoDialog(
+                                    navController = navController,
+                                    currentUserServices = currentUserServices,
+                                    userLoggedData = userLoggedData,
+                                    atendimentoAtual = atendimentoAtual,
+                                    novoAtendimento = novoAtendimento,
+                                    resumoAtendimento = resumoAtendimento,
+                                    data = data,
+                                    hora = hora,
+                                    onDismissRequest = {
+                                        visibleFinalizarDialog = false
+                                    })
+                            }
+                        }
 
+                }
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
                     shape = RoundedCornerShape(
@@ -606,28 +557,40 @@ fun Home(
                     onClick = {
                         when (countContent) {
                             1 -> {
-                                viagemSuporteTecnicoViewModel.iniciarViagem(
-                                    currentUserViewModel = currentUserViewModel,
-                                    currentUserServices = currentUserServices,
-                                    userLoggedData = userLoggedData,
-                                    novoAtendimento = novoAtendimento,
-                                    localSaida = localSaida,
-                                    localAtendimento = localAtendimento,
-                                    kmSaida = kmSaida,
-                                    data = data,
-                                    hora = hora,
+                                executarFuncaoViewModel.executarFuncao(
+                                    function = {
+                                        viagemSuporteTecnicoViewModel.iniciarViagem(
+                                            currentUserViewModel = currentUserViewModel,
+                                            currentUserServices = currentUserServices,
+                                            userLoggedData = userLoggedData,
+                                            novoAtendimento = novoAtendimento,
+                                            localSaida = localSaida,
+                                            localAtendimento = localAtendimento,
+                                            kmSaida = kmSaida,
+                                            data = data,
+                                            hora = hora,
+                                        )
+                                    },
+                                    onExecuted = {countContent = 0},
+                                    onError = {}
                                 )
                             }
 
                             2 -> {
-                                viagemSuporteTecnicoViewModel.informarChegada(
-                                    currentUserViewModel = currentUserViewModel,
-                                    currentUserServices = currentUserServices,
-                                    userLoggedData = userLoggedData,
-                                    atendimentoAtual = atendimentoAtual,
-                                    kmChegada = kmChegada,
-                                    data = data,
-                                    hora = hora,
+                                executarFuncaoViewModel.executarFuncao(
+                                    function = {
+                                        viagemSuporteTecnicoViewModel.informarChegada(
+                                            currentUserViewModel = currentUserViewModel,
+                                            currentUserServices = currentUserServices,
+                                            userLoggedData = userLoggedData,
+                                            atendimentoAtual = atendimentoAtual,
+                                            kmChegada = kmChegada,
+                                            data = data,
+                                            hora = hora,
+                                        )
+                                    },
+                                    onExecuted = { countContent = 0 },
+                                    onError = {}
                                 )
                             }
 
@@ -644,8 +607,6 @@ fun Home(
                                     ).show()
                                 }
                             }
-
-                            4 -> {}
                         }
                     })
                 {
@@ -653,6 +614,11 @@ fun Home(
                 }
             }
         }
+
+        ButtonDefault(text = "count++") {
+            countContent++
+        }
+
         TextButton(onClick = {
             coroutineScope.launch(Dispatchers.IO) {
                 // DELETA O ATENDIMENTO ATUAL DA TABELA
@@ -670,7 +636,7 @@ fun Home(
                 // DEFINE O VALOR DO (ULTIMO KM) DO USUÁRIO PARA O ULTIMO INFORMADO AO CONCLUIR A ULTIMA VIAGEM
                 currentUserServices.addUltimoKm(userLoggedData?.kmBackup.toString())
             }
-            reiniciarTela(route, navController)
+            countContent = 0
         }) {
             Text(text = "Cancelar atendimento")
         }
@@ -689,9 +655,10 @@ fun Home(
                     )
                 }
             }
-            reiniciarTela(route, navController)
+            countContent = 0
         }) {
             Text(text = "Cancelar retorno")
         }
     }
+
 }
