@@ -146,12 +146,6 @@ fun Home(
     val context = LocalContext.current
     val route = stringResource(R.string.home)
 
-    var visibleFinalizarOpcoes by remember { mutableStateOf(true) }
-    var visibleRetornar by remember { mutableStateOf(false) }
-    var visibleNovoAtendimento by remember { mutableStateOf(false) }
-
-    var textTituloFinalizarAtendimento by remember { mutableStateOf("Finalizar atendimento") }
-
     val progressIndicator = remember { mutableStateOf(false) }
 
     var kmSaida by remember { mutableStateOf("") }
@@ -170,8 +164,6 @@ fun Home(
     var localSaidaError by remember { mutableStateOf(true) }
     var localAtendimento by remember { mutableStateOf("") }
     var localAtendimentoError by remember { mutableStateOf(true) }
-    var local by remember { mutableStateOf("") }
-    var localError by remember { mutableStateOf(true) }
 
     var textFieldSize by remember { mutableStateOf(Size.Zero) }
 
@@ -583,49 +575,17 @@ fun Home(
                                 }
                                 if (visibleFinalizarDialog) {
                                     FinalizarAtendimentoDialog(
+                                        navController = navController,
+                                        currentUserServices = currentUserServices,
+                                        userLoggedData = userLoggedData,
                                         atendimentoAtual = atendimentoAtual,
+                                        novoAtendimento = novoAtendimento,
                                         resumoAtendimento = resumoAtendimento,
-                                        kmSaida = kmSaida,
                                         data = data,
                                         hora = hora,
                                         onDismissRequest = {
                                             visibleFinalizarDialog = false
-                                        },
-                                        iniciarViagem = {
-                                            viagemSuporteTecnicoViewModel.iniciarViagem(
-                                                currentUserViewModel = currentUserViewModel,
-                                                currentUserServices = currentUserServices,
-                                                userLoggedData = userLoggedData,
-                                                novoAtendimento = novoAtendimento,
-                                                localSaida = atendimentoAtual.localAtendimento.toString(),
-                                                localAtendimento = localAtendimento,
-                                                kmSaida = kmSaida,
-                                                data = data,
-                                                hora = hora,
-                                                route = route,
-                                                navController = navController
-                                            )
-                                        },
-                                        finalizarAtendimento = {
-                                            viagemSuporteTecnicoViewModel.finalizarAtendimento(
-                                                currentUserViewModel = currentUserViewModel,
-                                                currentUserServices = currentUserServices,
-                                                userLoggedData = userLoggedData,
-                                                atendimentoAtual = atendimentoAtual,
-                                                resumoAtendimento = resumoAtendimento,
-                                                data = data,
-                                                hora = hora,
-                                            )
-
-                                            visibleFinalizarDialog = false
-                                            visibleFinalizarOpcoes = false
-                                            visibleRetornar = false
-                                            visibleNovoAtendimento = false
-                                            textTituloFinalizarAtendimento = "Finalizar atendimento"
-                                            reiniciarTela(route, navController)
-                                        }
-
-                                    )
+                                        })
                                 }
                             }
                         }
@@ -656,10 +616,9 @@ fun Home(
                                     kmSaida = kmSaida,
                                     data = data,
                                     hora = hora,
-                                    route = route,
-                                    navController = navController
                                 )
                             }
+
                             2 -> {
                                 viagemSuporteTecnicoViewModel.informarChegada(
                                     currentUserViewModel = currentUserViewModel,
@@ -669,8 +628,6 @@ fun Home(
                                     kmChegada = kmChegada,
                                     data = data,
                                     hora = hora,
-                                    route = route,
-                                    navController = navController
                                 )
                             }
 
@@ -678,7 +635,6 @@ fun Home(
                                 if (resumoAtendimento.isNotEmpty() && resumoAtendimento.length > 5) {
                                     resumoAtendimentoError = true
                                     visibleFinalizarDialog = true
-                                    visibleFinalizarOpcoes = true
                                 } else {
                                     resumoAtendimentoError = false
                                     Toast.makeText(

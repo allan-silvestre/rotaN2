@@ -1,7 +1,8 @@
-package com.ags.controlekm.components
+package com.ags.controlekm.components.DropDownMenu
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
@@ -11,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.outlined.TimeToLeave
 import androidx.compose.material.icons.outlined.TravelExplore
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -38,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ags.controlekm.components.TextField.FormularioTextField
 import com.ags.controlekm.components.TextField.FormularioTextFieldMenu
 import com.ags.controlekm.database.Models.EnderecoAtendimento
 import com.ags.controlekm.database.ViewModels.EnderecoAtendimentoViewModel
@@ -49,7 +52,10 @@ import kotlinx.coroutines.launch
 fun DropDownMenuAtendimento(
     enderecoAtendimentoViewModel: EnderecoAtendimentoViewModel = viewModel(),
     label: String? = "",
-    onValueSelected: (String) -> Unit
+    hora : String? = "",
+    data : String? = "",
+    localSelecionado: (String) -> Unit,
+    kmInformado: (String) -> Unit,
 ) {
     val enderecosLocal: List<EnderecoAtendimento> by enderecoAtendimentoViewModel.allEnderecoAtendimento.collectAsState(emptyList())
     var enderecosList by rememberSaveable { mutableStateOf<List<String>>(emptyList()) }
@@ -68,7 +74,9 @@ fun DropDownMenuAtendimento(
     }
     var textFieldSize by remember { mutableStateOf(Size.Zero) }
     var expandedMenu by remember { mutableStateOf(false) }
+
     var local by remember { mutableStateOf("") }
+    var kmSaida by remember { mutableStateOf("") }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -102,7 +110,6 @@ fun DropDownMenuAtendimento(
             erro = true,
             erroMensagem = ""
         )
-
         DropdownMenu(
             modifier = Modifier.wrapContentSize(),
             expanded = expandedMenu,
@@ -133,7 +140,7 @@ fun DropDownMenuAtendimento(
                             },
                             onClick = {
                                 local = it
-                                onValueSelected(it)
+                                localSelecionado(it)
                                 expandedMenu = false
                             })
                     }
@@ -151,12 +158,48 @@ fun DropDownMenuAtendimento(
                             },
                             onClick = {
                                 local = it
-                                onValueSelected(it)
+                                localSelecionado(it)
                                 expandedMenu = false
                             })
                     }
                 }
             }
+        }
+    }
+    if(label.equals("Local do atendimento")) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Icon(
+                modifier = Modifier.size(18.dp),
+                imageVector = Icons.Outlined.TimeToLeave,
+                contentDescription = ""
+            )
+            FormularioTextField(
+                modifier = Modifier.weight(0.7f),
+                readOnly = false,
+                value = kmSaida,
+                onValueChange = {
+                    kmSaida = it.take(6)
+                    kmInformado(it)
+                },
+                label = "KM da Saida",
+                visualTransformation = VisualTransformation.None,
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Next,
+                capitalization = KeyboardCapitalization.None,
+                erro = true,
+                erroMensagem = ""
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                modifier = Modifier.weight(0.4f),
+                text = "Hora: ${hora}\n" + "Data: ${data}",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.SemiBold,
+            )
         }
     }
 }

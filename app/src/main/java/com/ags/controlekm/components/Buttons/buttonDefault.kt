@@ -1,4 +1,4 @@
-package com.ags.controlekm.components.button
+package com.ags.controlekm.components.Buttons
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding

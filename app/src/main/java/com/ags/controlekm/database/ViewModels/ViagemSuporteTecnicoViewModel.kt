@@ -36,17 +36,12 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
     val allViagemSuporteTecnico: Flow<List<ViagemSuporteTecnico>>
     private val viagemSuporteTecnicoServices: ViagemSuporteTecnicoServices
 
-    // FINALIZAR ATENDIMENTO
-    var visibleFinalizarDialog: Flow<Boolean>
-    var visibleFinalizarOpcoes = mutableStateOf(false)
-
     init {
         val viagemSuporteTecnicoDao = AppDatabase.getDatabase(application).viagemSuporteTecnicoDao()
         this.repository = ViagemSuporteTecnicoRepository(viagemSuporteTecnicoDao)
         allViagemSuporteTecnico = repository.allViagemSuporteTecnico
         viagemSuporteTecnicoServices = ViagemSuporteTecnicoServices()
 
-        visibleFinalizarDialog = flowOf(false)
 
         databaseReference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -100,8 +95,6 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
         kmSaida: String,
         data: String,
         hora: String,
-        route: String,
-        navController: NavHostController
     ) {
         // VERIFICA SE ALGUM CAMPO ESTA VAZIO
         if (localSaida.isEmpty() || localAtendimento.isEmpty() || kmSaida.isEmpty()) {
@@ -137,7 +130,6 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
                 )
                 currentUserServices.addUltimoKm(kmSaida)
             }
-            reiniciarTela(route, navController)
         }
 
     }
@@ -150,8 +142,6 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
         kmChegada: String,
         data: String,
         hora: String,
-        route: String,
-        navController: NavHostController
     ) {
         // VERIFICA SE O CAMPO ESTA VAZIO
         if( kmChegada.isEmpty() ) {
@@ -196,7 +186,6 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
                     currentUserServices.addKmBackup(kmChegada)
                 }
             }
-            reiniciarTela(route, navController)
         }
     }
 
@@ -206,8 +195,6 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
         resumoAtendimento: String,
         data: String,
         hora: String,
-        route: String,
-        navController: NavHostController
     ){
         atendimento.dataConclusao = data
         atendimento.horaConclusao = hora
@@ -221,8 +208,6 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
         viewModelScope.launch(Dispatchers.IO) {
             update(atendimento)
         }
-
-        reiniciarTela(route, navController)
     }
 
     fun finalizarAtendimento(

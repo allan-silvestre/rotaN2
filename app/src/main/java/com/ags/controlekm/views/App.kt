@@ -83,6 +83,7 @@ import coil.compose.SubcomposeAsyncImage
 import coil.compose.rememberImagePainter
 import com.ags.controlekm.R
 import com.ags.controlekm.components.Dialog.DialogEmailVerifield
+import com.ags.controlekm.components.Dialog.FinalizarAtendimentoDialog
 import com.ags.controlekm.database.ViewModels.CurrentUserViewModel
 import com.ags.controlekm.functions.navigateSingleTopTo
 import com.ags.controlekm.objects.BottomNavigationItem
@@ -98,7 +99,7 @@ import kotlinx.coroutines.launch
     "UnrememberedMutableState"
 )
 @Composable
-fun App( currentUserViewModel: CurrentUserViewModel = viewModel() ) {
+fun App(currentUserViewModel: CurrentUserViewModel = viewModel()) {
 
     val userLoggedData by currentUserViewModel.currentUserData.collectAsState(null)
 
@@ -443,7 +444,6 @@ fun App( currentUserViewModel: CurrentUserViewModel = viewModel() ) {
                     DisposableEffect(Unit) {
                         itemsVisible = true
                         onDispose {
-                            // Limpa recursos, se necessário
                         }
                     }
                 }
