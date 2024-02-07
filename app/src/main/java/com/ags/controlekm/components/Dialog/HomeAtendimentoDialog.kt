@@ -1,12 +1,12 @@
 package com.ags.controlekm.components.Dialog
 
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
@@ -18,31 +18,26 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
-import com.ags.controlekm.R
-import com.ags.controlekm.components.Buttons.ButtonDefault
+import com.ags.controlekm.components.Buttons.ButtonPadrao
 import com.ags.controlekm.components.DropDownMenu.DropDownMenuAtendimento
 import com.ags.controlekm.components.Progress.LoadingCircular
+import com.ags.controlekm.components.Text.TitleText
 import com.ags.controlekm.database.FirebaseServices.CurrentUserServices
 import com.ags.controlekm.database.Models.CurrentUser
 import com.ags.controlekm.database.Models.ViagemSuporteTecnico
 import com.ags.controlekm.database.ViewModels.CurrentUserViewModel
 import com.ags.controlekm.database.ViewModels.ViagemSuporteTecnicoViewModel
 import com.ags.controlekm.database.ViewModels.ExecutarFuncaoViewModel
-import com.ags.controlekm.functions.reiniciarTela
 
 @Composable
-fun FinalizarAtendimentoDialog(
+fun HomeAtendimentoDialog(
     viagemSuporteTecnicoViewModel: ViagemSuporteTecnicoViewModel = viewModel(),
     currentUserViewModel: CurrentUserViewModel = viewModel(),
     executarFuncaoViewModel: ExecutarFuncaoViewModel = viewModel(),
-    navController: NavHostController,
     currentUserServices: CurrentUserServices,
     userLoggedData: CurrentUser?,
     atendimentoAtual: ViagemSuporteTecnico,
@@ -52,18 +47,19 @@ fun FinalizarAtendimentoDialog(
     hora: String,
     onDismissRequest: () -> Unit,
 ) {
-    val route = stringResource(R.string.home)
+    val coroutineScope = rememberCoroutineScope()
 
-    val context = LocalContext.current
-
-    var visibleFinalizarOpcoes by remember { mutableStateOf(true) }
+    var visibleOpcoes by remember { mutableStateOf(true) }
     var visibleRetornar by remember { mutableStateOf(false) }
     var visibleNovoAtendimento by remember { mutableStateOf(false) }
+    var visibleFinalizarAtendimento by remember { mutableStateOf(false) }
 
     var titleDialog by remember { mutableStateOf("Finalizar atendimento") }
 
     var local by remember { mutableStateOf("") }
     var km by remember { mutableStateOf("") }
+
+    val paddingButton = 3.dp
 
     Dialog(
         onDismissRequest = { onDismissRequest() }
@@ -78,35 +74,37 @@ fun FinalizarAtendimentoDialog(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Exibir carregamento
+                // EXIBIR CARREGAMENTO
                 if (executarFuncaoViewModel.carregando.value) {
                     visibleRetornar = false
                     visibleNovoAtendimento = false
                     LoadingCircular()
                 }
                 // OPÇÕES FINALIZAR ATENDIMENTO
-                AnimatedVisibility(visibleFinalizarOpcoes) {
+                AnimatedVisibility(visibleOpcoes) {
                     Column(
                         modifier = Modifier,
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(
-                            modifier = Modifier.padding(20.dp),
-                            text = titleDialog,
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                        ButtonDefault("Retornar") {
+                        TitleText(titleDialog)
+                        ButtonPadrao(
+                            "Retornar",
+                            padding = paddingButton
+                        ) {
                             titleDialog = "Para onde vai retornar?"
                             visibleRetornar = true
                             visibleNovoAtendimento = false
-                            visibleFinalizarOpcoes = false
+                            visibleOpcoes = false
                         }
-                        ButtonDefault("Novo atendimento") {
+                        ButtonPadrao(
+                            "Novo atendimento",
+                            padding = paddingButton
+                        ) {
                             titleDialog = "Qual o local do novo atendimento?"
                             visibleNovoAtendimento = true
                             visibleRetornar = false
-                            visibleFinalizarOpcoes = false
+                            visibleOpcoes = false
                         }
                     }
                 }
@@ -117,56 +115,33 @@ fun FinalizarAtendimentoDialog(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(
-                            modifier = Modifier.padding(20.dp),
-                            text = titleDialog,
-                            fontWeight = FontWeight.SemiBold,
-                        )
+                        TitleText(titleDialog)
                         DropDownMenuAtendimento(
-                            label = "Local do atendimento",
+                            labelLocal = "Local do atendimento",
+                            labelKm = "KM de saída",
                             data = data,
                             hora = hora,
+                            visibleLocal = true,
+                            visibleKm = true,
                             localSelecionado = { localSelecionado -> local = localSelecionado },
                             kmInformado = { kmInformado -> km = kmInformado }
                         )
-                        ButtonDefault("Iniciar percurso") {
-                            executarFuncaoViewModel.executarFuncao(
-                                function = {
-                                    // INICIA UM NOVO ATENDIMENTO
-                                    viagemSuporteTecnicoViewModel.iniciarViagem(
-                                        currentUserViewModel = currentUserViewModel,
-                                        currentUserServices = currentUserServices,
-                                        userLoggedData = userLoggedData,
-                                        novoAtendimento = novoAtendimento,
-                                        localSaida = atendimentoAtual.localAtendimento.toString(),
-                                        localAtendimento = local,
-                                        kmSaida = km,
-                                        data = data,
-                                        hora = hora,
-                                    )
-
-                                    // FINALIZA ATENDIMENTO ATUAL
-                                    viagemSuporteTecnicoViewModel.finalizarAtendimento(
-                                        currentUserViewModel = currentUserViewModel,
-                                        currentUserServices = currentUserServices,
-                                        userLoggedData = userLoggedData,
-                                        atendimentoAtual = atendimentoAtual,
-                                        resumoAtendimento = resumoAtendimento,
-                                        data = data,
-                                        hora = hora,
-                                    )
-                                },
-                                onExecuted = { result ->
-                                    Toast.makeText(context, result, Toast.LENGTH_SHORT).show()
-                                    reiniciarTela(route, navController)
-                                },
-                                onError = {
-                                    Toast.makeText(
-                                        context,
-                                        "Erro durante a execução da função",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
+                        ButtonPadrao(
+                            "Iniciar percurso",
+                            padding = paddingButton
+                        ) {
+                            viagemSuporteTecnicoViewModel.novoAtendimento(
+                                currentUserViewModel = currentUserViewModel,
+                                currentUserServices = currentUserServices,
+                                userLoggedData = userLoggedData,
+                                novoAtendimento = novoAtendimento,
+                                localSaida = atendimentoAtual.localAtendimento.toString(),
+                                localAtendimento = local,
+                                kmSaida = km,
+                                data = data,
+                                hora = hora,
+                                atendimentoAtual = atendimentoAtual,
+                                resumoAtendimento = resumoAtendimento,
                             )
                         }
                     }
@@ -184,34 +159,22 @@ fun FinalizarAtendimentoDialog(
                             fontWeight = FontWeight.SemiBold,
                         )
                         DropDownMenuAtendimento(
-                            label = "Retornar para",
+                            labelLocal = "Retornar para",
                             data = data,
                             hora = hora,
+                            visibleLocal = true,
                             localSelecionado = { localSelecionado -> local = localSelecionado },
-                            kmInformado = { kmInformado -> km = kmInformado }
                         )
-                        ButtonDefault("Iniciar percurso") {
-                            executarFuncaoViewModel.executarFuncao(
-                                function = {
-                                    viagemSuporteTecnicoViewModel.iniciarRetorno(
-                                        atendimento = atendimentoAtual,
-                                        localRetorno = local,
-                                        resumoAtendimento = resumoAtendimento,
-                                        data = data,
-                                        hora = hora,
-                                    )
-                                },
-                                onExecuted = { result ->
-                                    Toast.makeText(context, result, Toast.LENGTH_SHORT).show()
-                                    reiniciarTela(route, navController)
-                                },
-                                onError = {
-                                    Toast.makeText(
-                                        context,
-                                        "Erro durante a execução da função",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
+                        ButtonPadrao(
+                            "Iniciar percurso",
+                            padding = paddingButton
+                        ) {
+                            viagemSuporteTecnicoViewModel.iniciarRetorno(
+                                atendimento = atendimentoAtual,
+                                localRetorno = local,
+                                resumoAtendimento = resumoAtendimento,
+                                data = data,
+                                hora = hora,
                             )
                         }
                     }

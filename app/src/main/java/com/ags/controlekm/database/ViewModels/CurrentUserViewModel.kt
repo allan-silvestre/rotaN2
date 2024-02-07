@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 
 class CurrentUserViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: CurrentUserRepository
-    val currentUserData: Flow<CurrentUser>
+    var currentUserData: Flow<CurrentUser>
     var currentUser = mutableStateOf(FirebaseAuth.getInstance().currentUser)
 
     init {
@@ -36,13 +36,9 @@ class CurrentUserViewModel(application: Application) : AndroidViewModel(applicat
                 getCurrentUserData(currentUser.value?.uid.toString()) { loadedUserData ->
                     insert(loadedUserData)
                 }
-
                 currentUserServices.emailIsVerifield(currentUser.value!!.isEmailVerified)
-
             }
-
         }
-
     }
 
     fun insert(currentUser: CurrentUser) {

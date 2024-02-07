@@ -12,8 +12,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.TimeToLeave
-import androidx.compose.material.icons.outlined.TravelExplore
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -51,11 +51,14 @@ import kotlinx.coroutines.launch
 @Composable
 fun DropDownMenuAtendimento(
     enderecoAtendimentoViewModel: EnderecoAtendimentoViewModel = viewModel(),
-    label: String? = "",
-    hora : String? = "",
-    data : String? = "",
-    localSelecionado: (String) -> Unit,
-    kmInformado: (String) -> Unit,
+    labelLocal: String? = null,
+    labelKm: String? = null,
+    hora: String? = null,
+    data: String? = null,
+    visibleLocal: Boolean = false,
+    visibleKm: Boolean = false,
+    localSelecionado: ((String) -> Unit)? = null,
+    kmInformado: ((String) -> Unit)? = null,
 ) {
     val enderecosLocal: List<EnderecoAtendimento> by enderecoAtendimentoViewModel.allEnderecoAtendimento.collectAsState(emptyList())
     var enderecosList by rememberSaveable { mutableStateOf<List<String>>(emptyList()) }
@@ -77,14 +80,14 @@ fun DropDownMenuAtendimento(
 
     var local by remember { mutableStateOf("") }
     var kmSaida by remember { mutableStateOf("") }
-
+if(visibleLocal){
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             modifier = Modifier.size(18.dp),
-            imageVector = Icons.Outlined.TravelExplore,
+            imageVector = Icons.Outlined.LocationOn,
             contentDescription = ""
         )
         FormularioTextFieldMenu(
@@ -102,7 +105,7 @@ fun DropDownMenuAtendimento(
                 expandedMenu = true
                 local = it
             },
-            label = label!!,
+            label = labelLocal!!,
             visualTransformation = VisualTransformation.None,
             keyboardType = KeyboardType.Text,
             imeAction = ImeAction.Next,
@@ -140,7 +143,7 @@ fun DropDownMenuAtendimento(
                             },
                             onClick = {
                                 local = it
-                                localSelecionado(it)
+                                localSelecionado!!(it)
                                 expandedMenu = false
                             })
                     }
@@ -158,7 +161,7 @@ fun DropDownMenuAtendimento(
                             },
                             onClick = {
                                 local = it
-                                localSelecionado(it)
+                                localSelecionado!!(it)
                                 expandedMenu = false
                             })
                     }
@@ -166,7 +169,8 @@ fun DropDownMenuAtendimento(
             }
         }
     }
-    if(label.equals("Local do atendimento")) {
+}
+    if(visibleKm) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -183,9 +187,9 @@ fun DropDownMenuAtendimento(
                 value = kmSaida,
                 onValueChange = {
                     kmSaida = it.take(6)
-                    kmInformado(it)
+                    kmInformado!!(it)
                 },
-                label = "KM da Saida",
+                label = labelKm!!,
                 visualTransformation = VisualTransformation.None,
                 keyboardType = KeyboardType.Number,
                 imeAction = ImeAction.Next,

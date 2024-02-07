@@ -7,16 +7,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 @Composable
 fun TitleText(text: String) {
     Text(
-        modifier = Modifier
+        modifier = Modifier.fillMaxWidth()
             .padding(5.dp)
             .fillMaxWidth(),
         text = text,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 14.sp,
+        fontSize = 16.sp,
+        textAlign = TextAlign.Center
     )
 }
