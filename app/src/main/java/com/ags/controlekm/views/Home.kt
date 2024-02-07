@@ -15,13 +15,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.ManageSearch
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -92,7 +96,9 @@ fun Home(
     var hora by remember { mutableStateOf("00:00:00") }
     var data by remember { mutableStateOf("00/00/0000") }
 
-    val viagensCurrentUser: List<ViagemSuporteTecnico> by viagemSuporteTecnicoViewModel.allViagensCurrentUser.collectAsState(emptyList())
+    val viagensCurrentUser: List<ViagemSuporteTecnico> by viagemSuporteTecnicoViewModel.allViagensCurrentUser.collectAsState(
+        emptyList()
+    )
 
     val userLoggedData by currentUserViewModel.currentUserData.collectAsState(null)
 
@@ -100,7 +106,9 @@ fun Home(
 
     val currentUserServices = CurrentUserServices(currentUser?.uid.toString())
 
-    val enderecosLocal: List<EnderecoAtendimento> by enderecoAtendimentoViewModel.allEnderecoAtendimento.collectAsState(emptyList())
+    val enderecosLocal: List<EnderecoAtendimento> by enderecoAtendimentoViewModel.allEnderecoAtendimento.collectAsState(
+        emptyList()
+    )
 
     var enderecosList by rememberSaveable { mutableStateOf<List<String>>(emptyList()) }
 
@@ -166,9 +174,10 @@ fun Home(
             onError = {}
         )
     }
-    
+
     Column(
-        modifier = Modifier.fillMaxSize()) {
+        modifier = Modifier.fillMaxSize()
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -213,11 +222,15 @@ fun Home(
                                 viagemSuporteTecnicoViewModel.countContent.intValue =
                                     viagemSuporteTecnicoViewModel.homeCountContent(
                                         viagemSuporte = viagensCurrentUser,
-                                        atendimento = { atendimento -> atendimentoAtual = atendimento }
+                                        atendimento = { atendimento ->
+                                            atendimentoAtual = atendimento
+                                        }
                                     )
                                 coroutineScope.launch(Dispatchers.IO) {
 
-                                    viagemSuporteTecnicoViewModel.getViagensCurrentUser(userLoggedData?.id.toString())
+                                    viagemSuporteTecnicoViewModel.getViagensCurrentUser(
+                                        userLoggedData?.id.toString()
+                                    )
 
                                     enderecosList = enderecosLocal.map { endereco ->
                                         endereco.toStringEnderecoAtendimento()
@@ -407,13 +420,35 @@ fun Home(
                 }
             }
         }
-
-        LazyColumn() {
-            items(viagensCurrentUser.sortedBy { it.dataChegada }) {
-                Row {
-                    //Text(text = it.kmChegada.toString())
-                    AtendimentoCard()
-                }
+        Spacer(modifier = Modifier.height(16.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .padding(15.dp),
+                text = "Últimos atendimentos"
+            )
+            Icon(
+                modifier = Modifier.padding(end = 15.dp),
+                imageVector = Icons.Filled.ManageSearch,
+                contentDescription = ""
+            )
+        }
+        LazyRow {
+            items(viagensCurrentUser.sortedByDescending {
+                SimpleDateFormat("dd/MM/yyyy",
+                    Locale.getDefault())
+                    .parse(it.dataSaida) }.take(5)) {
+                AtendimentoCard(
+                    data = it.dataConclusao.toString(),
+                    local = it.localAtendimento.toString(),
+                    kmRodado = it.kmRodado.toString(),
+                    status = it.statusService.toString()
+                )
             }
         }
     }
@@ -428,7 +463,6 @@ fun Home(
                 } else {
                     TitleText("Cancelar o atendimento \n ${atendimentoAtual.localAtendimento}")
                 }
-
             },
             confirmButton = {
                 Row(

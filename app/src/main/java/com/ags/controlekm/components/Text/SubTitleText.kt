@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.sp
 fun SubTitleText(text: String) {
     Text(
         modifier = Modifier
-            .padding(5.dp)
+            .padding(2.dp)
             .fillMaxWidth(),
         text = text,
         fontWeight = FontWeight.SemiBold,
