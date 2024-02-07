@@ -84,8 +84,6 @@ fun Home(
     var hora by remember { mutableStateOf("00:00:00") }
     var data by remember { mutableStateOf("00/00/0000") }
 
-    val allViagens: List<ViagemSuporteTecnico> by viagemSuporteTecnicoViewModel.allViagemSuporteTecnico.collectAsState(emptyList())
-
     val viagensCurrentUser: List<ViagemSuporteTecnico> by viagemSuporteTecnicoViewModel.allViagensCurrentUser.collectAsState(emptyList())
 
     val userLoggedData by currentUserViewModel.currentUserData.collectAsState(null)
@@ -115,11 +113,25 @@ fun Home(
 
     var visibleFinalizarDialog by remember { mutableStateOf(false) }
 
-    var novoAtendimento by remember { mutableStateOf(ViagemSuporteTecnico()) }
     var atendimentoAtual by remember { mutableStateOf(ViagemSuporteTecnico()) }
+    var novoAtendimento by remember { mutableStateOf(ViagemSuporteTecnico()) }
 
     var visibleButtonDefault by remember { mutableStateOf(false) }
     var visibleButtonCancel by remember { mutableStateOf(false) }
+
+    LaunchedEffect(data) {
+        viagemSuporteTecnicoViewModel.executar(
+            function = {
+                viagemSuporteTecnicoViewModel.countContent.intValue =
+                    viagemSuporteTecnicoViewModel.homeCountContent(
+                        viagemSuporte = viagensCurrentUser,
+                        atendimento = { atendimento -> atendimentoAtual = atendimento }
+                    )
+            },
+            onExecuted = {},
+            onError = {}
+        )
+    }
 
     LaunchedEffect(Unit) {
         coroutineScope.launch(Dispatchers.IO) {
@@ -183,22 +195,20 @@ fun Home(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    if (viagemSuporteTecnicoViewModel.countContent.intValue == 1 || viagemSuporteTecnicoViewModel.loading.value) {
+                    if (viagemSuporteTecnicoViewModel.countContent.intValue == 0 || viagemSuporteTecnicoViewModel.loading.value) {
                         LoadingCircular()
                         viagemSuporteTecnicoViewModel.executar(
                             function = {
                                 viagemSuporteTecnicoViewModel.countContent.intValue =
                                     viagemSuporteTecnicoViewModel.homeCountContent(
                                         viagemSuporte = viagensCurrentUser,
-                                        currentUser = currentUser,
                                         atendimento = { atendimento -> atendimentoAtual = atendimento }
-                                )
-
+                                    )
                             },
                             onExecuted = {},
                             onError = {}
                         )
-                    } else if (viagemSuporteTecnicoViewModel.countContent.intValue == 2) {
+                    } else if (viagemSuporteTecnicoViewModel.countContent.intValue == 1) {
                         visibleButtonDefault = true
                         visibleButtonCancel = false
                         textStatus = ""
@@ -224,7 +234,7 @@ fun Home(
                                 kmInformado = { kmInformado -> kmSaida = kmInformado }
                             )
                         }
-                    } else if (viagemSuporteTecnicoViewModel.countContent.intValue == 3) {
+                    } else if (viagemSuporteTecnicoViewModel.countContent.intValue == 2) {
                         visibleButtonDefault = true
                         visibleButtonCancel = true
                         if (atendimentoAtual.statusService.equals("Em rota")) {
@@ -262,7 +272,7 @@ fun Home(
                                 kmInformado = { kmInformado -> kmChegada = kmInformado }
                             )
                         }
-                    } else if (viagemSuporteTecnicoViewModel.countContent.intValue == 4) {
+                    } else if (viagemSuporteTecnicoViewModel.countContent.intValue == 3) {
                         visibleButtonDefault = true
                         visibleButtonCancel = true
                         textStatus = "Em andamento..."
@@ -315,7 +325,7 @@ fun Home(
                             fraction = if (visibleButtonCancel) 0.5f else 1f
                         ) {
                             when (viagemSuporteTecnicoViewModel.countContent.intValue) {
-                                2 -> {
+                                1 -> {
                                     viagemSuporteTecnicoViewModel.iniciarViagem(
                                         currentUserViewModel = currentUserViewModel,
                                         currentUserServices = currentUserServices,
@@ -330,7 +340,7 @@ fun Home(
                                     visibleButtonDefault = false
                                 }
 
-                                3 -> {
+                                2 -> {
                                     viagemSuporteTecnicoViewModel.confirmarChegada(
                                         currentUserViewModel = currentUserViewModel,
                                         currentUserServices = currentUserServices,
@@ -342,7 +352,7 @@ fun Home(
                                     )
                                 }
 
-                                4 -> {
+                                3 -> {
                                     if (resumoAtendimento.isNotEmpty() && resumoAtendimento.length > 5) {
                                         resumoAtendimentoError = true
                                         visibleFinalizarDialog = true
@@ -383,13 +393,6 @@ fun Home(
             items(viagensCurrentUser.sortedBy { it.dataChegada }) {
                 Row {
                     Text(text = it.kmChegada.toString())
-                }
-            }
-        }
-        LazyColumn( ) {
-            items(allViagens.sortedBy { it.kmChegada }) {
-                Row {
-                    //Text(text = it.kmChegada.toString())
                 }
             }
         }

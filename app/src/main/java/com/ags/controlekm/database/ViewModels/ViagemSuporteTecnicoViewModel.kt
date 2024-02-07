@@ -37,9 +37,9 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
     private val _loading = mutableStateOf(false)
     val loading get() = _loading
 
-    var START_CONTENT = 1
+    var START_CONTENT = 0
 
-    private val _countContent = mutableIntStateOf(1)
+    private val _countContent = mutableIntStateOf(0)
     val countContent get() = _countContent
 
     private val databaseReference: DatabaseReference =
@@ -58,7 +58,7 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
         val viagemSuporteTecnicoDao = AppDatabase.getDatabase(application).viagemSuporteTecnicoDao()
         this.repository = ViagemSuporteTecnicoRepository(viagemSuporteTecnicoDao)
         allViagemSuporteTecnico = repository.allViagemSuporteTecnico
-        viewModelScope.launch{
+        viewModelScope.launch {
             allViagensCurrentUser = repository.getViagensCurrentUser("")
         }
         viagemSuporteTecnicoServices = ViagemSuporteTecnicoServices()
@@ -429,21 +429,26 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
 
     fun homeCountContent(
         viagemSuporte: List<ViagemSuporteTecnico>,
-        currentUser: FirebaseUser?,
         atendimento: (ViagemSuporteTecnico) -> Unit
     ): Int {
-        if (viagemSuporte.isNotEmpty()) {
-            viagemSuporte.forEach {
-                if (it.statusService!!.contains("Em rota") || it.statusService!!.contains("Em rota, retornando")) {
+        var countContent = mutableIntStateOf(1)
+
+        viagemSuporte.forEach {
+            println("statusService: ${it.statusService}")
+            when {
+                it.statusService?.contains("Em rota") == true ||
+                        it.statusService?.contains("Em rota, retornando") == true -> {
                     atendimento(it)
-                    return 3
-                } else if (it.statusService!!.contains("Em andamento")) {
+                    countContent.intValue = 2
+                }
+
+                it.statusService?.contains("Em andamento") == true -> {
                     atendimento(it)
-                    return 4
+                    countContent.intValue = 3
                 }
             }
         }
-        return 2
+        return countContent.intValue
     }
 
     fun getViagensCurrentUser(tecnicoId: String) {

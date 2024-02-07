@@ -1,5 +1,6 @@
 package com.ags.controlekm.views
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -34,6 +35,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -53,10 +55,18 @@ import androidx.navigation.NavHostController
 import com.ags.controlekm.R
 import com.ags.controlekm.components.TextField.FormularioOutlinedTextField
 import com.ags.controlekm.components.TextField.FormularioOutlinedTextFieldMenu
+import com.ags.controlekm.database.Models.ViagemSuporteTecnico
 import com.ags.controlekm.database.ViewModels.LoginViewModel
+import com.ags.controlekm.database.ViewModels.ViagemSuporteTecnicoViewModel
 import com.ags.controlekm.functions.navigateSingleTopTo
+import com.ags.controlekm.functions.reiniciarTela
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun LoginView(
     navController: NavHostController,
@@ -64,11 +74,11 @@ fun LoginView(
 ) {
     val context = LocalContext.current
 
+    val coroutineScope = rememberCoroutineScope()
+
     var currentUser by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser) }
 
     val loginIsCompleted by loginViewModel.authResult.collectAsState(false)
-
-
 
     DisposableEffect(currentUser?.uid) {
         FirebaseAuth.getInstance().addAuthStateListener { firebaseAuth ->
@@ -135,11 +145,12 @@ fun LoginView(
                                 trackColor = MaterialTheme.colorScheme.surfaceVariant,
                             )
                         }
-                        if (currentUser != null) {
-                            val uid = currentUser?.uid
-                            val email = currentUser?.email
 
+                        if (currentUser != null) {
+
+                            navController.popBackStack("login", true)
                             navController.navigateSingleTopTo("home")
+
                             progressIndicator.value = false
                         } else {
                             DisposableEffect(Unit) {
