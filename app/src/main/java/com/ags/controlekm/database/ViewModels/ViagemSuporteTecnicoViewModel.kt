@@ -134,7 +134,7 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
                         currentUserServices.addUltimoKm(kmSaida)
                     }
                 },
-                onExecuted = { _countContent.intValue = START_CONTENT },
+                onExecuted = {},
                 onError = {}
             )
         }
@@ -208,7 +208,7 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
                         }
 
                     },
-                    onExecuted = { _countContent.intValue = START_CONTENT },
+                    onExecuted = {},
                     onError = {}
                 )
             }
@@ -238,7 +238,7 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
                 }
 
             },
-            onExecuted = { _countContent.intValue = START_CONTENT },
+            onExecuted = {},
             onError = {}
         )
     }
@@ -269,7 +269,7 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
                 }
 
             },
-            onExecuted = { _countContent.intValue = START_CONTENT },
+            onExecuted = {},
             onError = {}
         )
     }
@@ -309,7 +309,7 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
                     }
                 }
             },
-            onExecuted = { _countContent.intValue = START_CONTENT },
+            onExecuted = {},
             onError = {}
         )
     }
@@ -387,7 +387,6 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
                         onExecuted = {},
                         onError = {}
                     )
-                    _countContent.intValue = 0
                 },
                 onError = {}
             )

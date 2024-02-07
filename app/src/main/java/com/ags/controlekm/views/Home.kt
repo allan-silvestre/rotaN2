@@ -4,6 +4,7 @@ import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,12 +14,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,9 +38,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -48,22 +51,26 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.ags.controlekm.R
+import com.ags.controlekm.components.Buttons.ButtonIcon
 import com.ags.controlekm.components.Buttons.ButtonPadrao
+import com.ags.controlekm.components.Buttons.ButtonText
+import com.ags.controlekm.components.Cards.AtendimentoCard
 import com.ags.controlekm.components.Dialog.HomeAtendimentoDialog
 import com.ags.controlekm.components.DropDownMenu.DropDownMenuAtendimento
+import com.ags.controlekm.components.LoadingScreen
 import com.ags.controlekm.components.Progress.LoadingCircular
 import com.ags.controlekm.components.Text.ContentText
 import com.ags.controlekm.components.Text.TitleText
 import com.ags.controlekm.components.TextField.FormularioOutlinedTextField
+import com.ags.controlekm.components.isLoadingEffect
 import com.ags.controlekm.database.FirebaseServices.CurrentUserServices
 import com.ags.controlekm.database.Models.EnderecoAtendimento
 import com.ags.controlekm.database.Models.ViagemSuporteTecnico
 import com.ags.controlekm.database.ViewModels.CurrentUserViewModel
 import com.ags.controlekm.database.ViewModels.EnderecoAtendimentoViewModel
+import com.ags.controlekm.database.ViewModels.ExecutarFuncaoViewModel
 import com.ags.controlekm.database.ViewModels.ViagemSuporteTecnicoViewModel
 import com.google.firebase.auth.FirebaseAuth
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -76,6 +83,7 @@ fun Home(
     currentUserViewModel: CurrentUserViewModel = viewModel(),
     enderecoAtendimentoViewModel: EnderecoAtendimentoViewModel = viewModel(),
     viagemSuporteTecnicoViewModel: ViagemSuporteTecnicoViewModel = viewModel(),
+    inicializar: ExecutarFuncaoViewModel = viewModel()
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -117,21 +125,8 @@ fun Home(
     var novoAtendimento by remember { mutableStateOf(ViagemSuporteTecnico()) }
 
     var visibleButtonDefault by remember { mutableStateOf(false) }
+    var visibleAlertCancel by remember { mutableStateOf(false) }
     var visibleButtonCancel by remember { mutableStateOf(false) }
-
-    LaunchedEffect(data) {
-        viagemSuporteTecnicoViewModel.executar(
-            function = {
-                viagemSuporteTecnicoViewModel.countContent.intValue =
-                    viagemSuporteTecnicoViewModel.homeCountContent(
-                        viagemSuporte = viagensCurrentUser,
-                        atendimento = { atendimento -> atendimentoAtual = atendimento }
-                    )
-            },
-            onExecuted = {},
-            onError = {}
-        )
-    }
 
     LaunchedEffect(Unit) {
         coroutineScope.launch(Dispatchers.IO) {
@@ -150,30 +145,37 @@ fun Home(
         }
     }
 
-    DisposableEffect(enderecosLocal) {
-        val enderecos = coroutineScope.launch(Dispatchers.IO) {
-            enderecosList = enderecosLocal.map { endereco ->
-                endereco.toStringEnderecoAtendimento()
-            }
-        }
+    LaunchedEffect(data) {
+        viagemSuporteTecnicoViewModel.executar(
+            function = {
+                viagemSuporteTecnicoViewModel.countContent.intValue =
+                    viagemSuporteTecnicoViewModel.homeCountContent(
+                        viagemSuporte = viagensCurrentUser,
+                        atendimento = { atendimento -> atendimentoAtual = atendimento }
+                    )
+                coroutineScope.launch(Dispatchers.IO) {
 
-        coroutineScope.launch(Dispatchers.IO) {
-            viagemSuporteTecnicoViewModel.getViagensCurrentUser(userLoggedData?.id.toString())
-        }
+                    viagemSuporteTecnicoViewModel.getViagensCurrentUser(userLoggedData?.id.toString())
 
-        onDispose {
-            enderecos.cancel()
-        }
+                    enderecosList = enderecosLocal.map { endereco ->
+                        endereco.toStringEnderecoAtendimento()
+                    }
+                }
+            },
+            onExecuted = { },
+            onError = {}
+        )
     }
-
-    Column(modifier = Modifier.fillMaxSize()) {
+    
+    Column(
+        modifier = Modifier.fillMaxSize()) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(250.dp)
                 .drawBehind {
                     drawRect(
-                        color = Color(0xFF005CBB),
+                        color = Color(0xFF0B1F3C),
                         size = Size(size.width, size.height / 1.7f)
                     )
                 },
@@ -183,9 +185,18 @@ fun Home(
                     .fillMaxWidth()
                     .height(250.dp)
                     .padding(start = 12.dp, end = 12.dp),
+                shape = RoundedCornerShape(
+                    topStart = 30.dp,
+                    topEnd = 30.dp,
+                    bottomStart = 30.dp,
+                    bottomEnd = 30.dp
+                ),
                 elevation = CardDefaults.cardElevation(
                     defaultElevation = 5.dp
                 ),
+                colors = CardDefaults.cardColors(
+                    //containerColor = Color(0xFF0B1F3C),
+                )
             ) {
                 Column(
                     modifier = Modifier
@@ -195,7 +206,7 @@ fun Home(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    if (viagemSuporteTecnicoViewModel.countContent.intValue == 0 || viagemSuporteTecnicoViewModel.loading.value) {
+                    if (viagemSuporteTecnicoViewModel.loading.value) {
                         LoadingCircular()
                         viagemSuporteTecnicoViewModel.executar(
                             function = {
@@ -204,6 +215,14 @@ fun Home(
                                         viagemSuporte = viagensCurrentUser,
                                         atendimento = { atendimento -> atendimentoAtual = atendimento }
                                     )
+                                coroutineScope.launch(Dispatchers.IO) {
+
+                                    viagemSuporteTecnicoViewModel.getViagensCurrentUser(userLoggedData?.id.toString())
+
+                                    enderecosList = enderecosLocal.map { endereco ->
+                                        endereco.toStringEnderecoAtendimento()
+                                    }
+                                }
                             },
                             onExecuted = {},
                             onError = {}
@@ -320,9 +339,10 @@ fun Home(
                     AnimatedVisibility(visible = visibleButtonDefault) {
                         ButtonPadrao(
                             textButton,
+                            enable = if (viagemSuporteTecnicoViewModel.countContent.intValue == 0) false else true,
                             topStart = 0.dp,
                             topEnd = 0.dp,
-                            fraction = if (visibleButtonCancel) 0.5f else 1f
+                            fraction = 1f,
                         ) {
                             when (viagemSuporteTecnicoViewModel.countContent.intValue) {
                                 1 -> {
@@ -369,32 +389,71 @@ fun Home(
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.width(1.dp))
-                    AnimatedVisibility(visible = visibleButtonCancel) {
-                        ButtonPadrao(
-                            "Cancelar",
-                            topStart = 0.dp,
-                            topEnd = 0.dp,
-                            color = MaterialTheme.colorScheme.error
-                        ) {
-                            viagemSuporteTecnicoViewModel.cancelar(
-                                currentUserViewModel = currentUserViewModel,
-                                currentUserServices = currentUserServices,
-                                userLoggedData = userLoggedData!!,
-                                atendimentoAtual = atendimentoAtual
-                            )
-                        }
+                }
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 20.dp),
+                horizontalArrangement = Arrangement.End
+            ) {
+                AnimatedVisibility(visible = visibleButtonCancel) {
+                    ButtonIcon(
+                        icon = Icons.Filled.Cancel,
+                        color = MaterialTheme.colorScheme.error
+                    ) {
+                        visibleAlertCancel = true
                     }
                 }
             }
         }
 
-        LazyColumn( ) {
+        LazyColumn() {
             items(viagensCurrentUser.sortedBy { it.dataChegada }) {
                 Row {
-                    Text(text = it.kmChegada.toString())
+                    //Text(text = it.kmChegada.toString())
+                    AtendimentoCard()
                 }
             }
         }
+    }
+
+    // AlertaDialog Cancelar atendimento
+    if (visibleAlertCancel) {
+        AlertDialog(
+            onDismissRequest = { visibleAlertCancel = false },
+            title = {
+                if (atendimentoAtual.statusService.equals("Em rota, retornando")) {
+                    TitleText("Cancelar o retorno para \n ${atendimentoAtual.localRetorno}")
+                } else {
+                    TitleText("Cancelar o atendimento \n ${atendimentoAtual.localAtendimento}")
+                }
+
+            },
+            confirmButton = {
+                Row(
+                    modifier = Modifier.padding(start = 60.dp, end = 60.dp)
+                ) {
+                    ButtonText(
+                        modifier = Modifier.fillMaxWidth(0.5f),
+                        "Não"
+                    ) {
+                        visibleAlertCancel = false
+                    }
+                    ButtonText(
+                        modifier = Modifier,
+                        "Sim"
+                    ) {
+                        viagemSuporteTecnicoViewModel.cancelar(
+                            currentUserViewModel = currentUserViewModel,
+                            currentUserServices = currentUserServices,
+                            userLoggedData = userLoggedData!!,
+                            atendimentoAtual = atendimentoAtual
+                        )
+                        visibleAlertCancel = false
+                    }
+                }
+            }
+        )
     }
 }

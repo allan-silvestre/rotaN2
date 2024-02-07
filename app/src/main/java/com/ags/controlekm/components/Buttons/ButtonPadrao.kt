@@ -9,6 +9,7 @@ import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonElevation
 import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,6 +23,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun ButtonPadrao(
     text: String,
+    enable: Boolean = true,
     topStart: Dp = 6.dp,
     topEnd: Dp = 6.dp,
     bottomStart: Dp = 6.dp,
@@ -36,6 +38,7 @@ fun ButtonPadrao(
             .fillMaxWidth(fraction)
             .height(50.dp)
             .padding(padding),
+        enabled = enable,
         shape = RoundedCornerShape(
             topStart = topStart,
             topEnd = topEnd,

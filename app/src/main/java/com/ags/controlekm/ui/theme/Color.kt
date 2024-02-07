@@ -1,7 +1,7 @@
 package com.example.compose
 import androidx.compose.ui.graphics.Color
 
-val md_theme_light_primary = Color(0xFF2B5EA7)
+val md_theme_light_primary = Color(0xFF0B1F3C)
 val md_theme_light_onPrimary = Color(0xFFFFFFFF)
 val md_theme_light_primaryContainer = Color(0xFFD7E3FF)
 val md_theme_light_onPrimaryContainer = Color(0xFF001B3E)
@@ -13,7 +13,7 @@ val md_theme_light_tertiary = Color(0xFF705574)
 val md_theme_light_onTertiary = Color(0xFFFFFFFF)
 val md_theme_light_tertiaryContainer = Color(0xFFFAD8FD)
 val md_theme_light_onTertiaryContainer = Color(0xFF28132E)
-val md_theme_light_error = Color(0xFFBA1A1A)
+val md_theme_light_error = Color(0xFF93000A)
 val md_theme_light_errorContainer = Color(0xFFFFDAD6)
 val md_theme_light_onError = Color(0xFFFFFFFF)
 val md_theme_light_onErrorContainer = Color(0xFF410002)
@@ -28,7 +28,7 @@ val md_theme_light_inverseOnSurface = Color(0xFFF1F0F4)
 val md_theme_light_inverseSurface = Color(0xFF2F3033)
 val md_theme_light_inversePrimary = Color(0xFFAAC7FF)
 val md_theme_light_shadow = Color(0xFF000000)
-val md_theme_light_surfaceTint = Color(0xFF2B5EA7)
+val md_theme_light_surfaceTint = Color(0xFF0B1F3C)
 val md_theme_light_outlineVariant = Color(0xFFC4C6D0)
 val md_theme_light_scrim = Color(0xFF000000)
 

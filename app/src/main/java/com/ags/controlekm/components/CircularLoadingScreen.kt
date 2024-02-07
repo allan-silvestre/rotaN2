@@ -37,18 +37,11 @@ fun LoadingScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(32.dp)
             .isLoadingEffect(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
 
-            CircularProgressIndicator(
-                modifier = Modifier
-                    .size(50.dp),
-                color = MaterialTheme.colorScheme.secondary,
-                trackColor = MaterialTheme.colorScheme.surfaceVariant,
-            )
         }
     } else{
         contentAfterLoading()
