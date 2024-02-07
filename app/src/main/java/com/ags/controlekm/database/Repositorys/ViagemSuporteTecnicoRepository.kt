@@ -9,6 +9,10 @@ import kotlinx.coroutines.flow.Flow
 class ViagemSuporteTecnicoRepository(private val viagemSuporteTecnicoDao: ViagemSuporteTecnicoDao) {
     val allViagemSuporteTecnico: Flow<List<ViagemSuporteTecnico>> = viagemSuporteTecnicoDao.getAllViagemSuporteTecnico()
 
+    suspend fun getViagensCurrentUser(tecnicoId: String): Flow<List<ViagemSuporteTecnico>> {
+        return viagemSuporteTecnicoDao.getViagensCurrentUser(tecnicoId)
+    }
+
     suspend fun insert(viagemSuporteTecnico: ViagemSuporteTecnico) {
         viagemSuporteTecnicoDao.insert(viagemSuporteTecnico)
     }

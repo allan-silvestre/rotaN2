@@ -14,8 +14,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -81,25 +84,9 @@ fun Home(
     var hora by remember { mutableStateOf("00:00:00") }
     var data by remember { mutableStateOf("00/00/0000") }
 
-    LaunchedEffect(Unit) {
+    val allViagens: List<ViagemSuporteTecnico> by viagemSuporteTecnicoViewModel.allViagemSuporteTecnico.collectAsState(emptyList())
 
-        coroutineScope.launch(Dispatchers.IO) {
-            while (true) {
-                delay(1000)
-                handler.post {
-                    val currentTime = System.currentTimeMillis()
-
-                    val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                    data = dateFormat.format(currentTime)
-
-                    val timeFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
-                    hora = timeFormat.format(currentTime)
-                }
-            }
-        }
-    }
-
-    val viagemSuporte: List<ViagemSuporteTecnico> by viagemSuporteTecnicoViewModel.allViagemSuporteTecnico.collectAsState(emptyList())
+    val viagensCurrentUser: List<ViagemSuporteTecnico> by viagemSuporteTecnicoViewModel.allViagensCurrentUser.collectAsState(emptyList())
 
     val userLoggedData by currentUserViewModel.currentUserData.collectAsState(null)
 
@@ -134,12 +121,32 @@ fun Home(
     var visibleButtonDefault by remember { mutableStateOf(false) }
     var visibleButtonCancel by remember { mutableStateOf(false) }
 
+    LaunchedEffect(Unit) {
+        coroutineScope.launch(Dispatchers.IO) {
+            while (true) {
+                delay(1000)
+                handler.post {
+                    val currentTime = System.currentTimeMillis()
+
+                    val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                    data = dateFormat.format(currentTime)
+
+                    val timeFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+                    hora = timeFormat.format(currentTime)
+                }
+            }
+        }
+    }
+
     DisposableEffect(enderecosLocal) {
-        val coroutineScope = CoroutineScope(Dispatchers.IO)
-        val enderecos = coroutineScope.launch {
+        val enderecos = coroutineScope.launch(Dispatchers.IO) {
             enderecosList = enderecosLocal.map { endereco ->
                 endereco.toStringEnderecoAtendimento()
             }
+        }
+
+        coroutineScope.launch(Dispatchers.IO) {
+            viagemSuporteTecnicoViewModel.getViagensCurrentUser(userLoggedData?.id.toString())
         }
 
         onDispose {
@@ -148,7 +155,6 @@ fun Home(
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        Text(atendimentoAtual.statusService.toString())
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -183,7 +189,7 @@ fun Home(
                             function = {
                                 viagemSuporteTecnicoViewModel.countContent.intValue =
                                     viagemSuporteTecnicoViewModel.homeCountContent(
-                                        viagemSuporte = viagemSuporte,
+                                        viagemSuporte = viagensCurrentUser,
                                         currentUser = currentUser,
                                         atendimento = { atendimento -> atendimentoAtual = atendimento }
                                 )
@@ -369,6 +375,21 @@ fun Home(
                             )
                         }
                     }
+                }
+            }
+        }
+
+        LazyColumn( ) {
+            items(viagensCurrentUser.sortedBy { it.dataChegada }) {
+                Row {
+                    Text(text = it.kmChegada.toString())
+                }
+            }
+        }
+        LazyColumn( ) {
+            items(allViagens.sortedBy { it.kmChegada }) {
+                Row {
+                    //Text(text = it.kmChegada.toString())
                 }
             }
         }

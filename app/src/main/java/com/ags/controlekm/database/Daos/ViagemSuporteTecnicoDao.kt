@@ -14,6 +14,9 @@ interface ViagemSuporteTecnicoDao {
     @Query("SELECT * FROM viagemsuportetecnico")
     fun getAllViagemSuporteTecnico(): Flow<List<ViagemSuporteTecnico>>
 
+    @Query("SELECT * FROM viagemsuportetecnico WHERE tecnicoId = :tecnicoId")
+    fun getViagensCurrentUser(tecnicoId: String): Flow<List<ViagemSuporteTecnico>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(viagemSuporteTecnico: ViagemSuporteTecnico)
 

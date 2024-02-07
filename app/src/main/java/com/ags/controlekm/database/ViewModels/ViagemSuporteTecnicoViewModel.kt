@@ -22,6 +22,9 @@ import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -49,10 +52,15 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
     val allViagemSuporteTecnico: Flow<List<ViagemSuporteTecnico>>
     private val viagemSuporteTecnicoServices: ViagemSuporteTecnicoServices
 
+    lateinit var allViagensCurrentUser: Flow<List<ViagemSuporteTecnico>>
+
     init {
         val viagemSuporteTecnicoDao = AppDatabase.getDatabase(application).viagemSuporteTecnicoDao()
         this.repository = ViagemSuporteTecnicoRepository(viagemSuporteTecnicoDao)
         allViagemSuporteTecnico = repository.allViagemSuporteTecnico
+        viewModelScope.launch{
+            allViagensCurrentUser = repository.getViagensCurrentUser("")
+        }
         viagemSuporteTecnicoServices = ViagemSuporteTecnicoServices()
 
         databaseReference.addValueEventListener(object : ValueEventListener {
@@ -113,7 +121,7 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
             novoAtendimento.kmSaida = kmSaida
             novoAtendimento.tecnicoId = userLoggedData.id
             novoAtendimento.tecnicoNome = "${userLoggedData.nome} ${userLoggedData.sobrenome}"
-            novoAtendimento.imgPerfil = userLoggedData.imagem
+            novoAtendimento.imgPerfil = userLoggedData.imagem.toString()
             novoAtendimento.statusService = "Em rota"
 
             userLoggedData.ultimoKm = kmSaida
@@ -126,7 +134,7 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
                         currentUserServices.addUltimoKm(kmSaida)
                     }
                 },
-                onExecuted = {_countContent.intValue = START_CONTENT},
+                onExecuted = { _countContent.intValue = START_CONTENT },
                 onError = {}
             )
         }
@@ -160,7 +168,8 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
                 atendimentoAtual.dataChegada = data
                 atendimentoAtual.horaChegada = hora
                 atendimentoAtual.kmChegada = kmChegada
-                atendimentoAtual.kmRodado = (kmChegada.toInt() - atendimentoAtual.kmSaida!!.toInt()).toString()
+                atendimentoAtual.kmRodado =
+                    (kmChegada.toInt() - atendimentoAtual.kmSaida!!.toInt()).toString()
                 atendimentoAtual.statusService = "Em andamento"
 
                 userLoggedData.ultimoKm = kmChegada
@@ -174,7 +183,7 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
                         }
 
                     },
-                    onExecuted = {countContent.intValue = START_CONTENT},
+                    onExecuted = { countContent.intValue = START_CONTENT },
                     onError = {}
                 )
             } else if (atendimentoAtual.statusService.equals("Em rota, retornando")) {
@@ -183,7 +192,8 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
                 atendimentoAtual.kmChegada = kmChegada
                 atendimentoAtual.statusService = "Finalizado"
                 currentUserServices.addUltimoKm(kmChegada)
-                atendimentoAtual.kmRodado = (kmChegada.toInt() - atendimentoAtual.kmSaida!!.toInt()).toString()
+                atendimentoAtual.kmRodado =
+                    (kmChegada.toInt() - atendimentoAtual.kmSaida!!.toInt()).toString()
 
                 userLoggedData.ultimoKm = kmChegada
                 userLoggedData.kmBackup = kmChegada
@@ -198,7 +208,7 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
                         }
 
                     },
-                    onExecuted = {_countContent.intValue = START_CONTENT},
+                    onExecuted = { _countContent.intValue = START_CONTENT },
                     onError = {}
                 )
             }
@@ -228,7 +238,7 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
                 }
 
             },
-            onExecuted = {_countContent.intValue = START_CONTENT},
+            onExecuted = { _countContent.intValue = START_CONTENT },
             onError = {}
         )
     }
@@ -259,7 +269,7 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
                 }
 
             },
-            onExecuted = {_countContent.intValue = START_CONTENT},
+            onExecuted = { _countContent.intValue = START_CONTENT },
             onError = {}
         )
     }
@@ -299,7 +309,7 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
                     }
                 }
             },
-            onExecuted = {_countContent.intValue = START_CONTENT},
+            onExecuted = { _countContent.intValue = START_CONTENT },
             onError = {}
         )
     }
@@ -323,7 +333,11 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
                 .show()
             // VERIFICA SE O LOCAL DE SAIDA É IGUAL AO LOCAL DE ATENDIMENTO
         } else if (localSaida.equals(localAtendimento)) {
-            Toast.makeText(context, "O local de saida não pode ser o mesmo local do atendimento", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                context,
+                "O local de saida não pode ser o mesmo local do atendimento",
+                Toast.LENGTH_SHORT
+            ).show()
             // VERIFICA SE O KM INFORMADO É VALIDO DE ACORDO COM O ULTIMO KM INFORMADO
         } else if (kmSaida.toInt() < userLoggedData?.ultimoKm!!.toInt()) {
             Toast.makeText(
@@ -339,7 +353,7 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
             novoAtendimento.kmSaida = kmSaida
             novoAtendimento.tecnicoId = userLoggedData.id
             novoAtendimento.tecnicoNome = "${userLoggedData.nome} ${userLoggedData.sobrenome}"
-            novoAtendimento.imgPerfil = userLoggedData.imagem
+            novoAtendimento.imgPerfil = userLoggedData.imagem.toString()
             novoAtendimento.statusService = "Em rota"
 
             // FINALIZA O ATENDIMENTO ATUAL
@@ -420,18 +434,22 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
     ): Int {
         if (viagemSuporte.isNotEmpty()) {
             viagemSuporte.forEach {
-                if (it.tecnicoId!!.contains(currentUser?.uid.toString())) {
-                    if (it.statusService!!.contains("Em rota") || it.statusService!!.contains("Em rota, retornando")) {
-                        atendimento(it)
-                        return 3
-                    } else if(it.statusService!!.contains("Em andamento")){
-                        atendimento(it)
-                        return 4
-                    }
+                if (it.statusService!!.contains("Em rota") || it.statusService!!.contains("Em rota, retornando")) {
+                    atendimento(it)
+                    return 3
+                } else if (it.statusService!!.contains("Em andamento")) {
+                    atendimento(it)
+                    return 4
                 }
             }
         }
-        return 1
+        return 2
+    }
+
+    fun getViagensCurrentUser(tecnicoId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            allViagensCurrentUser = repository.getViagensCurrentUser(tecnicoId)
+        }
     }
 
     suspend fun insert(viagemSuporteTecnico: ViagemSuporteTecnico) {
