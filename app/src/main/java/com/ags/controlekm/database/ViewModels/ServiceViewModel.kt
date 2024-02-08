@@ -2,7 +2,7 @@ package com.ags.controlekm.database.ViewModels
 
 import android.app.Application
 import android.widget.Toast
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
@@ -13,7 +13,7 @@ import com.ags.controlekm.database.FirebaseServices.ViagemSuporteTecnicoServices
 import com.ags.controlekm.database.Models.CurrentUser
 import com.ags.controlekm.database.Models.ViagemSuporteTecnico
 import com.ags.controlekm.database.Repositorys.ViagemSuporteTecnicoRepository
-import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -23,24 +23,21 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.forEach
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Calendar
 
-class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel(application) {
+class ServiceViewModel(application: Application) : AndroidViewModel(application) {
 
     var context: Application = getApplication()
 
     private val _loading = mutableStateOf(false)
     val loading get() = _loading
 
-    var START_CONTENT = 0
+    //private val _countContent = mutableIntStateOf(0)
+    //val countContent get() = _countContent
 
-    private val _countContent = mutableIntStateOf(0)
-    val countContent get() = _countContent
 
     private val databaseReference: DatabaseReference =
         FirebaseDatabase.getInstance()
@@ -52,16 +49,35 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
     val allViagemSuporteTecnico: Flow<List<ViagemSuporteTecnico>>
     private val viagemSuporteTecnicoServices: ViagemSuporteTecnicoServices
 
-    lateinit var allViagensCurrentUser: Flow<List<ViagemSuporteTecnico>>
+    val calendar = Calendar.getInstance()
+
+    val firstDayWeek = mutableStateOf(calendar.timeInMillis)
+    val lastDayWeek = mutableStateOf(calendar.timeInMillis)
+
+    lateinit var allTripsCurrentUser: Flow<List<ViagemSuporteTecnico>>
+    var countContent: MutableStateFlow<Int> = MutableStateFlow(0)
+
+    //var allTripsCurrentUser = mutableStateOf<List<ViagemSuporteTecnico>>(emptyList())
+    var currentWeekData = mutableStateOf<List<ViagemSuporteTecnico>>(emptyList())
+    var currentService = mutableStateOf(ViagemSuporteTecnico())
 
     init {
-        val viagemSuporteTecnicoDao = AppDatabase.getDatabase(application).viagemSuporteTecnicoDao()
-        this.repository = ViagemSuporteTecnicoRepository(viagemSuporteTecnicoDao)
+        calendar.firstDayOfWeek = Calendar.SUNDAY
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
+        firstDayWeek.value = calendar.timeInMillis
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY)
+        lastDayWeek.value = calendar.timeInMillis
+
+        val serviceTripDao = AppDatabase.getDatabase(application).viagemSuporteTecnicoDao()
+        this.repository = ViagemSuporteTecnicoRepository(serviceTripDao)
         allViagemSuporteTecnico = repository.allViagemSuporteTecnico
-        viewModelScope.launch {
-            allViagensCurrentUser = repository.getViagensCurrentUser("")
-        }
+
         viagemSuporteTecnicoServices = ViagemSuporteTecnicoServices()
+
+        getViagensCurrentUser()
+        homeCountContent()
+
+        getCurrentWeekData(firstDayWeek.value, lastDayWeek.value)
 
         databaseReference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -183,7 +199,7 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
                         }
 
                     },
-                    onExecuted = { countContent.intValue = START_CONTENT },
+                    onExecuted = {},
                     onError = {}
                 )
             } else if (atendimentoAtual.statusService.equals("Em rota, retornando")) {
@@ -426,33 +442,56 @@ class ViagemSuporteTecnicoViewModel(application: Application) : AndroidViewModel
         }
     }
 
-    fun homeCountContent(
-        viagemSuporte: List<ViagemSuporteTecnico>,
-        atendimento: (ViagemSuporteTecnico) -> Unit
-    ): Int {
-        var countContent = mutableIntStateOf(1)
-
-        viagemSuporte.forEach {
-            println("statusService: ${it.statusService}")
-            when {
-                it.statusService?.contains("Em rota") == true ||
-                        it.statusService?.contains("Em rota, retornando") == true -> {
-                    atendimento(it)
-                    countContent.intValue = 2
-                }
-
-                it.statusService?.contains("Em andamento") == true -> {
-                    atendimento(it)
-                    countContent.intValue = 3
-                }
-            }
-        }
-        return countContent.intValue
+    fun getViagensCurrentUser() {
+        allTripsCurrentUser =
+            repository.getViagensCurrentUser(FirebaseAuth.getInstance().currentUser!!.uid)
     }
 
-    fun getViagensCurrentUser(tecnicoId: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            allViagensCurrentUser = repository.getViagensCurrentUser(tecnicoId)
+    fun homeCountContent() {
+        var count: MutableStateFlow<Int> = MutableStateFlow(1)
+
+        viewModelScope.launch {
+            repository.getViagensCurrentUser(FirebaseAuth.getInstance().currentUser!!.uid).collect {
+                it.forEach {
+                    when {
+                        it.statusService?.contains("Em rota") == true ||
+                                it.statusService?.contains("Em rota, retornando") == true -> {
+                            currentService.value = it
+                            count = MutableStateFlow(2)
+                        }
+
+                        it.statusService?.contains("Em andamento") == true -> {
+                            currentService.value = it
+                            count = MutableStateFlow(3)
+                        }
+                    }
+                }
+                countContent = count
+            }
+        }
+        /**
+        allTripsCurrentUser.forEach {
+        when {
+        it.statusService?.contains("Em rota") == true ||
+        it.statusService?.contains("Em rota, retornando") == true -> {
+        currentService.value = it
+        _countContent.intValue = 2
+        }
+
+        it.statusService?.contains("Em andamento") == true -> {
+        currentService.value = it
+        _countContent.intValue = 3
+        }
+        }
+        }
+         */
+    }
+
+    fun getCurrentWeekData(firstDayWeek: Long, lastDayWeek: Long) {
+        viewModelScope.launch {
+            repository.getCurrentWeekData(firstDayWeek, lastDayWeek).collect {
+                currentWeekData.value = it
+            }
         }
     }
 

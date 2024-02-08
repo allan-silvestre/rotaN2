@@ -4,9 +4,11 @@ import android.annotation.SuppressLint
 import android.os.Handler
 import android.os.Looper
 import android.widget.ProgressBar
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,14 +22,20 @@ import androidx.compose.material.icons.filled.Adjust
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DownloadDone
 import androidx.compose.material.icons.filled.HomeMini
+import androidx.compose.material.icons.filled.OpenInNew
+import androidx.compose.material.icons.filled.RemoveRedEye
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.DownloadDone
 import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.OpenInNew
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,6 +45,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.unit.dp
 import com.ags.controlekm.components.Text.ContentText
 import com.ags.controlekm.components.Text.SubTitleText
@@ -89,7 +98,7 @@ fun AtendimentoCard(
                 if (data.isNotEmpty()) {
                     Icon(
                         modifier = Modifier.size(22.dp),
-                        imageVector = Icons.Filled.CheckCircle,
+                        imageVector = Icons.Rounded.CheckCircle,
                         contentDescription = "",
                         tint = Color(0xFF228B22)
                     )
@@ -99,11 +108,29 @@ fun AtendimentoCard(
                     SubTitleText("Em andamento")
                     LinearProgressIndicator(
                         modifier = Modifier
-                            .padding(start = 50.dp, end = 50.dp, top = 6.dp, bottom = 6.dp)
+                            .padding(start = 50.dp, end = 50.dp, top = 6.dp, bottom = 6.dp),
+                        strokeCap = StrokeCap.Round
                     )
                     ContentText("${local}")
                 }
             }
         }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 10.dp, end = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.End
+        ) {
+            Icon(
+                modifier = Modifier
+                    .size(18.dp)
+                    .clickable {  },
+                imageVector = Icons.Rounded.OpenInNew,
+                contentDescription = "",
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+
     }
 }

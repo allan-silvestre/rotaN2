@@ -55,16 +55,9 @@ import androidx.navigation.NavHostController
 import com.ags.controlekm.R
 import com.ags.controlekm.components.TextField.FormularioOutlinedTextField
 import com.ags.controlekm.components.TextField.FormularioOutlinedTextFieldMenu
-import com.ags.controlekm.database.Models.ViagemSuporteTecnico
 import com.ags.controlekm.database.ViewModels.LoginViewModel
-import com.ags.controlekm.database.ViewModels.ViagemSuporteTecnicoViewModel
 import com.ags.controlekm.functions.navigateSingleTopTo
-import com.ags.controlekm.functions.reiniciarTela
 import com.google.firebase.auth.FirebaseAuth
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable

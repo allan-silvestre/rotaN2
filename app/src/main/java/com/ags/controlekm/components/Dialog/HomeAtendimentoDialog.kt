@@ -24,12 +24,12 @@ import com.ags.controlekm.database.FirebaseServices.CurrentUserServices
 import com.ags.controlekm.database.Models.CurrentUser
 import com.ags.controlekm.database.Models.ViagemSuporteTecnico
 import com.ags.controlekm.database.ViewModels.CurrentUserViewModel
-import com.ags.controlekm.database.ViewModels.ViagemSuporteTecnicoViewModel
+import com.ags.controlekm.database.ViewModels.ServiceViewModel
 import com.ags.controlekm.database.ViewModels.ExecutarFuncaoViewModel
 
 @Composable
 fun HomeAtendimentoDialog(
-    viagemSuporteTecnicoViewModel: ViagemSuporteTecnicoViewModel = viewModel(),
+    viagemSuporteTecnicoViewModel: ServiceViewModel = viewModel(),
     currentUserViewModel: CurrentUserViewModel = viewModel(),
     executarFuncaoViewModel: ExecutarFuncaoViewModel = viewModel(),
     currentUserServices: CurrentUserServices,
