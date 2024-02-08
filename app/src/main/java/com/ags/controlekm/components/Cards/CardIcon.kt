@@ -1,7 +1,5 @@
 package com.ags.controlekm.components.Cards
 
-import android.graphics.Color
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,9 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.materialIcon
 import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgeDefaults
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -28,7 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.ags.controlekm.objects.CardIconItem
+import com.ags.controlekm.database.Models.CardIconItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

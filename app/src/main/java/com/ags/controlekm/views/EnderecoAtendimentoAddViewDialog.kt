@@ -35,7 +35,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ags.controlekm.components.TextField.FormularioOutlinedTextField
 import com.ags.controlekm.database.Models.EnderecoAtendimento
-import com.ags.controlekm.database.ViewModels.EnderecoAtendimentoViewModel
+import com.ags.controlekm.database.ViewModels.AddressViewModel
 import com.ags.controlekm.functions.VerificacaoApenasNumero
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -45,7 +45,7 @@ fun EnderecoAtendimentoAddViewDialog(
     visible: Boolean,
     onSalvar: () -> Unit,
     onCancel: () -> Unit,
-    enderecoAtendimentoViewModel: EnderecoAtendimentoViewModel = viewModel(),
+    addressViewModel: AddressViewModel = viewModel(),
 ) {
     //VARIAVEL CONTROLADORA DE CONTEUDO
     var countContent by remember { mutableStateOf(0) }
@@ -227,7 +227,7 @@ fun EnderecoAtendimentoAddViewDialog(
                                                         numero = numero
                                                     )
                                                     coroutineScope.launch(Dispatchers.IO) {
-                                                    enderecoAtendimentoViewModel.insert(enderecoAtendimento)
+                                                    addressViewModel.insert(enderecoAtendimento)
                                                     }
                                                     onSalvar()
                                                 }

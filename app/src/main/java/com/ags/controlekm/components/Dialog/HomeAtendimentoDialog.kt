@@ -25,13 +25,13 @@ import com.ags.controlekm.database.Models.CurrentUser
 import com.ags.controlekm.database.Models.ViagemSuporteTecnico
 import com.ags.controlekm.database.ViewModels.CurrentUserViewModel
 import com.ags.controlekm.database.ViewModels.ServiceViewModel
-import com.ags.controlekm.database.ViewModels.ExecutarFuncaoViewModel
+import com.ags.controlekm.database.ViewModels.PerformFunctionViewModel
 
 @Composable
 fun HomeAtendimentoDialog(
     viagemSuporteTecnicoViewModel: ServiceViewModel = viewModel(),
     currentUserViewModel: CurrentUserViewModel = viewModel(),
-    executarFuncaoViewModel: ExecutarFuncaoViewModel = viewModel(),
+    performFunctionViewModel: PerformFunctionViewModel = viewModel(),
     currentUserServices: CurrentUserServices,
     userLoggedData: CurrentUser?,
     atendimentoAtual: ViagemSuporteTecnico,
@@ -56,7 +56,7 @@ fun HomeAtendimentoDialog(
         onDismissRequest = { onDismissRequest() },
         title = { TitleText(titleDialog) },
         text = {
-            if (executarFuncaoViewModel.loading.value) {
+            if (performFunctionViewModel.loading.value) {
                 visibleRetornar = false
                 visibleNovoAtendimento = false
                 LoadingCircular()

@@ -9,7 +9,7 @@ import com.ags.controlekm.database.Repositorys.EmpresaClienteRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
-class EmpresaClienteViewModel(application: Application) : AndroidViewModel(application){
+class CompanyUserViewModel(application: Application) : AndroidViewModel(application){
     private val repository: EmpresaClienteRepository
     val allEmpresaCliente: Flow<List<EmpresaCliente>>
 

@@ -35,10 +35,6 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
     private val _loading = mutableStateOf(false)
     val loading get() = _loading
 
-    //private val _countContent = mutableIntStateOf(0)
-    //val countContent get() = _countContent
-
-
     private val databaseReference: DatabaseReference =
         FirebaseDatabase.getInstance()
             .reference
@@ -46,20 +42,19 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
             .child("atendimentos")
 
     private val repository: ViagemSuporteTecnicoRepository
-    val allViagemSuporteTecnico: Flow<List<ViagemSuporteTecnico>>
+
     private val viagemSuporteTecnicoServices: ViagemSuporteTecnicoServices
 
-    val calendar = Calendar.getInstance()
-
-    val firstDayWeek = mutableStateOf(calendar.timeInMillis)
-    val lastDayWeek = mutableStateOf(calendar.timeInMillis)
-
+    val allViagemSuporteTecnico: Flow<List<ViagemSuporteTecnico>>
     lateinit var allTripsCurrentUser: Flow<List<ViagemSuporteTecnico>>
     var countContent: MutableStateFlow<Int> = MutableStateFlow(0)
+    var currentService = MutableStateFlow(ViagemSuporteTecnico())
 
-    //var allTripsCurrentUser = mutableStateOf<List<ViagemSuporteTecnico>>(emptyList())
     var currentWeekData = mutableStateOf<List<ViagemSuporteTecnico>>(emptyList())
-    var currentService = mutableStateOf(ViagemSuporteTecnico())
+
+    val calendar = Calendar.getInstance()
+    val firstDayWeek = mutableStateOf(calendar.timeInMillis)
+    val lastDayWeek = mutableStateOf(calendar.timeInMillis)
 
     init {
         calendar.firstDayOfWeek = Calendar.SUNDAY
@@ -443,8 +438,7 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun getViagensCurrentUser() {
-        allTripsCurrentUser =
-            repository.getViagensCurrentUser(FirebaseAuth.getInstance().currentUser!!.uid)
+        allTripsCurrentUser = repository.getViagensCurrentUser(FirebaseAuth.getInstance().currentUser!!.uid)
     }
 
     fun homeCountContent() {

@@ -65,8 +65,7 @@ import com.ags.controlekm.database.FirebaseServices.CurrentUserServices
 import com.ags.controlekm.database.Models.EnderecoAtendimento
 import com.ags.controlekm.database.Models.ViagemSuporteTecnico
 import com.ags.controlekm.database.ViewModels.CurrentUserViewModel
-import com.ags.controlekm.database.ViewModels.EnderecoAtendimentoViewModel
-import com.ags.controlekm.database.ViewModels.ExecutarFuncaoViewModel
+import com.ags.controlekm.database.ViewModels.AddressViewModel
 import com.ags.controlekm.database.ViewModels.ServiceViewModel
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
@@ -80,7 +79,7 @@ import java.util.Locale
 fun Home(
     navController: NavHostController,
     currentUserViewModel: CurrentUserViewModel = viewModel(),
-    enderecoAtendimentoViewModel: EnderecoAtendimentoViewModel = viewModel(),
+    addressViewModel: AddressViewModel = viewModel(),
     serviceViewModel: ServiceViewModel = viewModel(ServiceViewModel::class.java),
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -93,12 +92,12 @@ fun Home(
     val userLoggedData by currentUserViewModel.currentUserData.collectAsState(null)
     val allTripsCurrentUser by serviceViewModel.allTripsCurrentUser.collectAsState(emptyList())
     val countContent by serviceViewModel.countContent.collectAsState(flowOf(0))
+    val currentService by serviceViewModel.currentService.collectAsState()
+    val enderecosLocal: List<EnderecoAtendimento> by addressViewModel.allAddress.collectAsState(emptyList())
 
     var currentUser by rememberSaveable { mutableStateOf(FirebaseAuth.getInstance().currentUser) }
 
     val currentUserServices = CurrentUserServices(currentUser?.uid.toString())
-
-    val enderecosLocal: List<EnderecoAtendimento> by enderecoAtendimentoViewModel.allEnderecoAtendimento.collectAsState(emptyList())
 
     var enderecosList by rememberSaveable { mutableStateOf<List<String>>(emptyList()) }
 
@@ -119,7 +118,6 @@ fun Home(
 
     var visibleFinalizarDialog by remember { mutableStateOf(false) }
 
-    var atendimentoAtual by remember { mutableStateOf(ViagemSuporteTecnico()) }
     var novoAtendimento by remember { mutableStateOf(ViagemSuporteTecnico()) }
 
     var visibleButtonDefault by remember { mutableStateOf(false) }
@@ -139,14 +137,6 @@ fun Home(
                     val timeFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
                     hora = timeFormat.format(currentTime)
                 }
-            }
-        }
-    }
-
-    LaunchedEffect(data) {
-        coroutineScope.launch(Dispatchers.IO) {
-            enderecosList = enderecosLocal.map { endereco ->
-                endereco.toStringEnderecoAtendimento()
             }
         }
     }
@@ -259,14 +249,14 @@ fun Home(
                     } else if (countContent == 2) {
                         visibleButtonDefault = true
                         visibleButtonCancel = true
-                        if (atendimentoAtual.statusService.equals("Em rota")) {
+                        if (currentService.statusService.equals("Em rota")) {
                             textStatus =
-                                "${atendimentoAtual.statusService} entre ${atendimentoAtual.localSaida} \n e ${atendimentoAtual.localAtendimento}"
+                                "${currentService.statusService} entre ${currentService.localSaida} \n e ${currentService.localAtendimento}"
                             textButton = "Confirmar chegada"
                         }
-                        if (atendimentoAtual.statusService.equals("Em rota, retornando")) {
+                        if (currentService.statusService.equals("Em rota, retornando")) {
                             textStatus =
-                                "${atendimentoAtual.statusService} de ${atendimentoAtual.localAtendimento} \n para ${atendimentoAtual.localRetorno}"
+                                "${currentService.statusService} de ${currentService.localAtendimento} \n para ${currentService.localRetorno}"
                             textButton = "Confirmar chegada"
                         }
                         Column(
@@ -325,7 +315,7 @@ fun Home(
                             HomeAtendimentoDialog(
                                 currentUserServices = currentUserServices,
                                 userLoggedData = userLoggedData,
-                                atendimentoAtual = atendimentoAtual,
+                                atendimentoAtual = currentService,
                                 novoAtendimento = novoAtendimento,
                                 resumoAtendimento = resumoAtendimento,
                                 data = data,
@@ -368,7 +358,7 @@ fun Home(
                                         currentUserViewModel = currentUserViewModel,
                                         currentUserServices = currentUserServices,
                                         userLoggedData = userLoggedData,
-                                        atendimentoAtual = atendimentoAtual,
+                                        atendimentoAtual = currentService,
                                         kmChegada = kmChegada,
                                         data = data,
                                         hora = hora,
@@ -502,10 +492,10 @@ fun Home(
         AlertaDialogCancel(
             onDismissRequest = { visibleAlertCancel = false },
             title = {
-                if (atendimentoAtual.statusService.equals("Em rota, retornando")) {
-                    TitleText("Cancelar o retorno para \n ${atendimentoAtual.localRetorno}")
+                if (currentService.statusService.equals("Em rota, retornando")) {
+                    TitleText("Cancelar o retorno para \n ${currentService.localRetorno}")
                 } else {
-                    TitleText("Cancelar o atendimento \n ${atendimentoAtual.localAtendimento}")
+                    TitleText("Cancelar o atendimento \n ${currentService.localAtendimento}")
                 }
             },
             confirmButton = {
@@ -513,7 +503,7 @@ fun Home(
                     currentUserViewModel = currentUserViewModel,
                     currentUserServices = currentUserServices,
                     userLoggedData = userLoggedData!!,
-                    atendimentoAtual = atendimentoAtual
+                    atendimentoAtual = currentService
                 )
             }
         )

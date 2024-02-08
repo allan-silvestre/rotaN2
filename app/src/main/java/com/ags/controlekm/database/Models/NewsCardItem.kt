@@ -1,4 +1,4 @@
-package com.ags.controlekm.objects
+package com.ags.controlekm.database.Models
 
 import android.media.Image
 import androidx.compose.ui.graphics.Color

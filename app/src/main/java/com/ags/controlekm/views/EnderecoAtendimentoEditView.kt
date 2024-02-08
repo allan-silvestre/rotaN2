@@ -34,7 +34,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ags.controlekm.components.TextField.FormularioTextField
 import com.ags.controlekm.database.Models.EnderecoAtendimento
-import com.ags.controlekm.database.ViewModels.EnderecoAtendimentoViewModel
+import com.ags.controlekm.database.ViewModels.AddressViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -44,7 +44,7 @@ fun EnderecoAtendimentoEditView(
     visible: Boolean,
     onSalvar: () -> Unit,
     onCancel: () -> Unit,
-    enderecoAtendimentoViewModel: EnderecoAtendimentoViewModel = viewModel()
+    addressViewModel: AddressViewModel = viewModel()
 ) {
     //VARIAVEL CONTROLADORA DE CONTEUDO
     var countContent by remember { mutableStateOf(0) }
@@ -233,7 +233,7 @@ fun EnderecoAtendimentoEditView(
                                                                     numero = numero
                                                                 )
                                                             coroutineScope.launch(Dispatchers.IO) {
-                                                                enderecoAtendimentoViewModel.insert(enderecoAtendimento)
+                                                                addressViewModel.insert(enderecoAtendimento)
                                                             }
                                                             onSalvar()
                                                         }

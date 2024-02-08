@@ -79,7 +79,7 @@ import com.ags.controlekm.components.Dialog.AlertDialogSelectImage
 import com.ags.controlekm.components.TextField.FormularioTextField
 import com.ags.controlekm.components.TextField.FormularioTextFieldMenu
 import com.ags.controlekm.database.ViewModels.UserViewModel
-import com.ags.controlekm.objects.MaskVisualTransformation
+import com.ags.controlekm.functions.MaskVisualTransformation
 import com.ags.controlekm.functions.UploadImage
 import com.ags.controlekm.functions.VerificacaoApenasNumero
 import com.ags.controlekm.functions.VerificacaoApenasTexto

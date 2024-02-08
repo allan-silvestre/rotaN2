@@ -43,14 +43,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ags.controlekm.components.TextField.FormularioTextField
 import com.ags.controlekm.components.TextField.FormularioTextFieldMenu
 import com.ags.controlekm.database.Models.EnderecoAtendimento
-import com.ags.controlekm.database.ViewModels.EnderecoAtendimentoViewModel
+import com.ags.controlekm.database.ViewModels.AddressViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
 fun DropDownMenuAtendimento(
-    enderecoAtendimentoViewModel: EnderecoAtendimentoViewModel = viewModel(),
+    addressViewModel: AddressViewModel = viewModel(),
     labelLocal: String? = null,
     labelKm: String? = null,
     hora: String? = null,
@@ -60,7 +60,7 @@ fun DropDownMenuAtendimento(
     localSelecionado: ((String) -> Unit)? = null,
     kmInformado: ((String) -> Unit)? = null,
 ) {
-    val enderecosLocal: List<EnderecoAtendimento> by enderecoAtendimentoViewModel.allEnderecoAtendimento.collectAsState(emptyList())
+    val enderecosLocal: List<EnderecoAtendimento> by addressViewModel.allAddress.collectAsState(emptyList())
     var enderecosList by rememberSaveable { mutableStateOf<List<String>>(emptyList()) }
 
     DisposableEffect(enderecosLocal) {

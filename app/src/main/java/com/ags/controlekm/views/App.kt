@@ -85,8 +85,8 @@ import com.ags.controlekm.R
 import com.ags.controlekm.components.Dialog.DialogEmailVerifield
 import com.ags.controlekm.database.ViewModels.CurrentUserViewModel
 import com.ags.controlekm.functions.navigateSingleTopTo
-import com.ags.controlekm.objects.BottomNavigationItem
-import com.ags.controlekm.objects.MenuItem
+import com.ags.controlekm.database.Models.BottomNavigationItem
+import com.ags.controlekm.database.Models.MenuItem
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase

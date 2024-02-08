@@ -5,22 +5,19 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ags.controlekm.database.AppDatabase
 import com.ags.controlekm.database.FirebaseServices.EnderecoAtendimentoServices
-import com.ags.controlekm.database.FirebaseServices.ViagemSuporteTecnicoServices
 import com.ags.controlekm.database.Models.EnderecoAtendimento
-import com.ags.controlekm.database.Models.ViagemSuporteTecnico
 import com.ags.controlekm.database.Repositorys.EnderecoAtendimentoRepository
-import com.ags.controlekm.database.Repositorys.ViagemSuporteTecnicoRepository
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
-class EnderecoAtendimentoViewModel(application: Application): AndroidViewModel(application) {
+class AddressViewModel(application: Application): AndroidViewModel(application) {
     private val databaseReference: DatabaseReference =
         FirebaseDatabase.getInstance()
             .reference
@@ -28,13 +25,13 @@ class EnderecoAtendimentoViewModel(application: Application): AndroidViewModel(a
             .child("enderecos")
 
     private val repository: EnderecoAtendimentoRepository
-    val allEnderecoAtendimento: Flow<List<EnderecoAtendimento>>
+    val allAddress: Flow<List<EnderecoAtendimento>>
     private val enderecoAtendimentoServices: EnderecoAtendimentoServices
 
     init {
         val enderecoAtendimentoDao = AppDatabase.getDatabase(application).enderecoAtendimentoDao()
         this.repository = EnderecoAtendimentoRepository(enderecoAtendimentoDao)
-        allEnderecoAtendimento = repository.allEnderecoAtendimento
+        allAddress = repository.allEnderecoAtendimento
         enderecoAtendimentoServices = EnderecoAtendimentoServices()
 
         databaseReference.addValueEventListener(object : ValueEventListener {

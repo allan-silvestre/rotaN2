@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.ags.controlekm.R
 import com.ags.controlekm.components.Cards.CardNews
-import com.ags.controlekm.objects.NewsCardItem
+import com.ags.controlekm.database.Models.NewsCardItem
 
 @OptIn(ExperimentalFoundationApi::class)
 @SuppressLint("SuspiciousIndentation")

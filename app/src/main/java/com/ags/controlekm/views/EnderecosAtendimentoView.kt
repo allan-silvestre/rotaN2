@@ -18,7 +18,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -33,17 +32,17 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.ags.controlekm.functions.navigateSingleTopTo
 import com.ags.controlekm.database.Models.EnderecoAtendimento
-import com.ags.controlekm.database.ViewModels.EnderecoAtendimentoViewModel
+import com.ags.controlekm.database.ViewModels.AddressViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
 fun EnderecosAtendimentoView(
     navController: NavHostController,
-    enderecoAtendimentoViewModel: EnderecoAtendimentoViewModel = viewModel(),
+    addressViewModel: AddressViewModel = viewModel(),
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val enderecosLocal: List<EnderecoAtendimento> by enderecoAtendimentoViewModel.allEnderecoAtendimento.collectAsState(emptyList())
+    val enderecosLocal: List<EnderecoAtendimento> by addressViewModel.allAddress.collectAsState(emptyList())
 
     var selectedItem by remember { mutableStateOf<EnderecoAtendimento?>(null) }
 
@@ -90,7 +89,7 @@ fun EnderecosAtendimentoView(
                             .size(15.dp)
                             .clickable {
                                 coroutineScope.launch(Dispatchers.IO) {
-                                    enderecoAtendimentoViewModel.delete(item)
+                                    addressViewModel.delete(item)
                                 }
                             },
                         imageVector = Icons.Filled.Delete,

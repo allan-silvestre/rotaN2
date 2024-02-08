@@ -1,4 +1,4 @@
-package com.ags.controlekm.objects
+package com.ags.controlekm.functions
 
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping

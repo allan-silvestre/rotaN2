@@ -1,12 +1,10 @@
-package com.ags.controlekm.objects
+package com.ags.controlekm.database.Models
 
 import androidx.compose.ui.graphics.vector.ImageVector
 
-data class BottomNavigationItem(
+data class MenuItem(
     val title: String,
     val navHostLink: String,
     val selectedIcon: ImageVector,
     val unselectedIcon: ImageVector,
-    val hasNews: Boolean,
-    val badgeCount: Int? = null
 )
