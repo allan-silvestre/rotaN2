@@ -5,7 +5,9 @@ import com.ags.controlekm.database.Models.ViagemSuporteTecnico
 import kotlinx.coroutines.flow.Flow
 
 class ViagemSuporteTecnicoRepository(private val viagemSuporteTecnicoDao: ViagemSuporteTecnicoDao) {
-    val allViagemSuporteTecnico: Flow<List<ViagemSuporteTecnico>> = viagemSuporteTecnicoDao.getAllViagemSuporteTecnico()
+    fun getAllServices(): Flow<List<ViagemSuporteTecnico>> {
+        return viagemSuporteTecnicoDao.getAllServices()
+    }
 
     fun getViagensCurrentUser(tecnicoId: String): Flow<List<ViagemSuporteTecnico>> {
         return viagemSuporteTecnicoDao.getViagensCurrentUser(tecnicoId)

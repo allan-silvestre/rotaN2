@@ -47,6 +47,8 @@ import com.ags.controlekm.database.ViewModels.AddressViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @Composable
 fun DropDownMenuAtendimento(
@@ -60,13 +62,13 @@ fun DropDownMenuAtendimento(
     localSelecionado: ((String) -> Unit)? = null,
     kmInformado: ((String) -> Unit)? = null,
 ) {
-    val enderecosLocal: List<EnderecoAtendimento> by addressViewModel.allAddress.collectAsState(emptyList())
+    val allAddress: List<EnderecoAtendimento> by addressViewModel.allAddress.collectAsState(emptyList())
     var enderecosList by rememberSaveable { mutableStateOf<List<String>>(emptyList()) }
 
-    DisposableEffect(enderecosLocal) {
+    DisposableEffect(allAddress) {
         val coroutineScope = CoroutineScope(Dispatchers.IO)
         val enderecos = coroutineScope.launch {
-            enderecosList = enderecosLocal.map { endereco ->
+            enderecosList = allAddress.map { endereco ->
                 endereco.toStringEnderecoAtendimento()
             }
         }
@@ -75,6 +77,7 @@ fun DropDownMenuAtendimento(
             enderecos.cancel()
         }
     }
+
     var textFieldSize by remember { mutableStateOf(Size.Zero) }
     var expandedMenu by remember { mutableStateOf(false) }
 
@@ -128,28 +131,27 @@ if(visibleLocal){
                 if (local.isNotEmpty()) {
                     items(
                         enderecosList.filter {
-                            it.lowercase()
-                                .contains(local.lowercase()) || it.lowercase()
+                            it.lowercase().contains(local.lowercase()) || it.lowercase()
                                 .contains("others")
-                        }.sorted()
+                        }.sortedBy { it.lowercase() }
                     ) {
                         DropdownMenuItem(
                             text = {
                                 Text(
-                                    text = it,
+                                    text = it.toString(),
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.SemiBold
                                 )
                             },
                             onClick = {
-                                local = it
-                                localSelecionado!!(it)
+                                local = it.toString()
+                                localSelecionado!!(it.toString())
                                 expandedMenu = false
                             })
                     }
                 } else {
                     items(
-                        enderecosList.sorted()
+                        enderecosList.sortedBy { it.lowercase() }
                     ) {
                         DropdownMenuItem(
                             text = {

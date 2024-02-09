@@ -79,7 +79,6 @@ import java.util.Locale
 fun Home(
     navController: NavHostController,
     currentUserViewModel: CurrentUserViewModel = viewModel(),
-    addressViewModel: AddressViewModel = viewModel(),
     serviceViewModel: ServiceViewModel = viewModel(ServiceViewModel::class.java),
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -93,13 +92,10 @@ fun Home(
     val allTripsCurrentUser by serviceViewModel.allTripsCurrentUser.collectAsState(emptyList())
     val countContent by serviceViewModel.countContent.collectAsState(flowOf(0))
     val currentService by serviceViewModel.currentService.collectAsState()
-    val enderecosLocal: List<EnderecoAtendimento> by addressViewModel.allAddress.collectAsState(emptyList())
 
     var currentUser by rememberSaveable { mutableStateOf(FirebaseAuth.getInstance().currentUser) }
 
     val currentUserServices = CurrentUserServices(currentUser?.uid.toString())
-
-    var enderecosList by rememberSaveable { mutableStateOf<List<String>>(emptyList()) }
 
     val context = LocalContext.current
 
@@ -350,7 +346,6 @@ fun Home(
                                         data = data,
                                         hora = hora,
                                     )
-                                    visibleButtonDefault = false
                                 }
 
                                 2 -> {

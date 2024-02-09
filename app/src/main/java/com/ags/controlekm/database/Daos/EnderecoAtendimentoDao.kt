@@ -8,12 +8,13 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.ags.controlekm.database.Models.EnderecoAtendimento
+import com.ags.controlekm.database.Models.ViagemSuporteTecnico
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface EnderecoAtendimentoDao {
     @Query("SELECT * FROM enderecoatendimento")
-    fun getAllEnderecoAtendimento(): Flow<List<EnderecoAtendimento>>
+    fun getAllAddress(): Flow<List<EnderecoAtendimento>>
 
     @Transaction
     @Insert(onConflict = OnConflictStrategy.REPLACE)

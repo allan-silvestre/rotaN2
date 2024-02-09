@@ -25,14 +25,16 @@ class AddressViewModel(application: Application): AndroidViewModel(application) 
             .child("enderecos")
 
     private val repository: EnderecoAtendimentoRepository
-    val allAddress: Flow<List<EnderecoAtendimento>>
+    lateinit var allAddress: Flow<List<EnderecoAtendimento>>
     private val enderecoAtendimentoServices: EnderecoAtendimentoServices
 
     init {
         val enderecoAtendimentoDao = AppDatabase.getDatabase(application).enderecoAtendimentoDao()
         this.repository = EnderecoAtendimentoRepository(enderecoAtendimentoDao)
-        allAddress = repository.allEnderecoAtendimento
+
         enderecoAtendimentoServices = EnderecoAtendimentoServices()
+
+        getAllAdress()
 
         databaseReference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -55,6 +57,13 @@ class AddressViewModel(application: Application): AndroidViewModel(application) 
         })
 
     }
+
+     fun getAllAdress() {
+         viewModelScope.launch {
+             allAddress = repository.getAllAddress()
+         }
+    }
+
 
     suspend fun insert(enderecoAtendimento: EnderecoAtendimento) {
         viewModelScope.launch(Dispatchers.IO) {

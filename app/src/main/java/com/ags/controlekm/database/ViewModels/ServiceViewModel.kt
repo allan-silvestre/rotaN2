@@ -65,7 +65,7 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
 
         val serviceTripDao = AppDatabase.getDatabase(application).viagemSuporteTecnicoDao()
         this.repository = ViagemSuporteTecnicoRepository(serviceTripDao)
-        allViagemSuporteTecnico = repository.allViagemSuporteTecnico
+        allViagemSuporteTecnico = repository.getAllServices()
 
         viagemSuporteTecnicoServices = ViagemSuporteTecnicoServices()
 
@@ -145,7 +145,12 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
                         currentUserServices.addUltimoKm(kmSaida)
                     }
                 },
-                onExecuted = {},
+                onExecuted = {
+                    if(it) {
+                        countContent.value = 2
+                        _loading.value = false
+                    }
+                },
                 onError = {}
             )
         }
@@ -192,9 +197,13 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
                             currentUserViewModel.update(userLoggedData)
                             currentUserServices.addUltimoKm(kmChegada)
                         }
-
                     },
-                    onExecuted = {},
+                    onExecuted = {
+                        if(it) {
+                            countContent.value = 3
+                            _loading.value = false
+                        }
+                    },
                     onError = {}
                 )
             } else if (atendimentoAtual.statusService.equals("Em rota, retornando")) {
@@ -216,10 +225,12 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
                             currentUserViewModel.update(userLoggedData)
                             currentUserServices.addUltimoKm(kmChegada)
                             currentUserServices.addKmBackup(kmChegada)
+                            countContent.value = 1
                         }
-
                     },
-                    onExecuted = {},
+                    onExecuted = {
+                        if (it) { _loading.value = false}
+                    },
                     onError = {}
                 )
             }
@@ -247,40 +258,14 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
                 viewModelScope.launch(Dispatchers.IO) {
                     update(atendimento)
                 }
-
+                homeCountContent()
             },
-            onExecuted = {},
-            onError = {}
-        )
-    }
-
-    fun finalizarAtendimento(
-        currentUserViewModel: CurrentUserViewModel,
-        currentUserServices: CurrentUserServices,
-        userLoggedData: CurrentUser,
-        atendimentoAtual: ViagemSuporteTecnico,
-        resumoAtendimento: String,
-        data: String,
-        hora: String,
-    ) {
-        // FINALIZA O ATENDIMENTO ATUAL
-        atendimentoAtual.dataConclusao = data
-        atendimentoAtual.horaConclusao = hora
-        atendimentoAtual.descricao = resumoAtendimento
-        atendimentoAtual.statusService = "Finalizado"
-
-        userLoggedData.kmBackup = userLoggedData?.ultimoKm.toString()
-
-        executar(
-            function = {
-                viewModelScope.launch(Dispatchers.IO) {
-                    update(atendimentoAtual)
-                    currentUserViewModel.update(userLoggedData)
-                    currentUserServices.addKmBackup(userLoggedData.ultimoKm.toString())
+            onExecuted = {
+                if(it) {
+                    countContent.value = 2
+                    _loading.value = false
                 }
-
             },
-            onExecuted = {},
             onError = {}
         )
     }
@@ -291,6 +276,7 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
         userLoggedData: CurrentUser,
         atendimentoAtual: ViagemSuporteTecnico,
     ) {
+        var count: MutableStateFlow<Int> = MutableStateFlow(0)
         executar(
             function = {
                 if (atendimentoAtual.statusService.equals("Em rota, retornando")) {
@@ -305,6 +291,7 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
                     viewModelScope.launch(Dispatchers.IO) {
                         update(atendimentoAtual)
                     }
+                    count.value = 3
                 } else {
                     viewModelScope.launch(Dispatchers.IO) {
                         // NO ROOM
@@ -318,9 +305,15 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
                         // DEFINE O VALOR DO (ULTIMO KM) DO USUÁRIO PARA O ULTIMO INFORMADO AO CONCLUIR A ULTIMA VIAGEM
                         currentUserServices.addUltimoKm(userLoggedData.kmBackup.toString())
                     }
+                    count.value = 1
                 }
             },
-            onExecuted = {},
+            onExecuted = {
+                if(it) {
+                    countContent.value = count.value
+                    _loading.value = false
+                }
+            },
             onError = {}
         )
     }
@@ -382,63 +375,63 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
                         currentUserViewModel.update(userLoggedData)
                         currentUserServices.addKmBackup(userLoggedData.ultimoKm.toString())
                     }
-
                 },
                 onExecuted = {
-                    executar(
-                        function = {
-                            userLoggedData.ultimoKm = kmSaida
-                            //INICIA UM NOVO ATENDIMENTO
-                            viewModelScope.launch(Dispatchers.IO) {
-                                insert(novoAtendimento)
-                                currentUserViewModel.update(userLoggedData)
-                                currentUserServices.addUltimoKm(kmSaida)
-                            }
-                        },
-                        onExecuted = {},
-                        onError = {}
-                    )
+                    if(it) {
+                        executar(
+                            function = {
+                                userLoggedData.ultimoKm = kmSaida
+                                //INICIA UM NOVO ATENDIMENTO
+                                viewModelScope.launch(Dispatchers.IO) {
+                                    insert(novoAtendimento)
+                                    currentUserViewModel.update(userLoggedData)
+                                    currentUserServices.addUltimoKm(kmSaida)
+                                }
+                            },
+                            onExecuted = {
+                                if(it) {
+                                    countContent.value = 2
+                                    _loading.value = false
+                                }
+                            },
+                            onError = {}
+                        )
+                    }
                 },
                 onError = {}
             )
         }
     }
 
-    fun executar(function: () -> Unit, onExecuted: (String) -> Unit, onError: () -> Unit) {
-        // Verifique se já está carregando
-        if (!loading.value) {
-            // Iniciar o carregamento
-            _loading.value = true
-
-            viewModelScope.launch {
-                try {
-                    // Simular uma função assíncrona real
-                    val resultado = withContext(Dispatchers.IO) {
-                        delay(1000)
-                        function()
-                        _loading.value = false
-                        "isCompleted"
-                    }
-
-                    // Chamar a função de retorno de sucesso
-                    onExecuted(resultado)
-                } catch (e: Exception) {
-                    Toast.makeText(
-                        context,
-                        "Erro desconhecido, não foi possivél executar essa ação",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    onError()
-                } finally {
-                    // Finalizar o carregamento, mesmo em caso de erro
-                    _loading.value = false
+    fun executar(function: () -> Unit, onExecuted: (Boolean) -> Unit, onError: () -> Unit) {
+        _loading.value = true
+        viewModelScope.launch {
+            try {
+                // Simular uma função assíncrona real
+                val result = withContext(Dispatchers.IO) {
+                    delay(1000)
+                    function()
+                    true
                 }
+                // Chamar a função de retorno de sucesso
+                onExecuted(result)
+            } catch (e: Exception) {
+                Toast.makeText(
+                    context,
+                    "Erro desconhecido, não foi possivél executar essa ação",
+                    Toast.LENGTH_SHORT
+                ).show()
+                onError()
+            } finally {
+                // Finalizar o carregamento, mesmo em caso de erro
+                _loading.value = false
             }
         }
     }
 
     fun getViagensCurrentUser() {
-        allTripsCurrentUser = repository.getViagensCurrentUser(FirebaseAuth.getInstance().currentUser!!.uid)
+        allTripsCurrentUser =
+            repository.getViagensCurrentUser(FirebaseAuth.getInstance().currentUser!!.uid)
     }
 
     fun homeCountContent() {
@@ -463,22 +456,6 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
                 countContent = count
             }
         }
-        /**
-        allTripsCurrentUser.forEach {
-        when {
-        it.statusService?.contains("Em rota") == true ||
-        it.statusService?.contains("Em rota, retornando") == true -> {
-        currentService.value = it
-        _countContent.intValue = 2
-        }
-
-        it.statusService?.contains("Em andamento") == true -> {
-        currentService.value = it
-        _countContent.intValue = 3
-        }
-        }
-        }
-         */
     }
 
     fun getCurrentWeekData(firstDayWeek: Long, lastDayWeek: Long) {
