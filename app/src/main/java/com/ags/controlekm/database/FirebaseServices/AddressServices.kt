@@ -4,7 +4,7 @@ import com.ags.controlekm.database.Models.EnderecoAtendimento
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 
-class EnderecoAtendimentoServices {
+class AddressServices {
     private val databaseReference: DatabaseReference = FirebaseDatabase
         .getInstance().reference.child("rotaN2").child("enderecos")
 

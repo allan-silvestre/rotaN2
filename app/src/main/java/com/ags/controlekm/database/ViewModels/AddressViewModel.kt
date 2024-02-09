@@ -4,10 +4,9 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ags.controlekm.database.AppDatabase
-import com.ags.controlekm.database.FirebaseServices.EnderecoAtendimentoServices
+import com.ags.controlekm.database.FirebaseServices.AddressServices
 import com.ags.controlekm.database.Models.EnderecoAtendimento
 import com.ags.controlekm.database.Repositorys.EnderecoAtendimentoRepository
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -26,13 +25,13 @@ class AddressViewModel(application: Application): AndroidViewModel(application) 
 
     private val repository: EnderecoAtendimentoRepository
     lateinit var allAddress: Flow<List<EnderecoAtendimento>>
-    private val enderecoAtendimentoServices: EnderecoAtendimentoServices
+    private val enderecoAtendimentoServices: AddressServices
 
     init {
         val enderecoAtendimentoDao = AppDatabase.getDatabase(application).enderecoAtendimentoDao()
         this.repository = EnderecoAtendimentoRepository(enderecoAtendimentoDao)
 
-        enderecoAtendimentoServices = EnderecoAtendimentoServices()
+        enderecoAtendimentoServices = AddressServices()
 
         getAllAdress()
 

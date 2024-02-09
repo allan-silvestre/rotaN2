@@ -2,14 +2,12 @@ package com.ags.controlekm.database.ViewModels
 
 import android.app.Application
 import android.widget.Toast
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ags.controlekm.database.AppDatabase
 import com.ags.controlekm.database.FirebaseServices.CurrentUserServices
-import com.ags.controlekm.database.FirebaseServices.ViagemSuporteTecnicoServices
+import com.ags.controlekm.database.FirebaseServices.ServiceServices
 import com.ags.controlekm.database.Models.CurrentUser
 import com.ags.controlekm.database.Models.ViagemSuporteTecnico
 import com.ags.controlekm.database.Repositorys.ViagemSuporteTecnicoRepository
@@ -23,7 +21,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Calendar
@@ -43,7 +40,7 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
 
     private val repository: ViagemSuporteTecnicoRepository
 
-    private val viagemSuporteTecnicoServices: ViagemSuporteTecnicoServices
+    private val serviceServices: ServiceServices
 
     val allViagemSuporteTecnico: Flow<List<ViagemSuporteTecnico>>
     lateinit var allTripsCurrentUser: Flow<List<ViagemSuporteTecnico>>
@@ -67,7 +64,7 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
         this.repository = ViagemSuporteTecnicoRepository(serviceTripDao)
         allViagemSuporteTecnico = repository.getAllServices()
 
-        viagemSuporteTecnicoServices = ViagemSuporteTecnicoServices()
+        serviceServices = ServiceServices()
 
         getViagensCurrentUser()
         homeCountContent()
@@ -469,21 +466,21 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
     suspend fun insert(viagemSuporteTecnico: ViagemSuporteTecnico) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.insert(viagemSuporteTecnico)
-            viagemSuporteTecnicoServices.insert(viagemSuporteTecnico)
+            serviceServices.insert(viagemSuporteTecnico)
         }
     }
 
     suspend fun update(viagemSuporteTecnico: ViagemSuporteTecnico) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.update(viagemSuporteTecnico)
-            viagemSuporteTecnicoServices.update(viagemSuporteTecnico)
+            serviceServices.update(viagemSuporteTecnico)
         }
     }
 
     suspend fun delete(viagemSuporteTecnico: ViagemSuporteTecnico) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.delete(viagemSuporteTecnico)
-            viagemSuporteTecnicoServices.delete(viagemSuporteTecnico)
+            serviceServices.delete(viagemSuporteTecnico)
         }
     }
 }
