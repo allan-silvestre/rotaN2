@@ -53,9 +53,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.ags.controlekm.R
-import com.ags.controlekm.components.TextField.FormularioOutlinedTextField
-import com.ags.controlekm.components.TextField.FormularioOutlinedTextFieldMenu
-import com.ags.controlekm.database.ViewModels.LoginViewModel
+import com.ags.controlekm.components.textField.FormularioOutlinedTextField
+import com.ags.controlekm.components.textField.FormularioOutlinedTextFieldMenu
+import com.ags.controlekm.viewModels.LoginViewModel
 import com.ags.controlekm.functions.navigateSingleTopTo
 import com.google.firebase.auth.FirebaseAuth
 

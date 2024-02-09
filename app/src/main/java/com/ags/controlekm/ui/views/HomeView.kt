@@ -50,20 +50,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.ags.controlekm.components.Buttons.ButtonIcon
-import com.ags.controlekm.components.Buttons.ButtonDefault
-import com.ags.controlekm.components.Cards.LatestServicesCard
-import com.ags.controlekm.components.Dialog.CancelAlertDialog
-import com.ags.controlekm.components.Dialog.AfterServiceDialog
-import com.ags.controlekm.components.DropDownMenu.SelectAddressDropDownMenu
-import com.ags.controlekm.components.Progress.LoadingCircular
-import com.ags.controlekm.components.Text.ContentText
-import com.ags.controlekm.components.Text.TitleText
-import com.ags.controlekm.components.TextField.FormularioOutlinedTextField
-import com.ags.controlekm.database.FirebaseServices.CurrentUserServices
-import com.ags.controlekm.database.Models.ViagemSuporteTecnico
-import com.ags.controlekm.database.ViewModels.CurrentUserViewModel
-import com.ags.controlekm.database.ViewModels.ServiceViewModel
+import com.ags.controlekm.components.buttons.ButtonIcon
+import com.ags.controlekm.components.buttons.ButtonDefault
+import com.ags.controlekm.components.cards.LatestServicesCard
+import com.ags.controlekm.components.dialog.CancelAlertDialog
+import com.ags.controlekm.components.dialog.AfterServiceDialog
+import com.ags.controlekm.components.dropDownMenu.SelectAddressDropDownMenu
+import com.ags.controlekm.components.progress.LoadingCircular
+import com.ags.controlekm.components.text.ContentText
+import com.ags.controlekm.components.text.TitleText
+import com.ags.controlekm.components.textField.FormularioOutlinedTextField
+import com.ags.controlekm.database.firebaseServices.CurrentUserServices
+import com.ags.controlekm.models.Service
+import com.ags.controlekm.viewModels.CurrentUserViewModel
+import com.ags.controlekm.viewModels.ServiceViewModel
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -111,7 +111,7 @@ fun HomeView(
 
     var visibleFinalizarDialog by remember { mutableStateOf(false) }
 
-    var novoAtendimento by remember { mutableStateOf(ViagemSuporteTecnico()) }
+    var novoAtendimento by remember { mutableStateOf(Service()) }
 
     var visibleButtonDefault by remember { mutableStateOf(false) }
     var visibleAlertCancel by remember { mutableStateOf(false) }
@@ -244,12 +244,12 @@ fun HomeView(
                         visibleButtonCancel = true
                         if (currentService.statusService.equals("Em rota")) {
                             textStatus =
-                                "${currentService.statusService} entre ${currentService.localSaida} \n e ${currentService.localAtendimento}"
+                                "${currentService.statusService} entre ${currentService.departureAddress} \n e ${currentService.serviceAddress}"
                             textButton = "Confirmar chegada"
                         }
                         if (currentService.statusService.equals("Em rota, retornando")) {
                             textStatus =
-                                "${currentService.statusService} de ${currentService.localAtendimento} \n para ${currentService.localRetorno}"
+                                "${currentService.statusService} de ${currentService.serviceAddress} \n para ${currentService.addressReturn}"
                             textButton = "Confirmar chegada"
                         }
                         Column(
@@ -416,10 +416,10 @@ fun HomeView(
             items(allTripsCurrentUser!!.sortedByDescending {
                 SimpleDateFormat("dd/MM/yyyy",
                     Locale.getDefault())
-                    .parse(it.dataSaida) }.take(5)) {
+                    .parse(it.departureDate) }.take(5)) {
                 LatestServicesCard(
-                    data = it.dataConclusao.toString(),
-                    address = it.localAtendimento.toString(),
+                    data = it.dateCompletion.toString(),
+                    address = it.serviceAddress.toString(),
                 )
             }
         }
@@ -430,9 +430,9 @@ fun HomeView(
             onDismissRequest = { visibleAlertCancel = false },
             title = {
                 if (currentService.statusService.equals("Em rota, retornando")) {
-                    TitleText("Cancelar o retorno para \n ${currentService.localRetorno}")
+                    TitleText("Cancelar o retorno para \n ${currentService.addressReturn}")
                 } else {
-                    TitleText("Cancelar o atendimento \n ${currentService.localAtendimento}")
+                    TitleText("Cancelar o atendimento \n ${currentService.serviceAddress}")
                 }
             },
             confirmButton = {

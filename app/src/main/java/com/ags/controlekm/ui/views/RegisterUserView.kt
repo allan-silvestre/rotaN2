@@ -75,10 +75,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.ags.controlekm.components.Dialog.AlertDialogSelectImage
-import com.ags.controlekm.components.TextField.FormularioTextField
-import com.ags.controlekm.components.TextField.FormularioTextFieldMenu
-import com.ags.controlekm.database.ViewModels.UserViewModel
+import com.ags.controlekm.components.dialog.AlertDialogSelectImage
+import com.ags.controlekm.components.textField.FormularioTextField
+import com.ags.controlekm.components.textField.FormularioTextFieldMenu
+import com.ags.controlekm.viewModels.UserViewModel
 import com.ags.controlekm.mask_transformations.MaskVisualTransformation
 import com.ags.controlekm.functions.uploadImage
 import com.ags.controlekm.functions.checkOnlyNumbers

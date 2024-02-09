@@ -30,11 +30,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.ags.controlekm.components.Dialog.AddressAddDialog
-import com.ags.controlekm.components.Dialog.EditAddressDialog
+import com.ags.controlekm.components.dialog.AddressAddDialog
+import com.ags.controlekm.components.dialog.EditAddressDialog
 import com.ags.controlekm.functions.navigateSingleTopTo
-import com.ags.controlekm.database.Models.EnderecoAtendimento
-import com.ags.controlekm.database.ViewModels.AddressViewModel
+import com.ags.controlekm.models.Address
+import com.ags.controlekm.viewModels.AddressViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -44,9 +44,9 @@ fun AllAddressView(
     addressViewModel: AddressViewModel = viewModel(),
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val enderecosLocal: List<EnderecoAtendimento> by addressViewModel.allAddress.collectAsState(emptyList())
+    val enderecosLocal: List<Address> by addressViewModel.allAddress.collectAsState(emptyList())
 
-    var selectedItem by remember { mutableStateOf<EnderecoAtendimento?>(null) }
+    var selectedItem by remember { mutableStateOf<Address?>(null) }
 
     val visibleShowDialogAdd = remember { mutableStateOf(false) }
 
@@ -61,7 +61,7 @@ fun AllAddressView(
                 .fillMaxSize()
                 .padding(horizontal = 8.dp)
         ) {
-            items(enderecosLocal.sortedBy { it.nome }) { item ->
+            items(enderecosLocal.sortedBy { it.name }) { item ->
                 Row(
                     modifier = Modifier
                         .padding(8.dp),
@@ -74,7 +74,7 @@ fun AllAddressView(
                             .clickable {
 
                             },
-                        text = item.nome.toString(),
+                        text = item.name.toString(),
                         fontSize = 12.sp
                     )
                     Icon(

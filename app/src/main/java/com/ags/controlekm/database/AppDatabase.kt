@@ -4,33 +4,34 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.ags.controlekm.database.Daos.CurrentUserDao
-import com.ags.controlekm.database.Daos.EmpresaClienteDao
-import com.ags.controlekm.database.Daos.EnderecoAtendimentoDao
-import com.ags.controlekm.database.Daos.UserDao
-import com.ags.controlekm.database.Daos.ViagemSuporteTecnicoDao
-import com.ags.controlekm.database.Models.CurrentUser
-import com.ags.controlekm.database.Models.EmpresaCliente
-import com.ags.controlekm.database.Models.EnderecoAtendimento
-import com.ags.controlekm.database.Models.User
-import com.ags.controlekm.database.Models.ViagemSuporteTecnico
+import com.ags.controlekm.database.daos.AddressDao
+import com.ags.controlekm.database.daos.CompanyDao
+import com.ags.controlekm.database.daos.CurrentUserDao
+import com.ags.controlekm.database.daos.ServiceDao
+import com.ags.controlekm.database.daos.UserDao
+import com.ags.controlekm.models.CurrentUser
+import com.ags.controlekm.models.Company
+import com.ags.controlekm.models.Address
+import com.ags.controlekm.models.User
+import com.ags.controlekm.models.Service
 
 @Database(
     entities = [
         CurrentUser::class,
         User::class,
-        EmpresaCliente::class,
-        EnderecoAtendimento::class,
-        ViagemSuporteTecnico::class,
+        Company::class,
+        Address::class,
+        Service::class,
     ],
     version = 1
 )
 abstract class AppDatabase : RoomDatabase() {
+
     abstract fun currentUserDao(): CurrentUserDao
     abstract fun userDao(): UserDao
-    abstract fun empresaClienteDao(): EmpresaClienteDao
-    abstract fun enderecoAtendimentoDao(): EnderecoAtendimentoDao
-    abstract fun viagemSuporteTecnicoDao(): ViagemSuporteTecnicoDao
+    abstract fun empresaClienteDao(): CompanyDao
+    abstract fun enderecoAtendimentoDao(): AddressDao
+    abstract fun viagemSuporteTecnicoDao(): ServiceDao
 
     companion object {
         @Volatile

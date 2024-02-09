@@ -82,11 +82,11 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.rememberImagePainter
 import com.ags.controlekm.R
-import com.ags.controlekm.components.Dialog.EmailVerifieldDialog
-import com.ags.controlekm.database.ViewModels.CurrentUserViewModel
+import com.ags.controlekm.components.dialog.EmailVerifieldDialog
+import com.ags.controlekm.viewModels.CurrentUserViewModel
 import com.ags.controlekm.functions.navigateSingleTopTo
-import com.ags.controlekm.database.Models.BottomNavigationItem
-import com.ags.controlekm.database.Models.MenuItem
+import com.ags.controlekm.models.BottomNavigationItem
+import com.ags.controlekm.models.MenuItem
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
@@ -122,7 +122,7 @@ fun App(currentUserViewModel: CurrentUserViewModel = viewModel()) {
     var dialogEmailVisible = remember { mutableStateOf(true) }
 
     val perfilImg = rememberImagePainter(
-        data = userLoggedData?.imagem,
+        data = userLoggedData?.image,
         builder = {
             // You can customize loading and error placeholders if needed
             placeholder(R.drawable.perfil)
@@ -208,7 +208,7 @@ fun App(currentUserViewModel: CurrentUserViewModel = viewModel()) {
                                         drawerState.open()
                                     }
                                 },
-                            model = userLoggedData?.imagem,
+                            model = userLoggedData?.image,
                             contentDescription = "",
                             loading = {
                                 CircularProgressIndicator(
@@ -219,7 +219,7 @@ fun App(currentUserViewModel: CurrentUserViewModel = viewModel()) {
                                 )
                             },
                         )
-                        if (userLoggedData?.emailVerificado == true) {
+                        if (userLoggedData?.emailVerification == true) {
                             Icon(
                                 modifier = Modifier
                                     .size(16.dp),
@@ -243,17 +243,17 @@ fun App(currentUserViewModel: CurrentUserViewModel = viewModel()) {
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "${userLoggedData?.nome} ${userLoggedData?.sobrenome}",
+                            text = "${userLoggedData?.name} ${userLoggedData?.lastName}",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Normal
                         )
                         Text(
-                            text = "${userLoggedData?.cargo}",
+                            text = "${userLoggedData?.position}",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Light
                         )
                         Text(
-                            text = "${userLoggedData?.setor}",
+                            text = "${userLoggedData?.position}",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Light
                         )
@@ -311,7 +311,7 @@ fun App(currentUserViewModel: CurrentUserViewModel = viewModel()) {
                                 ) {
                                     Text(
                                         //modifier = Modifier.height(16.dp),
-                                        text = "${userLoggedData?.nome} ${userLoggedData?.sobrenome}",
+                                        text = "${userLoggedData?.name} ${userLoggedData?.lastName}",
                                         fontSize = 12.sp,
                                         lineHeight = 12.sp,
                                         fontWeight = FontWeight.SemiBold,
@@ -319,7 +319,7 @@ fun App(currentUserViewModel: CurrentUserViewModel = viewModel()) {
                                     )
                                     Text(
                                        // modifier = Modifier.height(20.dp),
-                                        text = "${userLoggedData?.cargo}",
+                                        text = "${userLoggedData?.position}",
                                         fontSize = 11.sp,
                                         lineHeight = 11.sp,
                                         fontWeight = FontWeight.Normal,
