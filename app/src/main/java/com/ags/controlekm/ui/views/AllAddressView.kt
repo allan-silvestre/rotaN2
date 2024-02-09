@@ -30,6 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.ags.controlekm.components.Dialog.AddressAddDialog
+import com.ags.controlekm.components.Dialog.EditAddressDialog
 import com.ags.controlekm.functions.navigateSingleTopTo
 import com.ags.controlekm.database.Models.EnderecoAtendimento
 import com.ags.controlekm.database.ViewModels.AddressViewModel
@@ -37,7 +39,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
-fun EnderecosAtendimentoView(
+fun AllAddressView(
     navController: NavHostController,
     addressViewModel: AddressViewModel = viewModel(),
 ) {
@@ -113,9 +115,9 @@ fun EnderecosAtendimentoView(
         }
     }
     if(visibleShowDialogAdd.value){
-        EnderecoAtendimentoAddViewDialog(
+        AddressAddDialog(
             visible = visibleShowDialogAdd.value,
-            onSalvar = {
+            onSave = {
                 navController.navigateSingleTopTo("enderecosAtendimento")
                 visibleShowDialogAdd.value = false
             },
@@ -128,7 +130,7 @@ fun EnderecosAtendimentoView(
 
     // Se um item for selecionado, exibe a tela de edição
     selectedItem?.let { item ->
-        EnderecoAtendimentoEditView(
+        EditAddressDialog(
             item = item,
             visible = true,
             onSalvar = {

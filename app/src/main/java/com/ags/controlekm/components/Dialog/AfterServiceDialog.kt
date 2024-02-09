@@ -15,9 +15,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.ags.controlekm.components.Buttons.ButtonPadrao
+import com.ags.controlekm.components.Buttons.ButtonDefault
 import com.ags.controlekm.components.Buttons.ButtonText
-import com.ags.controlekm.components.DropDownMenu.DropDownMenuAtendimento
+import com.ags.controlekm.components.DropDownMenu.SelectAddressDropDownMenu
 import com.ags.controlekm.components.Progress.LoadingCircular
 import com.ags.controlekm.components.Text.TitleText
 import com.ags.controlekm.database.FirebaseServices.CurrentUserServices
@@ -28,7 +28,7 @@ import com.ags.controlekm.database.ViewModels.ServiceViewModel
 import com.ags.controlekm.database.ViewModels.PerformFunctionViewModel
 
 @Composable
-fun HomeAtendimentoDialog(
+fun AfterServiceDialog(
     viagemSuporteTecnicoViewModel: ServiceViewModel = viewModel(),
     currentUserViewModel: CurrentUserViewModel = viewModel(),
     performFunctionViewModel: PerformFunctionViewModel = viewModel(),
@@ -85,18 +85,18 @@ fun HomeAtendimentoDialog(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    DropDownMenuAtendimento(
-                        labelLocal = "Local do atendimento",
+                    SelectAddressDropDownMenu(
+                        labelAddress = "Local do atendimento",
                         labelKm = "KM de saída",
                         data = data,
-                        hora = hora,
-                        visibleLocal = true,
+                        time = hora,
+                        visibleAddress = true,
                         visibleKm = true,
-                        localSelecionado = { localSelecionado -> local = localSelecionado },
-                        kmInformado = { kmInformado -> km = kmInformado }
+                        SelectedAddres = { localSelecionado -> local = localSelecionado },
+                        InformedKm = { kmInformado -> km = kmInformado }
                     )
 
-                    ButtonPadrao(
+                    ButtonDefault(
                         "Iniciar percurso",
                         padding = paddingButton
                     ) {
@@ -124,14 +124,14 @@ fun HomeAtendimentoDialog(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    DropDownMenuAtendimento(
-                        labelLocal = "Retornar para",
+                    SelectAddressDropDownMenu(
+                        labelAddress = "Retornar para",
                         data = data,
-                        hora = hora,
-                        visibleLocal = true,
-                        localSelecionado = { localSelecionado -> local = localSelecionado },
+                        time = hora,
+                        visibleAddress = true,
+                        SelectedAddres = { localSelecionado -> local = localSelecionado },
                     )
-                    ButtonPadrao(
+                    ButtonDefault(
                         "Iniciar percurso",
                         padding = paddingButton
                     ) {

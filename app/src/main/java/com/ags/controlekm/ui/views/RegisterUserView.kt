@@ -80,18 +80,18 @@ import com.ags.controlekm.components.TextField.FormularioTextField
 import com.ags.controlekm.components.TextField.FormularioTextFieldMenu
 import com.ags.controlekm.database.ViewModels.UserViewModel
 import com.ags.controlekm.mask_transformations.MaskVisualTransformation
-import com.ags.controlekm.functions.UploadImage
-import com.ags.controlekm.functions.VerificacaoApenasNumero
-import com.ags.controlekm.functions.VerificacaoApenasTexto
-import com.ags.controlekm.functions.VerificacaoFormatoCpf
-import com.ags.controlekm.functions.VerificacaoFormatoEmail
-import com.ags.controlekm.functions.VerificacaoFormatoSenha
+import com.ags.controlekm.functions.uploadImage
+import com.ags.controlekm.functions.checkOnlyNumbers
+import com.ags.controlekm.functions.checkOnlyText
+import com.ags.controlekm.functions.checkCpfFormat
+import com.ags.controlekm.functions.checkEmailFormat
+import com.ags.controlekm.functions.checkPasswordFormat
 import com.ags.controlekm.functions.navigateSingleTopTo
 import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun CadastroUserView(
+fun RegisterUserView(
     navController: NavHostController,
     userViewModel: UserViewModel = viewModel()
 ) {
@@ -99,19 +99,21 @@ fun CadastroUserView(
     var countContent by remember { mutableStateOf(0) }
 
     // CONTROLE DO TAMANHO DO FORMULARIO
-    val TAMANHO_FORMULARIO = 14
+    val SIZE_FORM = 14
 
     // CONFIGURAÇÕES DE MASCARAS DE TEXTO DO CAMPO NASCIMENTO
-    val NASCIMENTO_MASK = "##/##/####"
-    val NASCIMENTO_INPUT_LENGTH = 8
+    val BIRTH_MASK = "##/##/####"
+    val BIRTH_INPUT_LENGTH = 8
 
     // CONFIGURAÇÕES DE MASCARAS DE TEXTO DO CAMPO TELEFONE
-    val TELEFONE_MASK = "(##)# ####-####"
-    val TELEFONE_INPUT_LENGTH = 11
+    val PHONE_NUMBER_MASK = "(##)# ####-####"
+    val PHONE_NUMBER_INPUT_LENGTH = 11
 
     // CONFIGURAÇÕES DE MASCARAS DE TEXTO DO CAMPO CPF
     val CPF_MASK = "###.###.###-##"
     val CPF_INPUT_LENGTH = 11
+
+    val SPACE_DEFAULT = 6.dp
 
     // INDICADOR DE PROGRESSO / LOADING
     val progressIndicator = remember { mutableStateOf(false) }
@@ -164,10 +166,9 @@ fun CadastroUserView(
         )
     }
 
-    val espacoEntreCampos = 6.dp
 
-    var titulo by remember { mutableStateOf("Criar conta") }
-    var subTitulo by remember { mutableStateOf("Informe seu nome") }
+    var title by remember { mutableStateOf("Criar conta") }
+    var subTitle by remember { mutableStateOf("Informe seu nome") }
 
     var nome by remember { mutableStateOf("") }
     var nomeError by remember { mutableStateOf(true) }
@@ -250,12 +251,12 @@ fun CadastroUserView(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = titulo,
+                    text = title,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.ExtraBold
                 )
                 Text(
-                    text = subTitulo,
+                    text = subTitle,
                     fontSize = 12.sp,
                     textAlign = TextAlign.Center,
                 )
@@ -273,8 +274,8 @@ fun CadastroUserView(
                 ) { targetCount ->
                     when (targetCount) {
                         0 -> {
-                            subTitulo = "Informe seu nome"
-                            Spacer(modifier = Modifier.height(espacoEntreCampos))
+                            subTitle = "Informe seu nome"
+                            Spacer(modifier = Modifier.height(SPACE_DEFAULT))
                             Column(
                                 modifier = Modifier.fillMaxWidth()
                             ) {
@@ -292,7 +293,7 @@ fun CadastroUserView(
                                     erro = nomeError,
                                     erroMensagem = nomeErrorMessage
                                 )
-                                Spacer(modifier = Modifier.height(espacoEntreCampos))
+                                Spacer(modifier = Modifier.height(SPACE_DEFAULT))
                                 // SOBRENOME
                                 FormularioTextField(
                                     modifier = Modifier.fillMaxWidth(),
@@ -312,14 +313,14 @@ fun CadastroUserView(
 
                         1 -> {
                             progressIndicator.value = true
-                            titulo = "Login"
-                            subTitulo = ""
+                            title = "Login"
+                            subTitle = ""
                             Column(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {
-                                Spacer(modifier = Modifier.height(espacoEntreCampos))
+                                Spacer(modifier = Modifier.height(SPACE_DEFAULT))
                                 if (progressIndicator.value) {
                                     CircularProgressIndicator(
                                         modifier = Modifier
@@ -330,8 +331,8 @@ fun CadastroUserView(
                                 }
                             }
 
-                            nomeError = VerificacaoApenasTexto(nome)
-                            sobrenomeError = VerificacaoApenasTexto(sobrenome)
+                            nomeError = checkOnlyText(nome)
+                            sobrenomeError = checkOnlyText(sobrenome)
                             if (!nomeError || !sobrenomeError) {
                                 countContent = 0
                             } else {
@@ -341,8 +342,8 @@ fun CadastroUserView(
                         }
 
                         2 -> {
-                            subTitulo = "Dados pessoais"
-                            Spacer(modifier = Modifier.height(espacoEntreCampos))
+                            subTitle = "Dados pessoais"
+                            Spacer(modifier = Modifier.height(SPACE_DEFAULT))
                             Column(
                                 modifier = Modifier.fillMaxWidth(),
                             ) {
@@ -352,11 +353,11 @@ fun CadastroUserView(
                                     readOnly = false,
                                     value = nascimento,
                                     onValueChange = {
-                                        nascimento = it.take(NASCIMENTO_INPUT_LENGTH)
+                                        nascimento = it.take(BIRTH_INPUT_LENGTH)
                                     },
                                     label = "Nascimento",
                                     visualTransformation = MaskVisualTransformation(
-                                        NASCIMENTO_MASK
+                                        BIRTH_MASK
                                     ),
                                     keyboardType = KeyboardType.Number,
                                     imeAction = ImeAction.Next,
@@ -364,7 +365,7 @@ fun CadastroUserView(
                                     erro = nascimentoError,
                                     erroMensagem = nascimentoErrorMessage
                                 )
-                                Spacer(modifier = Modifier.height(espacoEntreCampos))
+                                Spacer(modifier = Modifier.height(SPACE_DEFAULT))
                                 //GENERO INICIO
                                 Box(
                                     modifier = Modifier,
@@ -405,7 +406,7 @@ fun CadastroUserView(
                                     }
 
                                 }
-                                Spacer(modifier = Modifier.height(espacoEntreCampos))
+                                Spacer(modifier = Modifier.height(SPACE_DEFAULT))
                                 //CPF
                                 FormularioTextField(
                                     modifier = Modifier.fillMaxWidth(),
@@ -413,7 +414,7 @@ fun CadastroUserView(
                                     value = cpf,
                                     onValueChange = {
                                         cpf = it.take(CPF_INPUT_LENGTH)
-                                        VerificacaoFormatoCpf(cpf)
+                                        checkCpfFormat(cpf)
                                     },
                                     label = "CPF",
                                     visualTransformation = MaskVisualTransformation(CPF_MASK),
@@ -428,14 +429,14 @@ fun CadastroUserView(
 
                         3 -> {
                             progressIndicator.value = true
-                            titulo = "Login"
-                            subTitulo = ""
+                            title = "Login"
+                            subTitle = ""
                             Column(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {
-                                Spacer(modifier = Modifier.height(espacoEntreCampos))
+                                Spacer(modifier = Modifier.height(SPACE_DEFAULT))
                                 if (progressIndicator.value) {
                                     CircularProgressIndicator(
                                         modifier = Modifier
@@ -444,8 +445,8 @@ fun CadastroUserView(
                                         trackColor = MaterialTheme.colorScheme.surfaceVariant,
                                     )
                                 }
-                                generoError = VerificacaoApenasTexto(generoSelected)
-                                if (!VerificacaoApenasNumero(nascimento) || nascimento.length < 8) {
+                                generoError = checkOnlyText(generoSelected)
+                                if (!checkOnlyNumbers(nascimento) || nascimento.length < 8) {
                                     nascimentoError = false
                                     nascimentoErrorMessage = "informe a data completa"
                                 } else {
@@ -455,7 +456,7 @@ fun CadastroUserView(
                                     cpfError = false
                                     cpfErrorMessage = "CPF vinculado a outra conta"
                                 } else {
-                                    if (!VerificacaoFormatoCpf(cpf)) {
+                                    if (!checkCpfFormat(cpf)) {
                                         cpfError = false
                                         cpfErrorMessage = "Informe um CPF válido"
                                     } else {
@@ -473,27 +474,27 @@ fun CadastroUserView(
                         }
 
                         4 -> {
-                            subTitulo = "Dados de contato"
-                            Spacer(modifier = Modifier.height(espacoEntreCampos))
+                            subTitle = "Dados de contato"
+                            Spacer(modifier = Modifier.height(SPACE_DEFAULT))
                             Column(
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                Spacer(modifier = Modifier.height(espacoEntreCampos))
+                                Spacer(modifier = Modifier.height(SPACE_DEFAULT))
                                 //TELEFONE
                                 FormularioTextField(
                                     modifier = Modifier.fillMaxWidth(),
                                     readOnly = false,
                                     value = telefone,
-                                    onValueChange = { telefone = it.take(TELEFONE_INPUT_LENGTH) },
+                                    onValueChange = { telefone = it.take(PHONE_NUMBER_INPUT_LENGTH) },
                                     label = "Telefone",
-                                    visualTransformation = MaskVisualTransformation(TELEFONE_MASK),
+                                    visualTransformation = MaskVisualTransformation(PHONE_NUMBER_MASK),
                                     keyboardType = KeyboardType.Number,
                                     imeAction = ImeAction.Next,
                                     capitalization = KeyboardCapitalization.None,
                                     erro = telefoneError,
                                     erroMensagem = telefoneErrorMessage
                                 )
-                                Spacer(modifier = Modifier.height(espacoEntreCampos))
+                                Spacer(modifier = Modifier.height(SPACE_DEFAULT))
                                 //E-MAIL
                                 FormularioTextField(
                                     modifier = Modifier.fillMaxWidth(),
@@ -514,14 +515,14 @@ fun CadastroUserView(
 
                         5 -> {
                             progressIndicator.value = true
-                            titulo = "Login"
-                            subTitulo = ""
+                            title = "Login"
+                            subTitle = ""
                             Column(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {
-                                Spacer(modifier = Modifier.height(espacoEntreCampos))
+                                Spacer(modifier = Modifier.height(SPACE_DEFAULT))
                                 if (progressIndicator.value) {
                                     CircularProgressIndicator(
                                         modifier = Modifier
@@ -534,7 +535,7 @@ fun CadastroUserView(
                                     telefoneError = false
                                     telefoneErrorMessage = "Número vinculado a outra conta"
                                 } else {
-                                    if (!VerificacaoApenasNumero(telefone) || telefone.length < 11) {
+                                    if (!checkOnlyNumbers(telefone) || telefone.length < 11) {
                                         telefoneErrorMessage = "Informe um número válido"
                                         telefoneError = false
                                     } else {
@@ -545,7 +546,7 @@ fun CadastroUserView(
                                     emailError = false
                                     emailErrorMessage = "Email vinculado a outra conta"
                                 } else {
-                                    if (!VerificacaoFormatoEmail(email)) {
+                                    if (!checkEmailFormat(email)) {
                                         emailErrorMessage = "Informe um Email válido"
                                         emailError = false
                                     } else {
@@ -563,12 +564,12 @@ fun CadastroUserView(
                         }
 
                         6 -> {
-                            subTitulo = "Dados funcionais"
-                            Spacer(modifier = Modifier.height(espacoEntreCampos))
+                            subTitle = "Dados funcionais"
+                            Spacer(modifier = Modifier.height(SPACE_DEFAULT))
                             Column(
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                Spacer(modifier = Modifier.height(espacoEntreCampos))
+                                Spacer(modifier = Modifier.height(SPACE_DEFAULT))
                                 //MATRICULA
                                 FormularioTextField(
                                     modifier = Modifier.fillMaxWidth(),
@@ -583,7 +584,7 @@ fun CadastroUserView(
                                     erro = matriculaError,
                                     erroMensagem = matriculaErrorMessage
                                 )
-                                Spacer(modifier = Modifier.height(espacoEntreCampos))
+                                Spacer(modifier = Modifier.height(SPACE_DEFAULT))
                                 // CARGO
                                 FormularioTextField(
                                     modifier = Modifier.fillMaxWidth(),
@@ -598,7 +599,7 @@ fun CadastroUserView(
                                     erro = cargoError,
                                     erroMensagem = cargoErrorMessage
                                 )
-                                Spacer(modifier = Modifier.height(espacoEntreCampos))
+                                Spacer(modifier = Modifier.height(SPACE_DEFAULT))
                                 // SETOR
                                 FormularioTextField(
                                     modifier = Modifier.fillMaxWidth(),
@@ -618,14 +619,14 @@ fun CadastroUserView(
 
                         7 -> {
                             progressIndicator.value = true
-                            titulo = "Login"
-                            subTitulo = ""
+                            title = "Login"
+                            subTitle = ""
                             Column(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {
-                                Spacer(modifier = Modifier.height(espacoEntreCampos))
+                                Spacer(modifier = Modifier.height(SPACE_DEFAULT))
                                 if (progressIndicator.value) {
                                     CircularProgressIndicator(
                                         modifier = Modifier
@@ -635,12 +636,12 @@ fun CadastroUserView(
                                     )
                                 }
                                 cargoError = cargo.isNotEmpty()
-                                setorError = VerificacaoApenasTexto(setor)
+                                setorError = checkOnlyText(setor)
                                 if (matriculaList.contains(matricula)) {
                                     matriculaError = false
                                     matriculaErrorMessage = "Matricula vinculado a outra conta"
                                 } else {
-                                    if (!VerificacaoApenasNumero(matricula) || matricula.length < 3) {
+                                    if (!checkOnlyNumbers(matricula) || matricula.length < 3) {
                                         matriculaErrorMessage = "Informe uma matrícula válida"
                                         matriculaError = false
                                     } else {
@@ -658,8 +659,8 @@ fun CadastroUserView(
                         }
 
                         8 -> {
-                            subTitulo = "Defina o tipo de acesso do colaborador"
-                            Spacer(modifier = Modifier.height(espacoEntreCampos))
+                            subTitle = "Defina o tipo de acesso do colaborador"
+                            Spacer(modifier = Modifier.height(SPACE_DEFAULT))
                             //PERMISSÕES / NIVEL DE ACESSO DO USUÁRIO
                             Box(
                                 modifier = Modifier.fillMaxWidth(),
@@ -705,14 +706,14 @@ fun CadastroUserView(
 
                         9 -> {
                             progressIndicator.value = true
-                            titulo = "Login"
-                            subTitulo = ""
+                            title = "Login"
+                            subTitle = ""
                             Column(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {
-                                Spacer(modifier = Modifier.height(espacoEntreCampos))
+                                Spacer(modifier = Modifier.height(SPACE_DEFAULT))
                                 if (progressIndicator.value) {
                                     CircularProgressIndicator(
                                         modifier = Modifier
@@ -721,7 +722,7 @@ fun CadastroUserView(
                                         trackColor = MaterialTheme.colorScheme.surfaceVariant,
                                     )
                                 }
-                                nivelAcessoError = VerificacaoApenasTexto(nivelAcessoSelected)
+                                nivelAcessoError = checkOnlyText(nivelAcessoSelected)
                                 if (
                                     !nivelAcessoError
                                 ) {
@@ -733,8 +734,8 @@ fun CadastroUserView(
                         }
 
                         10 -> {
-                            subTitulo = "Defina uma senha de acesso"
-                            Spacer(modifier = Modifier.height(espacoEntreCampos))
+                            subTitle = "Defina uma senha de acesso"
+                            Spacer(modifier = Modifier.height(SPACE_DEFAULT))
                             //SENHA
                             FormularioTextFieldMenu(
                                 modifier = Modifier.fillMaxWidth(),
@@ -755,14 +756,14 @@ fun CadastroUserView(
 
                         11 -> {
                             progressIndicator.value = true
-                            titulo = "Login"
-                            subTitulo = ""
+                            title = "Login"
+                            subTitle = ""
                             Column(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {
-                                Spacer(modifier = Modifier.height(espacoEntreCampos))
+                                Spacer(modifier = Modifier.height(SPACE_DEFAULT))
                                 if (progressIndicator.value) {
                                     CircularProgressIndicator(
                                         modifier = Modifier
@@ -771,7 +772,7 @@ fun CadastroUserView(
                                         trackColor = MaterialTheme.colorScheme.surfaceVariant,
                                     )
                                 }
-                                senhaError = VerificacaoFormatoSenha(senha)
+                                senhaError = checkPasswordFormat(senha)
                                 if (!senhaError) {
                                     countContent = 10
                                 } else {
@@ -781,7 +782,7 @@ fun CadastroUserView(
                         }
 
                         12 -> {
-                            subTitulo = "Imagem do perfil"
+                            subTitle = "Imagem do perfil"
                             Column(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -790,7 +791,7 @@ fun CadastroUserView(
                                 Box(
                                     modifier = Modifier
                                         .wrapContentSize()
-                                        .padding(top = espacoEntreCampos),
+                                        .padding(top = SPACE_DEFAULT),
                                     contentAlignment = Alignment.BottomEnd
                                 ) {
                                     Image(
@@ -823,7 +824,7 @@ fun CadastroUserView(
                                     }
 
                                 }
-                                Spacer(modifier = Modifier.height(espacoEntreCampos))
+                                Spacer(modifier = Modifier.height(SPACE_DEFAULT))
                                 TextButton(
                                     onClick = { AlertDialogSelectImage = true }
                                 ) {
@@ -834,14 +835,14 @@ fun CadastroUserView(
 
                         13 -> {
                             progressIndicator.value = true
-                            titulo = "Login"
-                            subTitulo = ""
+                            title = "Login"
+                            subTitle = ""
                             Column(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {
-                                Spacer(modifier = Modifier.height(espacoEntreCampos))
+                                Spacer(modifier = Modifier.height(SPACE_DEFAULT))
                                 if (progressIndicator.value) {
                                     CircularProgressIndicator(
                                         modifier = Modifier
@@ -861,8 +862,8 @@ fun CadastroUserView(
                                 verticalArrangement = Arrangement.Center
                             ) {
                                 progressIndicator.value = true
-                                titulo = "Salvando"
-                                subTitulo = ""
+                                title = "Salvando"
+                                subTitle = ""
                                 if (progressIndicator.value) {
                                     LinearProgressIndicator(
                                         modifier = Modifier
@@ -880,7 +881,7 @@ fun CadastroUserView(
                                                         // TRATAMENTO PARA SALVAR NOVO USUÁRIO
                                                         bitmap.value.let { bitmap ->
                                                             // Chama a função UploadImage dentro de uma coroutine
-                                                            UploadImage(
+                                                            uploadImage(
                                                                 bitmap = bitmap,
                                                                 context = context as ComponentActivity,
                                                                 imgName = AuthResult.user!!.uid,
@@ -921,7 +922,7 @@ fun CadastroUserView(
                     }
                 }
             }
-            if (countContent < TAMANHO_FORMULARIO) {
+            if (countContent < SIZE_FORM) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -947,7 +948,7 @@ fun CadastroUserView(
                         onClick = {
                             countContent++
                         }) {
-                        if (countContent == TAMANHO_FORMULARIO - 1) Text("Finalizar")
+                        if (countContent == SIZE_FORM - 1) Text("Finalizar")
                         else Text("Próximo")
                     }
                 }

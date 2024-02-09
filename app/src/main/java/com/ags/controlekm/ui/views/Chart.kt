@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.sp
 import kotlin.math.round
 
 @Composable
-fun Grafico(
+fun Chart(
     graphBarData: List<Float>,
     xAxisScaleData: List<String>,
     barData_: List<Int>,

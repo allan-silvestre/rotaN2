@@ -44,7 +44,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 @Composable
-fun DialogEmailVerifield(
+fun EmailVerifieldDialog(
     onDismissRequest: () -> Unit,
 ) {
     var currentUser by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser) }

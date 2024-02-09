@@ -39,7 +39,7 @@ import androidx.compose.ui.unit.sp
 import com.ags.controlekm.database.Models.NewsCardItem
 
 @Composable
-fun CardNews(cardItem: NewsCardItem, modifier: Modifier) {
+fun NewsCard(cardItem: NewsCardItem, modifier: Modifier) {
     var expanded by remember { mutableStateOf(false) }
     Card(
         elevation = CardDefaults.cardElevation(

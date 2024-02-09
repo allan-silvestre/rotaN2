@@ -19,13 +19,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.ags.controlekm.R
-import com.ags.controlekm.components.Cards.CardNews
+import com.ags.controlekm.components.Cards.NewsCard
 import com.ags.controlekm.database.Models.NewsCardItem
 
 @OptIn(ExperimentalFoundationApi::class)
 @SuppressLint("SuspiciousIndentation")
 @Composable
-fun News(navController: NavHostController) {
+fun NewsView(navController: NavHostController) {
     // NEWS CARDITEM
     val cardItemsNews = listOf(
         NewsCardItem(
@@ -75,7 +75,7 @@ fun News(navController: NavHostController) {
                 .horizontalScroll(rememberScrollState()),
         ) {
             itemsIndexed(cardItemsNews) { Index, cardItem ->
-                CardNews(
+                NewsCard(
                     cardItem,
                     modifier = Modifier
                         .width(this@BoxWithConstraints.maxWidth)

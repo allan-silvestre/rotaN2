@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -52,20 +51,18 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.ags.controlekm.components.Buttons.ButtonIcon
-import com.ags.controlekm.components.Buttons.ButtonPadrao
-import com.ags.controlekm.components.Cards.AtendimentoCard
-import com.ags.controlekm.components.Dialog.AlertaDialogCancel
-import com.ags.controlekm.components.Dialog.HomeAtendimentoDialog
-import com.ags.controlekm.components.DropDownMenu.DropDownMenuAtendimento
+import com.ags.controlekm.components.Buttons.ButtonDefault
+import com.ags.controlekm.components.Cards.LatestServicesCard
+import com.ags.controlekm.components.Dialog.CancelAlertDialog
+import com.ags.controlekm.components.Dialog.AfterServiceDialog
+import com.ags.controlekm.components.DropDownMenu.SelectAddressDropDownMenu
 import com.ags.controlekm.components.Progress.LoadingCircular
 import com.ags.controlekm.components.Text.ContentText
 import com.ags.controlekm.components.Text.TitleText
 import com.ags.controlekm.components.TextField.FormularioOutlinedTextField
 import com.ags.controlekm.database.FirebaseServices.CurrentUserServices
-import com.ags.controlekm.database.Models.EnderecoAtendimento
 import com.ags.controlekm.database.Models.ViagemSuporteTecnico
 import com.ags.controlekm.database.ViewModels.CurrentUserViewModel
-import com.ags.controlekm.database.ViewModels.AddressViewModel
 import com.ags.controlekm.database.ViewModels.ServiceViewModel
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
@@ -76,7 +73,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 @Composable
-fun Home(
+fun HomeView(
     navController: NavHostController,
     currentUserViewModel: CurrentUserViewModel = viewModel(),
     serviceViewModel: ServiceViewModel = viewModel(ServiceViewModel::class.java),
@@ -222,24 +219,24 @@ fun Home(
                         textStatus = ""
                         textButton = "Iniciar percurso"
                         Column(modifier = Modifier.fillMaxWidth()) {
-                            DropDownMenuAtendimento(
-                                labelLocal = "De (Local de saída)",
-                                visibleLocal = true,
-                                localSelecionado = { localSelecionado ->
+                            SelectAddressDropDownMenu(
+                                labelAddress = "De (Local de saída)",
+                                visibleAddress = true,
+                                SelectedAddres = { localSelecionado ->
                                     localSaida = localSelecionado
                                 },
                             )
-                            DropDownMenuAtendimento(
-                                labelLocal = "Para (Local do atendimento)",
+                            SelectAddressDropDownMenu(
+                                labelAddress = "Para (Local do atendimento)",
                                 labelKm = "KM de saída",
                                 data = data,
-                                hora = hora,
-                                visibleLocal = true,
+                                time = hora,
+                                visibleAddress = true,
                                 visibleKm = true,
-                                localSelecionado = { localSelecionado ->
+                                SelectedAddres = { localSelecionado ->
                                     localAtendimento = localSelecionado
                                 },
-                                kmInformado = { kmInformado -> kmSaida = kmInformado }
+                                InformedKm = { kmInformado -> kmSaida = kmInformado }
                             )
                         }
                     } else if (countContent == 2) {
@@ -272,12 +269,12 @@ fun Home(
                                 fontSize = 14.sp,
                                 textAlign = TextAlign.Center
                             )
-                            DropDownMenuAtendimento(
+                            SelectAddressDropDownMenu(
                                 labelKm = "KM da Chegada",
-                                hora = hora,
+                                time = hora,
                                 data = data,
                                 visibleKm = true,
-                                kmInformado = { kmInformado -> kmChegada = kmInformado }
+                                InformedKm = { kmInformado -> kmChegada = kmInformado }
                             )
                         }
                     } else if (countContent == 3) {
@@ -308,7 +305,7 @@ fun Home(
                             )
                         }
                         if (visibleFinalizarDialog) {
-                            HomeAtendimentoDialog(
+                            AfterServiceDialog(
                                 currentUserServices = currentUserServices,
                                 userLoggedData = userLoggedData,
                                 atendimentoAtual = currentService,
@@ -326,7 +323,7 @@ fun Home(
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(modifier = Modifier.fillMaxWidth()) {
                     AnimatedVisibility(visible = visibleButtonDefault) {
-                        ButtonPadrao(
+                        ButtonDefault(
                             textButton,
                             enable = if (countContent == 0) false else true,
                             topStart = 0.dp,
@@ -420,18 +417,16 @@ fun Home(
                 SimpleDateFormat("dd/MM/yyyy",
                     Locale.getDefault())
                     .parse(it.dataSaida) }.take(5)) {
-                AtendimentoCard(
+                LatestServicesCard(
                     data = it.dataConclusao.toString(),
-                    local = it.localAtendimento.toString(),
-                    kmRodado = it.kmRodado.toString(),
-                    status = it.statusService.toString()
+                    address = it.localAtendimento.toString(),
                 )
             }
         }
     }
     // AlertaDialog Cancelar
     if (visibleAlertCancel) {
-        AlertaDialogCancel(
+        CancelAlertDialog(
             onDismissRequest = { visibleAlertCancel = false },
             title = {
                 if (currentService.statusService.equals("Em rota, retornando")) {

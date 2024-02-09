@@ -47,28 +47,26 @@ import com.ags.controlekm.database.ViewModels.AddressViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 @Composable
-fun DropDownMenuAtendimento(
+fun SelectAddressDropDownMenu(
     addressViewModel: AddressViewModel = viewModel(),
-    labelLocal: String? = null,
+    labelAddress: String? = null,
     labelKm: String? = null,
-    hora: String? = null,
+    time: String? = null,
     data: String? = null,
-    visibleLocal: Boolean = false,
+    visibleAddress: Boolean = false,
     visibleKm: Boolean = false,
-    localSelecionado: ((String) -> Unit)? = null,
-    kmInformado: ((String) -> Unit)? = null,
+    SelectedAddres: ((String) -> Unit)? = null,
+    InformedKm: ((String) -> Unit)? = null,
 ) {
     val allAddress: List<EnderecoAtendimento> by addressViewModel.allAddress.collectAsState(emptyList())
-    var enderecosList by rememberSaveable { mutableStateOf<List<String>>(emptyList()) }
+    var addressList by rememberSaveable { mutableStateOf<List<String>>(emptyList()) }
 
     DisposableEffect(allAddress) {
         val coroutineScope = CoroutineScope(Dispatchers.IO)
         val enderecos = coroutineScope.launch {
-            enderecosList = allAddress.map { endereco ->
+            addressList = allAddress.map { endereco ->
                 endereco.toStringEnderecoAtendimento()
             }
         }
@@ -81,9 +79,9 @@ fun DropDownMenuAtendimento(
     var textFieldSize by remember { mutableStateOf(Size.Zero) }
     var expandedMenu by remember { mutableStateOf(false) }
 
-    var local by remember { mutableStateOf("") }
-    var kmSaida by remember { mutableStateOf("") }
-if(visibleLocal){
+    var address by remember { mutableStateOf("") }
+    var departureTime by remember { mutableStateOf("") }
+if(visibleAddress){
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
@@ -99,16 +97,16 @@ if(visibleLocal){
                     textFieldSize = coordinates.size.toSize()
                 },
             readOnly = false,
-            value = local,
+            value = address,
             trailingIconVector = Icons.Filled.ArrowDropDown,
             trailingOnClick = {
                 expandedMenu = !expandedMenu
             },
             onValueChange = {
                 expandedMenu = true
-                local = it
+                address = it
             },
-            label = labelLocal!!,
+            label = labelAddress!!,
             visualTransformation = VisualTransformation.None,
             keyboardType = KeyboardType.Text,
             imeAction = ImeAction.Next,
@@ -128,10 +126,10 @@ if(visibleLocal){
                     .width(300.dp)
                     .height(195.dp)
             ) {
-                if (local.isNotEmpty()) {
+                if (address.isNotEmpty()) {
                     items(
-                        enderecosList.filter {
-                            it.lowercase().contains(local.lowercase()) || it.lowercase()
+                        addressList.filter {
+                            it.lowercase().contains(address.lowercase()) || it.lowercase()
                                 .contains("others")
                         }.sortedBy { it.lowercase() }
                     ) {
@@ -144,14 +142,14 @@ if(visibleLocal){
                                 )
                             },
                             onClick = {
-                                local = it.toString()
-                                localSelecionado!!(it.toString())
+                                address = it.toString()
+                                SelectedAddres!!(it.toString())
                                 expandedMenu = false
                             })
                     }
                 } else {
                     items(
-                        enderecosList.sortedBy { it.lowercase() }
+                        addressList.sortedBy { it.lowercase() }
                     ) {
                         DropdownMenuItem(
                             text = {
@@ -162,8 +160,8 @@ if(visibleLocal){
                                 )
                             },
                             onClick = {
-                                local = it
-                                localSelecionado!!(it)
+                                address = it
+                                SelectedAddres!!(it)
                                 expandedMenu = false
                             })
                     }
@@ -186,10 +184,10 @@ if(visibleLocal){
             FormularioTextField(
                 modifier = Modifier.weight(0.7f),
                 readOnly = false,
-                value = kmSaida,
+                value = departureTime,
                 onValueChange = {
-                    kmSaida = it.take(6)
-                    kmInformado!!(it)
+                    departureTime = it.take(6)
+                    InformedKm!!(it)
                 },
                 label = labelKm!!,
                 visualTransformation = VisualTransformation.None,
@@ -202,7 +200,7 @@ if(visibleLocal){
             Spacer(modifier = Modifier.width(12.dp))
             Text(
                 modifier = Modifier.weight(0.4f),
-                text = "Hora: ${hora}\n" + "Data: ${data}",
+                text = "Hora: ${time}\n" + "Data: ${data}",
                 fontSize = 11.sp,
                 fontWeight = FontWeight.SemiBold,
             )

@@ -82,7 +82,7 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.rememberImagePainter
 import com.ags.controlekm.R
-import com.ags.controlekm.components.Dialog.DialogEmailVerifield
+import com.ags.controlekm.components.Dialog.EmailVerifieldDialog
 import com.ags.controlekm.database.ViewModels.CurrentUserViewModel
 import com.ags.controlekm.functions.navigateSingleTopTo
 import com.ags.controlekm.database.Models.BottomNavigationItem
@@ -415,7 +415,7 @@ fun App(currentUserViewModel: CurrentUserViewModel = viewModel()) {
             }
         ) { innerPadding ->
             if (currentUser?.isEmailVerified == false && dialogEmailVisible.value) {
-                DialogEmailVerifield(
+                EmailVerifieldDialog(
                     onDismissRequest = { dialogEmailVisible.value = false }
                 )
             }
@@ -433,13 +433,13 @@ fun App(currentUserViewModel: CurrentUserViewModel = viewModel()) {
                     }
                 }
                 composable("newUser") {
-                    CadastroUserView(navController)
+                    RegisterUserView(navController)
                 }
                 composable("forgotPassword") {
-                    ForgotPassword(navController)
+                    ForgotPasswordView(navController)
                 }
                 composable("home") {
-                    Home(navController)
+                    HomeView(navController)
                     DisposableEffect(Unit) {
                         itemsVisible = true
                         onDispose {
@@ -447,10 +447,10 @@ fun App(currentUserViewModel: CurrentUserViewModel = viewModel()) {
                     }
                 }
                 composable("news") {
-                    News(navController)
+                    NewsView(navController)
                 }
                 composable("enderecosAtendimento") {
-                    EnderecosAtendimentoView(navController)
+                    AllAddressView(navController)
                 }
             }
 

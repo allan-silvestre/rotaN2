@@ -1,7 +1,7 @@
 package com.ags.controlekm.functions
 
 //VERIFICAÇÃO DO CPF
-fun VerificacaoFormatoCpf(digitos: String): Boolean {
+fun checkCpfFormat(digitos: String): Boolean {
     var validadorA = 0
     var validadorB = 0
     var valorPadraoDivisao = 11

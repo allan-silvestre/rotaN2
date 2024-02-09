@@ -8,11 +8,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.ags.controlekm.components.Buttons.ButtonText
-import com.ags.controlekm.components.Text.TitleText
-import org.w3c.dom.Text
 
 @Composable
-fun AlertaDialogCancel(
+fun CancelAlertDialog(
     onDismissRequest: () -> Unit,
     title: @Composable () -> Unit,
     confirmButton: () -> Unit

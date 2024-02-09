@@ -45,7 +45,7 @@ import com.ags.controlekm.functions.navigateSingleTopTo
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun ForgotPassword(navController: NavHostController) {
+fun ForgotPasswordView(navController: NavHostController) {
 
     val currentUser = FirebaseAuth.getInstance().currentUser
 

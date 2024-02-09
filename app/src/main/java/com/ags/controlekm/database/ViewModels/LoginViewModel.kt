@@ -7,18 +7,12 @@ import androidx.lifecycle.viewModelScope
 import com.ags.controlekm.database.AppDatabase
 import com.ags.controlekm.database.Models.CurrentUser
 import com.ags.controlekm.database.Repositorys.CurrentUserRepository
-import com.ags.controlekm.functions.VerificacaoFormatoEmail
+import com.ags.controlekm.functions.checkEmailFormat
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -37,7 +31,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun login(email: String, senha: String) {
-        if (email.isEmpty() || !VerificacaoFormatoEmail(email) || senha.isEmpty()) {
+        if (email.isEmpty() || !checkEmailFormat(email) || senha.isEmpty()) {
             authResult.value = false
         } else {
             viewModelScope.launch {

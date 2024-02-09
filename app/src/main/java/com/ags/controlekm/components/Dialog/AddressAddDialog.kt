@@ -1,4 +1,4 @@
-package com.ags.controlekm.ui.views
+package com.ags.controlekm.components.Dialog
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
@@ -36,14 +36,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ags.controlekm.components.TextField.FormularioOutlinedTextField
 import com.ags.controlekm.database.Models.EnderecoAtendimento
 import com.ags.controlekm.database.ViewModels.AddressViewModel
-import com.ags.controlekm.functions.VerificacaoApenasNumero
+import com.ags.controlekm.functions.checkOnlyNumbers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
-fun EnderecoAtendimentoAddViewDialog(
+fun AddressAddDialog(
     visible: Boolean,
-    onSalvar: () -> Unit,
+    onSave: () -> Unit,
     onCancel: () -> Unit,
     addressViewModel: AddressViewModel = viewModel(),
 ) {
@@ -205,7 +205,7 @@ fun EnderecoAtendimentoAddViewDialog(
                                             horizontalArrangement = Arrangement.End
                                         ) {
                                             TextButton(onClick = {
-                                                numeroError = VerificacaoApenasNumero(numero)
+                                                numeroError = checkOnlyNumbers(numero)
 
                                                 if (
                                                     nome.isEmpty() ||
@@ -229,7 +229,7 @@ fun EnderecoAtendimentoAddViewDialog(
                                                     coroutineScope.launch(Dispatchers.IO) {
                                                     addressViewModel.insert(enderecoAtendimento)
                                                     }
-                                                    onSalvar()
+                                                    onSave()
                                                 }
                                             }) {
                                                 Text("Salvar")

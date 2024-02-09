@@ -1,4 +1,4 @@
-package com.ags.controlekm.ui.views
+package com.ags.controlekm.components.Dialog
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
@@ -39,7 +39,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
-fun EnderecoAtendimentoEditView(
+fun EditAddressDialog(
     item: EnderecoAtendimento,
     visible: Boolean,
     onSalvar: () -> Unit,

@@ -1,9 +1,6 @@
 package com.ags.controlekm.components.Cards
 
 import android.annotation.SuppressLint
-import android.os.Handler
-import android.os.Looper
-import android.widget.ProgressBar
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,32 +12,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Adjust
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.DownloadDone
-import androidx.compose.material.icons.filled.HomeMini
-import androidx.compose.material.icons.filled.OpenInNew
-import androidx.compose.material.icons.filled.RemoveRedEye
-import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.DownloadDone
-import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.OpenInNew
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ProgressIndicatorDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,23 +30,13 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.unit.dp
 import com.ags.controlekm.components.Text.ContentText
 import com.ags.controlekm.components.Text.SubTitleText
-import com.ags.controlekm.components.Text.TitleText
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun AtendimentoCard(
+fun LatestServicesCard(
     data: String,
-    local: String,
-    kmRodado: String,
-    status: String
+    address: String,
 ) {
-    val coroutineScope = rememberCoroutineScope()
-
     Box(
         modifier = Modifier
             .width(220.dp)
@@ -103,7 +74,7 @@ fun AtendimentoCard(
                         tint = Color(0xFF228B22)
                     )
                     SubTitleText("${data}")
-                    ContentText("${local}")
+                    ContentText("${address}")
                 } else {
                     SubTitleText("Em andamento")
                     LinearProgressIndicator(
@@ -111,7 +82,7 @@ fun AtendimentoCard(
                             .padding(start = 50.dp, end = 50.dp, top = 6.dp, bottom = 6.dp),
                         strokeCap = StrokeCap.Round
                     )
-                    ContentText("${local}")
+                    ContentText("${address}")
                 }
             }
         }
