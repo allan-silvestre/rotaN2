@@ -428,59 +428,6 @@ fun Home(
                 )
             }
         }
-        Card (
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(250.dp)
-                .padding(start = 12.dp, end = 12.dp),
-            shape = RoundedCornerShape(
-                topStart = 30.dp,
-                topEnd = 30.dp,
-                bottomStart = 30.dp,
-                bottomEnd = 30.dp
-            ),
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 5.dp
-            ),
-            colors = CardDefaults.cardColors(
-                //containerColor = Color(0xFF0B1F3C),
-            )
-        ) {
-            Column (
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(195.dp)
-                    .padding(top = 8.dp, start = 8.dp, end = 8.dp),
-                horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.Center
-            ) {
-                TitleText("Semana atual")
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(195.dp)
-                        .padding(top = 8.dp, start = 8.dp, end = 8.dp),
-                    horizontalAlignment = Alignment.Start,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    item {
-                        Text("KM rodado:")
-                    }
-                    item {
-                        Text("Valor a receber:")
-                    }
-                    item {
-                        Text("KM rodado:")
-                    }
-                    item {
-                        Text("")
-                    }
-                    item {
-                        Text(countContent.toString())
-                    }
-                }
-            }
-        }
     }
     // AlertaDialog Cancelar
     if (visibleAlertCancel) {
