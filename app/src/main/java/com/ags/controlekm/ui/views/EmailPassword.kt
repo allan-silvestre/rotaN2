@@ -1,4 +1,4 @@
-package com.ags.controlekm.views
+package com.ags.controlekm.ui.views
 
 import android.app.Activity
 import android.os.Bundle

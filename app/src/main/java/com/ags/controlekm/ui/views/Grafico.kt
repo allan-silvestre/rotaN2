@@ -1,4 +1,4 @@
-package com.ags.controlekm.views
+package com.ags.controlekm.ui.views
 
 import android.graphics.Paint
 import androidx.compose.animation.core.animateFloatAsState

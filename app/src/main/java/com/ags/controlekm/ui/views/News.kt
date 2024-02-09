@@ -1,4 +1,4 @@
-package com.ags.controlekm.views
+package com.ags.controlekm.ui.views
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.ExperimentalFoundationApi
