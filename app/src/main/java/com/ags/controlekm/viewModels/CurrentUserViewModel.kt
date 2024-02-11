@@ -3,6 +3,7 @@ package com.ags.controlekm.viewModels
 import android.app.Application
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ags.controlekm.database.AppDatabase
 import com.ags.controlekm.database.firebaseServices.CurrentUserServices
@@ -14,19 +15,19 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-
-class CurrentUserViewModel(application: Application) : AndroidViewModel(application) {
+@HiltViewModel
+class CurrentUserViewModel @Inject constructor(
     private val repository: CurrentUserRepository
-    var currentUserData: Flow<CurrentUser>
+): ViewModel() {
+    var currentUserData: Flow<CurrentUser> = repository.currentUser
     var currentUser = mutableStateOf(FirebaseAuth.getInstance().currentUser)
 
     init {
-        val currentUserDao = AppDatabase.getDatabase(application).currentUserDao()
-        this.repository = CurrentUserRepository(currentUserDao)
-        currentUserData = repository.currentUser
         var currentUserServices = CurrentUserServices(currentUser.value?.uid.toString())
 
         viewModelScope.launch {
@@ -80,7 +81,5 @@ class CurrentUserViewModel(application: Application) : AndroidViewModel(applicat
 
         // Adiciona o listener
         userRef.addValueEventListener(valueEventListener)
-
     }
-
 }

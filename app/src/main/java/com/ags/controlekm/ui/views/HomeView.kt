@@ -77,7 +77,7 @@ import java.util.Locale
 @Composable
 fun HomeView(
     navController: NavHostController,
-    currentUserViewModel: CurrentUserViewModel = viewModel(),
+    currentUserViewModel: CurrentUserViewModel = hiltViewModel<CurrentUserViewModel>(),
     serviceViewModel: ServiceViewModel = hiltViewModel<ServiceViewModel>()
 ) {
     val coroutineScope = rememberCoroutineScope()

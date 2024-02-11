@@ -2,22 +2,22 @@ package com.ags.controlekm.viewModels
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ags.controlekm.database.AppDatabase
 import com.ags.controlekm.models.Company
 import com.ags.controlekm.database.repositorys.CompanyRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class CompanyUserViewModel(application: Application) : AndroidViewModel(application){
+@HiltViewModel
+class CompanyViewModel @Inject constructor(
     private val repository: CompanyRepository
-    val allCompany: Flow<List<Company>>
+) : ViewModel(){
 
-    init{
-        val empresaClienteDao = AppDatabase.getDatabase(application).companyDao()
-        this.repository = CompanyRepository(empresaClienteDao)
-        allCompany = repository.allCompany
-    }
+    val allCompany: Flow<List<Company>> = repository.allCompany
 
     fun insert(company: Company) {
         viewModelScope.launch {

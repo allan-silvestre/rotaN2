@@ -73,6 +73,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.ags.controlekm.ui.components.dialog.AlertDialogSelectImage
@@ -93,7 +94,7 @@ import com.google.firebase.auth.FirebaseAuth
 @Composable
 fun RegisterUserView(
     navController: NavHostController,
-    userViewModel: UserViewModel = viewModel()
+    userViewModel: UserViewModel = hiltViewModel<UserViewModel>()
 ) {
     //VARIAVEL CONTROLADORA DE CONTEUDO
     var countContent by remember { mutableStateOf(0) }

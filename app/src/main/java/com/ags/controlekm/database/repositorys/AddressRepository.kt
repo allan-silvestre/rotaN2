@@ -7,7 +7,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class AddressRepository @Inject constructor(private val addressDao: AddressDao) {
+class AddressRepository @Inject constructor(
+    private val addressDao: AddressDao
+) {
     fun getAllAddress(): Flow<List<Address>> {return addressDao.getAllAddress()}
 
     suspend fun insert(address: Address) {addressDao.insert(address)}

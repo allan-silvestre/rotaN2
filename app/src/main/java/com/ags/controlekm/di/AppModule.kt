@@ -4,7 +4,10 @@ import android.content.Context
 import com.ags.controlekm.database.AppDatabase
 import com.ags.controlekm.database.daos.AddressDao
 import com.ags.controlekm.database.daos.AddressDao_Impl
+import com.ags.controlekm.database.daos.CompanyDao
+import com.ags.controlekm.database.daos.CurrentUserDao
 import com.ags.controlekm.database.daos.ServiceDao
+import com.ags.controlekm.database.daos.UserDao
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -18,20 +21,32 @@ import javax.inject.Singleton
 class AppModule {
     @Provides
     @Singleton
-    fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
+    fun appDatabase(@ApplicationContext context: Context): AppDatabase {
         return AppDatabase.getDatabase(context)
     }
-
     @Provides
     @Singleton
-    fun provideAddressDao(appDatabase: AppDatabase): AddressDao {
+    fun userDao(appDatabase: AppDatabase): UserDao {
+        return appDatabase.userDao()
+    }
+    @Provides
+    @Singleton
+    fun currentUserDao(appDatabase: AppDatabase): CurrentUserDao {
+        return appDatabase.currentUserDao()
+    }
+    @Provides
+    @Singleton
+    fun addressDao(appDatabase: AppDatabase): AddressDao {
         return appDatabase.addressDao()
     }
-
     @Provides
     @Singleton
-    fun provideServiceDao(appDatabase: AppDatabase): ServiceDao {
+    fun serviceDao(appDatabase: AppDatabase): ServiceDao {
         return appDatabase.serviceDao()
     }
-
+    @Provides
+    @Singleton
+    fun companyDao(appDatabase: AppDatabase): CompanyDao {
+        return appDatabase.companyDao()
+    }
 }

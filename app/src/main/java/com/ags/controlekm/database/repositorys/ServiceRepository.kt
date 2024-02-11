@@ -5,7 +5,9 @@ import com.ags.controlekm.models.Service
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class ServiceRepository @Inject constructor(private val serviceDao: ServiceDao) {
+class ServiceRepository @Inject constructor(
+    private val serviceDao: ServiceDao
+) {
     fun getAllServices(): Flow<List<Service>> {
         return serviceDao.getAllServices()
     }

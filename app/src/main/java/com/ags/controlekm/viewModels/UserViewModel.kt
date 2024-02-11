@@ -2,22 +2,20 @@ package com.ags.controlekm.viewModels
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ags.controlekm.database.AppDatabase
 import com.ags.controlekm.database.repositorys.UserRepository
 import com.ags.controlekm.models.User
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class UserViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository: UserRepository
-    val allUsers: Flow<List<User>>
+@HiltViewModel
+class UserViewModel @Inject constructor(private val repository: UserRepository) : ViewModel() {
 
-    init {
-        val userDao = AppDatabase.getDatabase(application).userDao()
-        this.repository = UserRepository(userDao)
-        allUsers = repository.allUsers
-    }
+    val allUsers: Flow<List<User>> = repository.allUsers
 
     fun insert(user: User) {
         viewModelScope.launch {
@@ -37,6 +35,3 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 }
-
-// COMO CHAMAR O VIEWMODEL DENTRO DE UMA FUNÇÃO COMPOSE
-// val users: List<User> by userViewModel.allUsers.collectAsState(emptyList())

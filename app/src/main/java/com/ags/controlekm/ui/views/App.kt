@@ -75,6 +75,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -98,8 +99,9 @@ import kotlinx.coroutines.launch
     "UnrememberedMutableState"
 )
 @Composable
-fun App(currentUserViewModel: CurrentUserViewModel = viewModel()) {
-
+fun App(
+    currentUserViewModel: CurrentUserViewModel = hiltViewModel<CurrentUserViewModel>()
+) {
     val userLoggedData by currentUserViewModel.currentUserData.collectAsState(null)
 
     val databaseReference: DatabaseReference = FirebaseDatabase.getInstance().reference
