@@ -1,4 +1,4 @@
-package com.ags.controlekm
+package com.ags.controlekm.di
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp

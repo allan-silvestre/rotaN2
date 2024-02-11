@@ -14,6 +14,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ags.controlekm.ui.components.buttons.ButtonDefault
 import com.ags.controlekm.ui.components.buttons.ButtonText
@@ -26,11 +27,9 @@ import com.ags.controlekm.models.Service
 import com.ags.controlekm.viewModels.CurrentUserViewModel
 import com.ags.controlekm.viewModels.ServiceViewModel
 import com.ags.controlekm.viewModels.PerformFunctionViewModel
-import dagger.hilt.android.AndroidEntryPoint
 
 @Composable
 fun AfterServiceDialog(
-    viagemSuporteTecnicoViewModel: ServiceViewModel = viewModel(),
     currentUserViewModel: CurrentUserViewModel = viewModel(),
     performFunctionViewModel: PerformFunctionViewModel = viewModel(),
     currentUserServices: CurrentUserServices,
@@ -41,6 +40,7 @@ fun AfterServiceDialog(
     data: String,
     hora: String,
     onDismissRequest: () -> Unit,
+    serviceViewModel: ServiceViewModel = hiltViewModel<ServiceViewModel>()
 ) {
     var visibleOpcoes by remember { mutableStateOf(true) }
     var visibleRetornar by remember { mutableStateOf(false) }
@@ -101,7 +101,7 @@ fun AfterServiceDialog(
                         "Iniciar percurso",
                         padding = paddingButton
                     ) {
-                        viagemSuporteTecnicoViewModel.novoAtendimento(
+                        serviceViewModel.novoAtendimento(
                             currentUserViewModel = currentUserViewModel,
                             currentUserServices = currentUserServices,
                             userLoggedData = userLoggedData,
@@ -136,7 +136,7 @@ fun AfterServiceDialog(
                         "Iniciar percurso",
                         padding = paddingButton
                     ) {
-                        viagemSuporteTecnicoViewModel.iniciarRetorno(
+                        serviceViewModel.iniciarRetorno(
                             atendimento = atendimentoAtual,
                             localRetorno = local,
                             resumoAtendimento = resumoAtendimento,

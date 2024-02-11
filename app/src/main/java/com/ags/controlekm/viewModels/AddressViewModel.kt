@@ -1,11 +1,7 @@
 package com.ags.controlekm.viewModels
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ags.controlekm.MyApp
-import com.ags.controlekm.database.AppDatabase
 import com.ags.controlekm.database.firebaseServices.AddressServices
 import com.ags.controlekm.models.Address
 import com.ags.controlekm.database.repositorys.AddressRepository
@@ -31,14 +27,10 @@ class AddressViewModel @Inject constructor(
             .child("address")
 
     //private val repository: AddressRepository
-    lateinit var allAddress: Flow<List<Address>>
+    var allAddress: Flow<List<Address>> = addressRepository.getAllAddress()
     private val enderecoAtendimentoServices: AddressServices = AddressServices()
 
     init {
-        allAddress = addressRepository.getAllAddress()
-        //val enderecoAtendimentoDao = AppDatabase.getDatabase(application).enderecoAtendimentoDao()
-        //this.repository = AddressRepository(enderecoAtendimentoDao)
-
         databaseReference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val dataList = mutableListOf<Address>()
@@ -57,7 +49,6 @@ class AddressViewModel @Inject constructor(
             override fun onCancelled(error: DatabaseError) {
             }
         })
-
     }
 
      fun getAllAdress() {

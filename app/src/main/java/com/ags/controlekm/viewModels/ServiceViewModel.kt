@@ -4,10 +4,12 @@ import android.app.Application
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ags.controlekm.database.AppDatabase
 import com.ags.controlekm.database.firebaseServices.CurrentUserServices
 import com.ags.controlekm.database.firebaseServices.ServiceServices
+import com.ags.controlekm.database.repositorys.AddressRepository
 import com.ags.controlekm.models.CurrentUser
 import com.ags.controlekm.models.Service
 import com.ags.controlekm.database.repositorys.ServiceRepository
@@ -17,6 +19,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -24,10 +27,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Calendar
+import javax.inject.Inject
 
-class ServiceViewModel(application: Application) : AndroidViewModel(application) {
-
-    var context: Application = getApplication()
+@HiltViewModel
+class ServiceViewModel @Inject constructor(
+    private val repository: ServiceRepository
+): ViewModel() {
 
     private val _loading = mutableStateOf(false)
     val loading get() = _loading
@@ -36,14 +41,13 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
         FirebaseDatabase.getInstance()
             .reference
             .child("rotaN2")
-            .child("atendimentos")
+            .child("services")
 
-    private val repository: ServiceRepository
-
+    var allTripsCurrentUser: Flow<List<Service>> =
+        repository.getViagensCurrentUser(FirebaseAuth.getInstance().currentUser?.uid.toString())
+    val allService: Flow<List<Service>> = repository.getAllServices()
     private val serviceServices: ServiceServices
 
-    val allService: Flow<List<Service>>
-    lateinit var allTripsCurrentUser: Flow<List<Service>>
     var countContent: MutableStateFlow<Int> = MutableStateFlow(0)
     var currentService = MutableStateFlow(Service())
 
@@ -60,13 +64,8 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
         calendar.set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY)
         lastDayWeek.value = calendar.timeInMillis
 
-        val serviceTripDao = AppDatabase.getDatabase(application).serviceDao()
-        this.repository = ServiceRepository(serviceTripDao)
-        allService = repository.getAllServices()
-
         serviceServices = ServiceServices()
 
-        getViagensCurrentUser()
         homeCountContent()
 
         getCurrentWeekData(firstDayWeek.value, lastDayWeek.value)
@@ -105,22 +104,13 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
     ) {
         // VERIFICA SE ALGUM CAMPO ESTA VAZIO
         if (localSaida.equals(null) || localAtendimento.equals(null) || kmSaida.equals(null)) {
-            Toast.makeText(context, "Preencha todos os campos para continuar", Toast.LENGTH_SHORT)
-                .show()
+            println("Preencha todos os campos para continuar")
             // VERIFICA SE O LOCAL DE SAIDA É IGUAL AO LOCAL DE ATENDIMENTO
         } else if (localSaida.equals(localAtendimento)) {
-            Toast.makeText(
-                context,
-                "O local de saida não pode ser o mesmo local do atendimento",
-                Toast.LENGTH_SHORT
-            ).show()
+            println("O local de saida não pode ser o mesmo local do atendimento")
             // VERIFICA SE O KM INFORMADO É VALIDO DE ACORDO COM O ULTIMO KM INFORMADO
         } else if (kmSaida.toInt() < userLoggedData.lastKm!!.toInt()) {
-            Toast.makeText(
-                context,
-                "O KM não pode ser inferior ao último informado",
-                Toast.LENGTH_SHORT
-            ).show()
+            println("O KM não pode ser inferior ao último informado")
         } else {
             novoAtendimento.departureDate = data
             novoAtendimento.departureTime = hora
@@ -164,18 +154,10 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
     ) {
         // VERIFICA SE O CAMPO ESTA VAZIO
         if (kmChegada.isEmpty()) {
-            Toast.makeText(
-                context,
-                "Você precisa informar o KM ao chegar no local de atendimento para continuar",
-                Toast.LENGTH_SHORT
-            ).show()
+            println("Você precisa informar o KM ao chegar no local de atendimento para continuar")
             // VERIFICA SE O KM INFORMADO É VALIDO DE ACORDO COM O ULTIMO KM INFORMADO
         } else if (kmChegada.toInt() < userLoggedData?.lastKm!!.toInt()) {
-            Toast.makeText(
-                context,
-                "O KM não pode ser inferior ao último informado",
-                Toast.LENGTH_SHORT
-            ).show()
+            println("O KM não pode ser inferior ao último informado")
         } else {
             if (atendimentoAtual.statusService.equals("Em rota")) {
                 atendimentoAtual.dateArrival = data
@@ -330,22 +312,13 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
     ) {
         // VERIFICA SE ALGUM CAMPO ESTA VAZIO
         if (localSaida.equals(null) || localAtendimento.equals(null) || kmSaida.equals(null)) {
-            Toast.makeText(context, "Preencha todos os campos para continuar", Toast.LENGTH_SHORT)
-                .show()
+            println("Preencha todos os campos para continuar")
             // VERIFICA SE O LOCAL DE SAIDA É IGUAL AO LOCAL DE ATENDIMENTO
         } else if (localSaida.equals(localAtendimento)) {
-            Toast.makeText(
-                context,
-                "O local de saida não pode ser o mesmo local do atendimento",
-                Toast.LENGTH_SHORT
-            ).show()
+            println("O local de saida não pode ser o mesmo local do atendimento")
             // VERIFICA SE O KM INFORMADO É VALIDO DE ACORDO COM O ULTIMO KM INFORMADO
         } else if (kmSaida.toInt() < userLoggedData?.lastKm!!.toInt()) {
-            Toast.makeText(
-                context,
-                "O KM não pode ser inferior ao último informado",
-                Toast.LENGTH_SHORT
-            ).show()
+            println("O KM não pode ser inferior ao último informado")
         } else {
             novoAtendimento.departureDate = data
             novoAtendimento.departureTime = hora
@@ -413,11 +386,7 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
                 // Chamar a função de retorno de sucesso
                 onExecuted(result)
             } catch (e: Exception) {
-                Toast.makeText(
-                    context,
-                    "Erro desconhecido, não foi possivél executar essa ação",
-                    Toast.LENGTH_SHORT
-                ).show()
+                println("Erro desconhecido, não foi possivél executar essa ação")
                 onError()
             } finally {
                 // Finalizar o carregamento, mesmo em caso de erro
