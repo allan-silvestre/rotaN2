@@ -19,7 +19,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.ags.controlekm.R
-import com.ags.controlekm.components.cards.NewsCard
+import com.ags.controlekm.ui.components.cards.NewsCard
 import com.ags.controlekm.models.NewsCardItem
 
 @OptIn(ExperimentalFoundationApi::class)

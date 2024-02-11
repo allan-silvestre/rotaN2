@@ -9,17 +9,16 @@ import androidx.room.Transaction
 import androidx.room.Update
 import com.ags.controlekm.models.Address
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
 @Dao
 interface AddressDao {
     @Query("SELECT * FROM address")
     fun getAllAddress(): Flow<List<Address>>
 
-    @Transaction
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert (address: Address)
 
-    @Transaction
     @Update
     suspend fun update (address: Address)
 

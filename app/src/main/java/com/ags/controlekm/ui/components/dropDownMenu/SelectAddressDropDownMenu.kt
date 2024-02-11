@@ -1,4 +1,4 @@
-package com.ags.controlekm.components.dropDownMenu
+package com.ags.controlekm.ui.components.dropDownMenu
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -39,9 +39,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.window.PopupProperties
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.ags.controlekm.components.textField.FormularioTextField
-import com.ags.controlekm.components.textField.FormularioTextFieldMenu
+import com.ags.controlekm.ui.components.textField.FormularioTextField
+import com.ags.controlekm.ui.components.textField.FormularioTextFieldMenu
 import com.ags.controlekm.models.Address
 import com.ags.controlekm.viewModels.AddressViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -50,7 +51,6 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun SelectAddressDropDownMenu(
-    addressViewModel: AddressViewModel = viewModel(),
     labelAddress: String? = null,
     labelKm: String? = null,
     time: String? = null,
@@ -59,6 +59,7 @@ fun SelectAddressDropDownMenu(
     visibleKm: Boolean = false,
     SelectedAddres: ((String) -> Unit)? = null,
     InformedKm: ((String) -> Unit)? = null,
+    addressViewModel: AddressViewModel = hiltViewModel<AddressViewModel>(),
 ) {
     val allAddress: List<Address> by addressViewModel.allAddress.collectAsState(emptyList())
     var addressList by rememberSaveable { mutableStateOf<List<String>>(emptyList()) }

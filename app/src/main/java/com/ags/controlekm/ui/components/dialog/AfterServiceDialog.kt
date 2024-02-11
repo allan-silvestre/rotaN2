@@ -1,4 +1,4 @@
-package com.ags.controlekm.components.dialog
+package com.ags.controlekm.ui.components.dialog
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
@@ -15,17 +15,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.ags.controlekm.components.buttons.ButtonDefault
-import com.ags.controlekm.components.buttons.ButtonText
-import com.ags.controlekm.components.dropDownMenu.SelectAddressDropDownMenu
-import com.ags.controlekm.components.progress.LoadingCircular
-import com.ags.controlekm.components.text.TitleText
+import com.ags.controlekm.ui.components.buttons.ButtonDefault
+import com.ags.controlekm.ui.components.buttons.ButtonText
+import com.ags.controlekm.ui.components.dropDownMenu.SelectAddressDropDownMenu
+import com.ags.controlekm.ui.components.progress.LoadingCircular
+import com.ags.controlekm.ui.components.text.TitleText
 import com.ags.controlekm.database.firebaseServices.CurrentUserServices
 import com.ags.controlekm.models.CurrentUser
 import com.ags.controlekm.models.Service
 import com.ags.controlekm.viewModels.CurrentUserViewModel
 import com.ags.controlekm.viewModels.ServiceViewModel
 import com.ags.controlekm.viewModels.PerformFunctionViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
 @Composable
 fun AfterServiceDialog(

@@ -82,7 +82,7 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.rememberImagePainter
 import com.ags.controlekm.R
-import com.ags.controlekm.components.dialog.EmailVerifieldDialog
+import com.ags.controlekm.ui.components.dialog.EmailVerifieldDialog
 import com.ags.controlekm.viewModels.CurrentUserViewModel
 import com.ags.controlekm.functions.navigateSingleTopTo
 import com.ags.controlekm.models.BottomNavigationItem

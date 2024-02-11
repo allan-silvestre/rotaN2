@@ -1,4 +1,4 @@
-package com.ags.controlekm.components.dialog
+package com.ags.controlekm.ui.components.dialog
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
@@ -32,8 +32,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.ags.controlekm.components.textField.FormularioOutlinedTextField
+import com.ags.controlekm.ui.components.textField.FormularioOutlinedTextField
 import com.ags.controlekm.models.Address
 import com.ags.controlekm.viewModels.AddressViewModel
 import com.ags.controlekm.functions.checkOnlyNumbers
@@ -45,7 +46,7 @@ fun AddressAddDialog(
     visible: Boolean,
     onSave: () -> Unit,
     onCancel: () -> Unit,
-    addressViewModel: AddressViewModel = viewModel(),
+    addressViewModel: AddressViewModel = hiltViewModel<AddressViewModel>(),
 ) {
     //VARIAVEL CONTROLADORA DE CONTEUDO
     var countContent by remember { mutableStateOf(0) }

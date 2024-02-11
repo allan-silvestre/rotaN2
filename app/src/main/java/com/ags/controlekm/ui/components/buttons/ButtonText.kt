@@ -1,9 +1,9 @@
-package com.ags.controlekm.components.buttons
+package com.ags.controlekm.ui.components.buttons
 
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.ags.controlekm.components.text.SubTitleText
+import com.ags.controlekm.ui.components.text.SubTitleText
 
 @Composable
 fun ButtonText(

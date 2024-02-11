@@ -1,4 +1,4 @@
-package com.ags.controlekm.components.progress
+package com.ags.controlekm.ui.components.progress
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator

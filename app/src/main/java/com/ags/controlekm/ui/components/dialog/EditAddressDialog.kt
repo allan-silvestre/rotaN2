@@ -1,4 +1,4 @@
-package com.ags.controlekm.components.dialog
+package com.ags.controlekm.ui.components.dialog
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
@@ -31,8 +31,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.ags.controlekm.components.textField.FormularioTextField
+import com.ags.controlekm.ui.components.textField.FormularioTextField
 import com.ags.controlekm.models.Address
 import com.ags.controlekm.viewModels.AddressViewModel
 import kotlinx.coroutines.Dispatchers
@@ -44,7 +45,7 @@ fun EditAddressDialog(
     visible: Boolean,
     onSalvar: () -> Unit,
     onCancel: () -> Unit,
-    addressViewModel: AddressViewModel = viewModel()
+    addressViewModel: AddressViewModel = hiltViewModel<AddressViewModel>(),
 ) {
     //VARIAVEL CONTROLADORA DE CONTEUDO
     var countContent by remember { mutableStateOf(0) }
@@ -69,7 +70,6 @@ fun EditAddressDialog(
     var numero by remember { mutableStateOf(item.number) }
     var numeroError by rememberSaveable { mutableStateOf(true) }
 
-    //Visible Dialog
     val visibleDialogEdit = remember { mutableStateOf(visible) }
 
     val coroutineScope = rememberCoroutineScope()

@@ -14,7 +14,7 @@ class CompanyUserViewModel(application: Application) : AndroidViewModel(applicat
     val allCompany: Flow<List<Company>>
 
     init{
-        val empresaClienteDao = AppDatabase.getDatabase(application).empresaClienteDao()
+        val empresaClienteDao = AppDatabase.getDatabase(application).companyDao()
         this.repository = CompanyRepository(empresaClienteDao)
         allCompany = repository.allCompany
     }

@@ -60,7 +60,7 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
         calendar.set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY)
         lastDayWeek.value = calendar.timeInMillis
 
-        val serviceTripDao = AppDatabase.getDatabase(application).viagemSuporteTecnicoDao()
+        val serviceTripDao = AppDatabase.getDatabase(application).serviceDao()
         this.repository = ServiceRepository(serviceTripDao)
         allService = repository.getAllServices()
 

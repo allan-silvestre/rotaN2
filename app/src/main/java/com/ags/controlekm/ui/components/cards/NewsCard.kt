@@ -1,4 +1,4 @@
-package com.ags.controlekm.components.cards
+package com.ags.controlekm.ui.components.cards
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween

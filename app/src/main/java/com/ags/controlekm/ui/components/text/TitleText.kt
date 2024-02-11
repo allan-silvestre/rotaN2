@@ -1,4 +1,4 @@
-package com.ags.controlekm.components.text
+package com.ags.controlekm.ui.components.text
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding

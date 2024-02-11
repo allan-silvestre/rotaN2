@@ -1,4 +1,4 @@
-package com.ags.controlekm.components.dialog
+package com.ags.controlekm.ui.components.dialog
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -7,7 +7,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.ags.controlekm.components.buttons.ButtonText
+import com.ags.controlekm.ui.components.buttons.ButtonText
 
 @Composable
 fun CancelAlertDialog(

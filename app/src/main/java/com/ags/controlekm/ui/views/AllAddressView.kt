@@ -28,20 +28,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.ags.controlekm.components.dialog.AddressAddDialog
-import com.ags.controlekm.components.dialog.EditAddressDialog
+import com.ags.controlekm.ui.components.dialog.AddressAddDialog
+import com.ags.controlekm.ui.components.dialog.EditAddressDialog
 import com.ags.controlekm.functions.navigateSingleTopTo
 import com.ags.controlekm.models.Address
 import com.ags.controlekm.viewModels.AddressViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
 fun AllAddressView(
     navController: NavHostController,
-    addressViewModel: AddressViewModel = viewModel(),
+    addressViewModel: AddressViewModel = hiltViewModel<AddressViewModel>()
 ) {
     val coroutineScope = rememberCoroutineScope()
     val enderecosLocal: List<Address> by addressViewModel.allAddress.collectAsState(emptyList())

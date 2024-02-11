@@ -1,4 +1,4 @@
-package com.ags.controlekm.components.text
+package com.ags.controlekm.ui.components.text
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,13 +11,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun ContentText(text: String) {
+fun SubTitleText(text: String) {
     Text(
         modifier = Modifier
             .padding(2.dp)
             .fillMaxWidth(),
         text = text,
-        fontWeight = FontWeight.Medium,
+        fontWeight = FontWeight.SemiBold,
         fontSize = 12.sp,
         textAlign = TextAlign.Center
     )

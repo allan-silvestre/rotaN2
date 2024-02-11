@@ -1,4 +1,4 @@
-package com.ags.controlekm.components.dialog
+package com.ags.controlekm.ui.components.dialog
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

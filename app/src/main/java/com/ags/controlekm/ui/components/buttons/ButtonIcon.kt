@@ -1,4 +1,4 @@
-package com.ags.controlekm.components.buttons
+package com.ags.controlekm.ui.components.buttons
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size

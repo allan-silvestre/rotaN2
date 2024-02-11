@@ -1,4 +1,4 @@
-package com.ags.controlekm.components.charts
+package com.ags.controlekm.ui.components.charts
 
 import android.graphics.Paint
 import androidx.compose.animation.core.animateFloatAsState

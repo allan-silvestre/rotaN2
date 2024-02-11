@@ -1,4 +1,4 @@
-package com.ags.controlekm.components.cards
+package com.ags.controlekm.ui.components.cards
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
@@ -27,8 +27,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.unit.dp
-import com.ags.controlekm.components.text.ContentText
-import com.ags.controlekm.components.text.SubTitleText
+import com.ags.controlekm.ui.components.text.ContentText
+import com.ags.controlekm.ui.components.text.SubTitleText
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable

@@ -26,12 +26,11 @@ import com.ags.controlekm.models.Service
     version = 1
 )
 abstract class AppDatabase : RoomDatabase() {
-
     abstract fun currentUserDao(): CurrentUserDao
     abstract fun userDao(): UserDao
-    abstract fun empresaClienteDao(): CompanyDao
-    abstract fun enderecoAtendimentoDao(): AddressDao
-    abstract fun viagemSuporteTecnicoDao(): ServiceDao
+    abstract fun companyDao(): CompanyDao
+    abstract fun addressDao(): AddressDao
+    abstract fun serviceDao(): ServiceDao
 
     companion object {
         @Volatile
