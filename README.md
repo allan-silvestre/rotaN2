@@ -2,7 +2,7 @@
 
 <h4>
 Projeto de controle de rota de equipe de suporte N2.<br>
-## ⚒️ Funcionalidades
+## ⚒️ Funcionalidades<br>
 O app funciona para controle de quilometragem, registro de viagens e atendimentos realizados, além de relatorio de atendimentos e valores a receber.
 
 ## ✅ Técnicas e tecnologias
