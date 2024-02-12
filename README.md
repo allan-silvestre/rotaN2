@@ -14,6 +14,7 @@ O app funciona para controle de quilometragem, registro de viagens e atendimento
 - `Work Manager`
 - `Dangger-hilt`
 - `ViewModel`
+- `Coroutines`
 - `Unit / Mockito`
 - `Coil`
 - `Lifecycle`
