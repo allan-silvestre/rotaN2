@@ -1,12 +1,9 @@
 package com.ags.controlekm.viewModels
 
-import android.app.Application
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ags.controlekm.database.AppDatabase
-import com.ags.controlekm.database.firebaseServices.CurrentUserServices
+import com.ags.controlekm.database.firebaseRepositories.CurrentUserServices
 import com.ags.controlekm.models.CurrentUser
 import com.ags.controlekm.database.repositorys.CurrentUserRepository
 import com.google.firebase.auth.FirebaseAuth

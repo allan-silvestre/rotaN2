@@ -1,4 +1,4 @@
-package com.ags.controlekm.database.firebaseServices
+package com.ags.controlekm.database.firebaseRepositories
 
 import com.ags.controlekm.models.User
 import com.google.firebase.database.DatabaseReference

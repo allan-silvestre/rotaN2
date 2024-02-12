@@ -4,7 +4,9 @@ import com.ags.controlekm.database.daos.ServiceDao
 import com.ags.controlekm.models.Service
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class ServiceRepository @Inject constructor(
     private val serviceDao: ServiceDao
 ) {

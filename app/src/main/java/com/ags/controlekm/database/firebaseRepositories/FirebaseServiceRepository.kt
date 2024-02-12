@@ -1,10 +1,10 @@
-package com.ags.controlekm.database.firebaseServices
+package com.ags.controlekm.database.firebaseRepositories
 
 import com.ags.controlekm.models.Service
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 
-class ServiceServices {
+class FirebaseServiceRepository {
     private val databaseReference: DatabaseReference = FirebaseDatabase
         .getInstance().reference.child("rotaN2").child("services")
 

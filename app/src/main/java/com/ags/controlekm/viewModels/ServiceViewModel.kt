@@ -1,15 +1,10 @@
 package com.ags.controlekm.viewModels
 
-import android.app.Application
-import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ags.controlekm.database.AppDatabase
-import com.ags.controlekm.database.firebaseServices.CurrentUserServices
-import com.ags.controlekm.database.firebaseServices.ServiceServices
-import com.ags.controlekm.database.repositorys.AddressRepository
+import com.ags.controlekm.database.firebaseRepositories.CurrentUserServices
+import com.ags.controlekm.database.firebaseRepositories.FirebaseServiceRepository
 import com.ags.controlekm.models.CurrentUser
 import com.ags.controlekm.models.Service
 import com.ags.controlekm.database.repositorys.ServiceRepository
@@ -46,7 +41,7 @@ class ServiceViewModel @Inject constructor(
     var allTripsCurrentUser: Flow<List<Service>> =
         repository.getViagensCurrentUser(FirebaseAuth.getInstance().currentUser?.uid.toString())
     val allService: Flow<List<Service>> = repository.getAllServices()
-    private val serviceServices: ServiceServices
+    private val firebaseServiceRepository: FirebaseServiceRepository
 
     var countContent: MutableStateFlow<Int> = MutableStateFlow(0)
     var currentService = MutableStateFlow(Service())
@@ -64,7 +59,7 @@ class ServiceViewModel @Inject constructor(
         calendar.set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY)
         lastDayWeek.value = calendar.timeInMillis
 
-        serviceServices = ServiceServices()
+        firebaseServiceRepository = FirebaseServiceRepository()
 
         homeCountContent()
 
@@ -435,21 +430,21 @@ class ServiceViewModel @Inject constructor(
     suspend fun insert(service: Service) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.insert(service)
-            serviceServices.insert(service)
+            firebaseServiceRepository.insert(service)
         }
     }
 
     suspend fun update(service: Service) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.update(service)
-            serviceServices.update(service)
+            firebaseServiceRepository.update(service)
         }
     }
 
     suspend fun delete(service: Service) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.delete(service)
-            serviceServices.delete(service)
+            firebaseServiceRepository.delete(service)
         }
     }
 }

@@ -49,7 +49,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.ags.controlekm.ui.components.buttons.ButtonIcon
 import com.ags.controlekm.ui.components.buttons.ButtonDefault
@@ -61,9 +60,8 @@ import com.ags.controlekm.ui.components.progress.LoadingCircular
 import com.ags.controlekm.ui.components.text.ContentText
 import com.ags.controlekm.ui.components.text.TitleText
 import com.ags.controlekm.ui.components.textField.FormularioOutlinedTextField
-import com.ags.controlekm.database.firebaseServices.CurrentUserServices
+import com.ags.controlekm.database.firebaseRepositories.CurrentUserServices
 import com.ags.controlekm.models.Service
-import com.ags.controlekm.viewModels.AddressViewModel
 import com.ags.controlekm.viewModels.CurrentUserViewModel
 import com.ags.controlekm.viewModels.ServiceViewModel
 import com.google.firebase.auth.FirebaseAuth

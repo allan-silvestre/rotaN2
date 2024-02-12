@@ -3,12 +3,10 @@ package com.ags.controlekm.di
 import android.content.Context
 import com.ags.controlekm.database.AppDatabase
 import com.ags.controlekm.database.daos.AddressDao
-import com.ags.controlekm.database.daos.AddressDao_Impl
 import com.ags.controlekm.database.daos.CompanyDao
 import com.ags.controlekm.database.daos.CurrentUserDao
 import com.ags.controlekm.database.daos.ServiceDao
 import com.ags.controlekm.database.daos.UserDao
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,7 +16,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-class AppModule {
+class DatabaseModule {
     @Provides
     @Singleton
     fun appDatabase(@ApplicationContext context: Context): AppDatabase {

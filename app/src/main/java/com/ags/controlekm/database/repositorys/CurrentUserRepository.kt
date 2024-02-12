@@ -4,7 +4,9 @@ import com.ags.controlekm.database.daos.CurrentUserDao
 import com.ags.controlekm.models.CurrentUser
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class CurrentUserRepository @Inject constructor(
     private val currentUserDao: CurrentUserDao
 ) {
