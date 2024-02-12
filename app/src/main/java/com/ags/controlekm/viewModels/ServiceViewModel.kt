@@ -3,8 +3,9 @@ package com.ags.controlekm.viewModels
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ags.controlekm.database.firebaseRepositories.CurrentUserServices
+import com.ags.controlekm.database.firebaseRepositories.FirebaseCurrentUserRepository
 import com.ags.controlekm.database.firebaseRepositories.FirebaseServiceRepository
+import com.ags.controlekm.database.repositorys.CurrentUserRepository
 import com.ags.controlekm.models.CurrentUser
 import com.ags.controlekm.models.Service
 import com.ags.controlekm.database.repositorys.ServiceRepository
@@ -26,7 +27,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ServiceViewModel @Inject constructor(
-    private val repository: ServiceRepository
+    private val repository: ServiceRepository,
+    private val currentUserRepository: CurrentUserRepository,
+    private val firebaseCurrentUserRepository: FirebaseCurrentUserRepository,
+    private val firebaseServiceRepository: FirebaseServiceRepository
 ): ViewModel() {
 
     private val _loading = mutableStateOf(false)
@@ -41,7 +45,7 @@ class ServiceViewModel @Inject constructor(
     var allTripsCurrentUser: Flow<List<Service>> =
         repository.getViagensCurrentUser(FirebaseAuth.getInstance().currentUser?.uid.toString())
     val allService: Flow<List<Service>> = repository.getAllServices()
-    private val firebaseServiceRepository: FirebaseServiceRepository
+    //private val firebaseServiceRepository: FirebaseServiceRepository
 
     var countContent: MutableStateFlow<Int> = MutableStateFlow(0)
     var currentService = MutableStateFlow(Service())
@@ -59,7 +63,7 @@ class ServiceViewModel @Inject constructor(
         calendar.set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY)
         lastDayWeek.value = calendar.timeInMillis
 
-        firebaseServiceRepository = FirebaseServiceRepository()
+        //firebaseServiceRepository = FirebaseServiceRepository()
 
         homeCountContent()
 
@@ -87,8 +91,6 @@ class ServiceViewModel @Inject constructor(
 
     // FUNÇÕES DE LÓGICA DE NEGOCIO
     fun iniciarViagem(
-        currentUserViewModel: CurrentUserViewModel,
-        currentUserServices: CurrentUserServices,
         userLoggedData: CurrentUser,
         novoAtendimento: Service,
         localSaida: String,
@@ -123,8 +125,8 @@ class ServiceViewModel @Inject constructor(
                 function = {
                     viewModelScope.launch(Dispatchers.IO) {
                         insert(novoAtendimento)
-                        currentUserViewModel.update(userLoggedData)
-                        currentUserServices.addUltimoKm(kmSaida)
+                        currentUserRepository.update(userLoggedData)
+                        firebaseCurrentUserRepository.addUltimoKm(kmSaida)
                     }
                 },
                 onExecuted = {
@@ -139,8 +141,6 @@ class ServiceViewModel @Inject constructor(
     }
 
     fun confirmarChegada(
-        currentUserViewModel: CurrentUserViewModel,
-        currentUserServices: CurrentUserServices,
         userLoggedData: CurrentUser?,
         atendimentoAtual: Service,
         kmChegada: String,
@@ -168,8 +168,8 @@ class ServiceViewModel @Inject constructor(
                     function = {
                         viewModelScope.launch(Dispatchers.IO) {
                             update(atendimentoAtual)
-                            currentUserViewModel.update(userLoggedData)
-                            currentUserServices.addUltimoKm(kmChegada)
+                            currentUserRepository.update(userLoggedData)
+                            firebaseCurrentUserRepository.addUltimoKm(kmChegada)
                         }
                     },
                     onExecuted = {
@@ -185,7 +185,7 @@ class ServiceViewModel @Inject constructor(
                 atendimentoAtual.timeCompletedReturn = hora
                 atendimentoAtual.arrivalKm = kmChegada
                 atendimentoAtual.statusService = "Finalizado"
-                currentUserServices.addUltimoKm(kmChegada)
+                firebaseCurrentUserRepository.addUltimoKm(kmChegada)
                 atendimentoAtual.kmDriven =
                     (kmChegada.toInt() - atendimentoAtual.departureKm!!.toInt()).toString()
 
@@ -196,9 +196,9 @@ class ServiceViewModel @Inject constructor(
                     function = {
                         viewModelScope.launch(Dispatchers.IO) {
                             update(atendimentoAtual)
-                            currentUserViewModel.update(userLoggedData)
-                            currentUserServices.addUltimoKm(kmChegada)
-                            currentUserServices.addKmBackup(kmChegada)
+                            currentUserRepository.update(userLoggedData)
+                            firebaseCurrentUserRepository.addUltimoKm(kmChegada)
+                            firebaseCurrentUserRepository.addKmBackup(kmChegada)
                             countContent.value = 1
                         }
                     },
@@ -245,8 +245,6 @@ class ServiceViewModel @Inject constructor(
     }
 
     fun cancelar(
-        currentUserViewModel: CurrentUserViewModel,
-        currentUserServices: CurrentUserServices,
         userLoggedData: CurrentUser,
         atendimentoAtual: Service,
     ) {
@@ -274,10 +272,10 @@ class ServiceViewModel @Inject constructor(
 
                         // NO ROOM
                         // DEFINE O VALOR DO (ULTIMO KM) DO USUÁRIO PARA O ULTIMO INFORMADO AO CONCLUIR A ULTIMA VIAGEM
-                        currentUserViewModel.update(userLoggedData)
+                        currentUserRepository.update(userLoggedData)
                         // NO FIREBASE
                         // DEFINE O VALOR DO (ULTIMO KM) DO USUÁRIO PARA O ULTIMO INFORMADO AO CONCLUIR A ULTIMA VIAGEM
-                        currentUserServices.addUltimoKm(userLoggedData.kmBackup.toString())
+                        firebaseCurrentUserRepository.addUltimoKm(userLoggedData.kmBackup.toString())
                     }
                     count.value = 1
                 }
@@ -293,8 +291,6 @@ class ServiceViewModel @Inject constructor(
     }
 
     fun novoAtendimento(
-        currentUserViewModel: CurrentUserViewModel,
-        currentUserServices: CurrentUserServices,
         userLoggedData: CurrentUser?,
         novoAtendimento: Service,
         localSaida: String,
@@ -337,8 +333,8 @@ class ServiceViewModel @Inject constructor(
                     // FINALIZA O ATENDIMENTO ATUAL
                     viewModelScope.launch(Dispatchers.IO) {
                         update(atendimentoAtual)
-                        currentUserViewModel.update(userLoggedData)
-                        currentUserServices.addKmBackup(userLoggedData.lastKm.toString())
+                        currentUserRepository.update(userLoggedData)
+                        firebaseCurrentUserRepository.addKmBackup(userLoggedData.lastKm.toString())
                     }
                 },
                 onExecuted = {
@@ -349,8 +345,8 @@ class ServiceViewModel @Inject constructor(
                                 //INICIA UM NOVO ATENDIMENTO
                                 viewModelScope.launch(Dispatchers.IO) {
                                     insert(novoAtendimento)
-                                    currentUserViewModel.update(userLoggedData)
-                                    currentUserServices.addUltimoKm(kmSaida)
+                                    currentUserRepository.update(userLoggedData)
+                                    firebaseCurrentUserRepository.addUltimoKm(kmSaida)
                                 }
                             },
                             onExecuted = {

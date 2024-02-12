@@ -60,7 +60,7 @@ import com.ags.controlekm.ui.components.progress.LoadingCircular
 import com.ags.controlekm.ui.components.text.ContentText
 import com.ags.controlekm.ui.components.text.TitleText
 import com.ags.controlekm.ui.components.textField.FormularioOutlinedTextField
-import com.ags.controlekm.database.firebaseRepositories.CurrentUserServices
+import com.ags.controlekm.database.firebaseRepositories.FirebaseCurrentUserRepository
 import com.ags.controlekm.models.Service
 import com.ags.controlekm.viewModels.CurrentUserViewModel
 import com.ags.controlekm.viewModels.ServiceViewModel
@@ -92,7 +92,7 @@ fun HomeView(
 
     var currentUser by rememberSaveable { mutableStateOf(FirebaseAuth.getInstance().currentUser) }
 
-    val currentUserServices = CurrentUserServices(currentUser?.uid.toString())
+    //val firebaseCurrentUserRepository = FirebaseCurrentUserRepository(currentUser?.uid.toString())
 
     val context = LocalContext.current
 
@@ -306,7 +306,6 @@ fun HomeView(
                         }
                         if (visibleFinalizarDialog) {
                             AfterServiceDialog(
-                                currentUserServices = currentUserServices,
                                 userLoggedData = userLoggedData,
                                 atendimentoAtual = currentService,
                                 novoAtendimento = novoAtendimento,
@@ -333,8 +332,6 @@ fun HomeView(
                             when (countContent) {
                                 1 -> {
                                     serviceViewModel.iniciarViagem(
-                                        currentUserViewModel = currentUserViewModel,
-                                        currentUserServices = currentUserServices,
                                         userLoggedData = userLoggedData!!,
                                         novoAtendimento = novoAtendimento,
                                         localSaida = localSaida,
@@ -347,8 +344,6 @@ fun HomeView(
 
                                 2 -> {
                                     serviceViewModel.confirmarChegada(
-                                        currentUserViewModel = currentUserViewModel,
-                                        currentUserServices = currentUserServices,
                                         userLoggedData = userLoggedData,
                                         atendimentoAtual = currentService,
                                         kmChegada = kmChegada,
@@ -437,8 +432,6 @@ fun HomeView(
             },
             confirmButton = {
                 serviceViewModel.cancelar(
-                    currentUserViewModel = currentUserViewModel,
-                    currentUserServices = currentUserServices,
                     userLoggedData = userLoggedData!!,
                     atendimentoAtual = currentService
                 )
