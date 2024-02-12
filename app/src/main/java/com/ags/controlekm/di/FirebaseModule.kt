@@ -1,6 +1,7 @@
 package com.ags.controlekm.di
 
 import com.ags.controlekm.database.firebaseRepositories.FirebaseAddressRepository
+import com.ags.controlekm.database.firebaseRepositories.FirebaseUserRepository
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import dagger.Module
@@ -16,6 +17,12 @@ class FirebaseModule {
     @Provides
     fun databaseReference(): DatabaseReference {
         return FirebaseDatabase.getInstance().reference.child("rotaN2").child("address")
+    }
+
+    @Singleton
+    @Provides
+    fun firebaseUserRepository(databaseReference: DatabaseReference): FirebaseUserRepository {
+        return FirebaseUserRepository(databaseReference)
     }
     @Singleton
     @Provides
