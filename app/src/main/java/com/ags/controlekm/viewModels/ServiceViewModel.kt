@@ -9,15 +9,13 @@ import com.ags.controlekm.database.repositorys.CurrentUserRepository
 import com.ags.controlekm.models.CurrentUser
 import com.ags.controlekm.models.Service
 import com.ags.controlekm.database.repositorys.ServiceRepository
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -69,18 +67,29 @@ class ServiceViewModel @Inject constructor(
         } else if (kmSaida.toInt() < userLoggedData.lastKm!!.toInt()) {
             println("O KM não pode ser inferior ao último informado")
         } else {
-            novoAtendimento.departureDate = data
-            novoAtendimento.departureTime = hora
-            novoAtendimento.departureAddress = localSaida
-            novoAtendimento.serviceAddress = localAtendimento
-            novoAtendimento.departureKm = kmSaida
-            novoAtendimento.technicianId = userLoggedData.id
-            novoAtendimento.technicianName = "${userLoggedData.name} ${userLoggedData.lastName}"
-            novoAtendimento.profileImgTechnician = userLoggedData.image.toString()
-            novoAtendimento.statusService = "Em rota"
+            runBlocking {
+                this.launch{
+                    novoAtendimento.departureDate = data
+                    novoAtendimento.departureTime = hora
+                    novoAtendimento.departureAddress = localSaida
+                    novoAtendimento.serviceAddress = localAtendimento
+                    novoAtendimento.departureKm = kmSaida
+                    novoAtendimento.technicianId = userLoggedData.id
+                    novoAtendimento.technicianName = "${userLoggedData.name} ${userLoggedData.lastName}"
+                    novoAtendimento.profileImgTechnician = userLoggedData.image.toString()
+                    novoAtendimento.statusService = "Em rota"
 
-            userLoggedData.lastKm = kmSaida
+                    userLoggedData.lastKm = kmSaida
+                }
 
+                this.launch {
+
+                }
+
+
+            }
+
+/*
             executar(
                 function = {
                     viewModelScope.launch(Dispatchers.IO) {
@@ -96,10 +105,11 @@ class ServiceViewModel @Inject constructor(
                     }
                 },
                 onError = {}
-            )
+            )*/
         }
     }
 
+    /*
     fun confirmarChegada(
         userLoggedData: CurrentUser?,
         atendimentoAtual: Service,
@@ -170,7 +180,9 @@ class ServiceViewModel @Inject constructor(
             }
         }
     }
+*/
 
+/*
     fun iniciarRetorno(
         atendimento: Service,
         localRetorno: String,
@@ -203,7 +215,9 @@ class ServiceViewModel @Inject constructor(
             onError = {}
         )
     }
+*/
 
+/*
     fun cancelar(
         userLoggedData: CurrentUser,
         atendimentoAtual: Service,
@@ -249,7 +263,9 @@ class ServiceViewModel @Inject constructor(
             onError = {}
         )
     }
+*/
 
+/*
     fun novoAtendimento(
         userLoggedData: CurrentUser?,
         novoAtendimento: Service,
@@ -323,29 +339,7 @@ class ServiceViewModel @Inject constructor(
             )
         }
     }
-
-    fun executar(function: () -> Unit, onExecuted: (Boolean) -> Unit, onError: () -> Unit) {
-        _loading.value = true
-        viewModelScope.launch {
-            try {
-                // Simular uma função assíncrona real
-                val result = withContext(Dispatchers.IO) {
-                    delay(1000)
-                    function()
-                    true
-                }
-                // Chamar a função de retorno de sucesso
-                onExecuted(result)
-            } catch (e: Exception) {
-                println("Erro desconhecido, não foi possivél executar essa ação")
-                onError()
-            } finally {
-                // Finalizar o carregamento, mesmo em caso de erro
-                _loading.value = false
-            }
-        }
-    }
-
+*/
     fun homeCountContent() {
         var count: MutableStateFlow<Int> = MutableStateFlow(1)
 
@@ -368,10 +362,10 @@ class ServiceViewModel @Inject constructor(
         }
     }
 
-    suspend fun insert(service: Service) {
+    suspend fun insert(newService: Service) {
         viewModelScope.launch(Dispatchers.IO) {
-            serviceRepository.insert(service)
-            firebaseServiceRepository.insert(service)
+            serviceRepository.insert(newService)
+            firebaseServiceRepository.insert(newService)
         }
     }
 

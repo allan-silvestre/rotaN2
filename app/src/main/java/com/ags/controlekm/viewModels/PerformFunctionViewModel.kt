@@ -16,35 +16,15 @@ class PerformFunctionViewModel(application: Application) : AndroidViewModel(appl
     private val _loading = mutableStateOf(false)
     val loading get() = _loading
 
-    fun executar(function: () -> Unit, onExecuted: (String) -> Unit, onError: () -> Unit) {
-        // Verifique se já está carregando
-        if (!loading.value) {
-            // Iniciar o carregamento
-            _loading.value = true
-
-            viewModelScope.launch {
-                try {
-                    // Simular uma função assíncrona real
-                    val resultado = withContext(Dispatchers.IO) {
-                        delay(1000)
-                        function()
-                        _loading.value = false
-                        "isCompleted"
-                    }
-
-                    // Chamar a função de retorno de sucesso
-                    onExecuted("isCompleted")
-                } catch (e: Exception) {
-                    Toast.makeText(
-                        context,
-                        "Erro desconhecido, não foi possivél executar essa ação",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    onError()
-                } finally {
-                    // Finalizar o carregamento, mesmo em caso de erro
-                    _loading.value = false
-                }
+    fun performFunction(function: () -> Unit, onError: () -> Unit) {
+        _loading.value = true
+        viewModelScope.launch {
+            try {
+                function()
+            } catch (e: Exception) {
+                onError()
+            } finally {
+                _loading.value = false
             }
         }
     }
