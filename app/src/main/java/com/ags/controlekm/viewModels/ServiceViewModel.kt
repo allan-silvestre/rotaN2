@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Calendar
 import javax.inject.Inject
 
 @HiltViewModel
@@ -33,31 +32,20 @@ class ServiceViewModel @Inject constructor(
     private val _loading = mutableStateOf(false)
     val loading get() = _loading
 
-    private val databaseReference: DatabaseReference =
-        FirebaseDatabase.getInstance()
-            .reference
-            .child("rotaN2")
-            .child("services")
-
-    var allServicesCurrentUser: Flow<List<Service>> =
-        serviceRepository.getViagensCurrentUser(
-            FirebaseAuth.getInstance().currentUser?.uid.toString()
-        )
+    var servicesCurrentUser: Flow<List<Service>> = serviceRepository.getServicesCurrentUser()
+    var currentService: Flow<Service> = serviceRepository.getcurrentService()
 
     var countContent: MutableStateFlow<Int> = MutableStateFlow(0)
-    var currentService = MutableStateFlow(Service())
-
-    var currentWeekData = mutableStateOf<List<Service>>(emptyList())
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
+            // SINCRONIZA O BANCO DE DADOS O FIREBASE
             firebaseServiceRepository.getAllServices().collect{ serviceList ->
                 serviceList.forEach { service ->
                     serviceRepository.insert(service)
                 }
             }
         }
-
         homeCountContent()
     }
 
@@ -358,26 +346,19 @@ class ServiceViewModel @Inject constructor(
         }
     }
 
-    fun getViagensCurrentUser() {
-        allServicesCurrentUser =
-            serviceRepository.getViagensCurrentUser(FirebaseAuth.getInstance().currentUser!!.uid)
-    }
-
     fun homeCountContent() {
         var count: MutableStateFlow<Int> = MutableStateFlow(1)
 
         viewModelScope.launch {
-            serviceRepository.getViagensCurrentUser(FirebaseAuth.getInstance().currentUser!!.uid).collect {
+            serviceRepository.getServicesCurrentUser().collect {
                 it.forEach {
                     when {
                         it.statusService?.contains("Em rota") == true ||
                                 it.statusService?.contains("Em rota, retornando") == true -> {
-                            currentService.value = it
                             count = MutableStateFlow(2)
                         }
 
                         it.statusService?.contains("Em andamento") == true -> {
-                            currentService.value = it
                             count = MutableStateFlow(3)
                         }
                     }
@@ -386,7 +367,7 @@ class ServiceViewModel @Inject constructor(
             }
         }
     }
-    
+
     suspend fun insert(service: Service) {
         viewModelScope.launch(Dispatchers.IO) {
             serviceRepository.insert(service)

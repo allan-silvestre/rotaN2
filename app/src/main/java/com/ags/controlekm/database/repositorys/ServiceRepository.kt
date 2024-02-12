@@ -2,26 +2,30 @@ package com.ags.controlekm.database.repositorys
 
 import com.ags.controlekm.database.daos.ServiceDao
 import com.ags.controlekm.models.Service
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class ServiceRepository @Inject constructor(
-    private val serviceDao: ServiceDao
+    private val serviceDao: ServiceDao,
 ) {
+    private val currentUserId = FirebaseAuth.getInstance().currentUser?.uid.toString()
     fun getAllServices(): Flow<List<Service>> {
         return serviceDao.getAllServices()
     }
 
-    fun getViagensCurrentUser(tecnicoId: String): Flow<List<Service>> {
-        return serviceDao.getViagensCurrentUser(tecnicoId)
+    fun getServicesCurrentUser(): Flow<List<Service>> {
+        return serviceDao.getServicesCurrentUser(currentUserId)
     }
-
-    fun getCurrentWeekData(firstDayWeek: Long, lastDayWeek: Long): Flow<List<Service>> {
-        return serviceDao.getCurrentWeekData(firstDayWeek, lastDayWeek)
+    fun getcurrentService(): Flow<Service> {
+        return serviceDao.getCurrentService(
+            currentUserId,
+            "Em rota",
+            "Em andamento",
+            "Em rota, retornando")!!
     }
-
     suspend fun insert(service: Service) {
         serviceDao.insert(service)
     }

@@ -43,7 +43,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun AllAddressView(
     navController: NavHostController,
-    addressViewModel: AddressViewModel = hiltViewModel<AddressViewModel>()
+    addressViewModel: AddressViewModel = hiltViewModel()
 ) {
     val coroutineScope = rememberCoroutineScope()
     val enderecosLocal: List<Address> by addressViewModel.allAddress.collectAsState(emptyList())

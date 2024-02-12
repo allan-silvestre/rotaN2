@@ -100,7 +100,7 @@ import kotlinx.coroutines.launch
 )
 @Composable
 fun App(
-    currentUserViewModel: CurrentUserViewModel = hiltViewModel<CurrentUserViewModel>()
+    currentUserViewModel: CurrentUserViewModel = hiltViewModel()
 ) {
     val userLoggedData by currentUserViewModel.currentUserData.collectAsState(null)
 

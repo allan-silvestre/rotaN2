@@ -72,8 +72,8 @@ import java.util.Locale
 @Composable
 fun HomeView(
     navController: NavHostController,
-    currentUserViewModel: CurrentUserViewModel = hiltViewModel<CurrentUserViewModel>(),
-    serviceViewModel: ServiceViewModel = hiltViewModel<ServiceViewModel>()
+    currentUserViewModel: CurrentUserViewModel = hiltViewModel(),
+    serviceViewModel: ServiceViewModel = hiltViewModel()
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -83,9 +83,9 @@ fun HomeView(
     var data by remember { mutableStateOf("00/00/0000") }
 
     val currentUser by currentUserViewModel.currentUserData.collectAsState(null)
-    val allTripsCurrentUser by serviceViewModel.allServicesCurrentUser.collectAsState(emptyList())
+    val allTripsCurrentUser by serviceViewModel.servicesCurrentUser.collectAsState(emptyList())
     val countContent by serviceViewModel.countContent.collectAsState(flowOf(0))
-    val currentService by serviceViewModel.currentService.collectAsState()
+    val currentService by serviceViewModel.currentService.collectAsState(null)
 
     val context = LocalContext.current
 
@@ -235,14 +235,14 @@ fun HomeView(
                     } else if (countContent == 2) {
                         visibleButtonDefault = true
                         visibleButtonCancel = true
-                        if (currentService.statusService.equals("Em rota")) {
+                        if (currentService?.statusService.equals("Em rota")) {
                             textStatus =
-                                "${currentService.statusService} entre ${currentService.departureAddress} \n e ${currentService.serviceAddress}"
+                                "${currentService?.statusService} entre ${currentService?.departureAddress} \n e ${currentService?.serviceAddress}"
                             textButton = "Confirmar chegada"
                         }
-                        if (currentService.statusService.equals("Em rota, retornando")) {
+                        if (currentService?.statusService.equals("Em rota, retornando")) {
                             textStatus =
-                                "${currentService.statusService} de ${currentService.serviceAddress} \n para ${currentService.addressReturn}"
+                                "${currentService?.statusService} de ${currentService?.serviceAddress} \n para ${currentService?.addressReturn}"
                             textButton = "Confirmar chegada"
                         }
                         Column(
@@ -300,7 +300,7 @@ fun HomeView(
                         if (visibleFinalizarDialog) {
                             AfterServiceDialog(
                                 userLoggedData = currentUser,
-                                atendimentoAtual = currentService,
+                                atendimentoAtual = currentService!!,
                                 novoAtendimento = novoAtendimento,
                                 resumoAtendimento = resumoAtendimento,
                                 data = data,
@@ -338,7 +338,7 @@ fun HomeView(
                                 2 -> {
                                     serviceViewModel.confirmarChegada(
                                         userLoggedData = currentUser,
-                                        atendimentoAtual = currentService,
+                                        atendimentoAtual = currentService!!,
                                         kmChegada = kmChegada,
                                         data = data,
                                         hora = hora,
@@ -417,16 +417,16 @@ fun HomeView(
         CancelAlertDialog(
             onDismissRequest = { visibleAlertCancel = false },
             title = {
-                if (currentService.statusService.equals("Em rota, retornando")) {
-                    TitleText("Cancelar o retorno para \n ${currentService.addressReturn}")
+                if (currentService?.statusService.equals("Em rota, retornando")) {
+                    TitleText("Cancelar o retorno para \n ${currentService?.addressReturn}")
                 } else {
-                    TitleText("Cancelar o atendimento \n ${currentService.serviceAddress}")
+                    TitleText("Cancelar o atendimento \n ${currentService?.serviceAddress}")
                 }
             },
             confirmButton = {
                 serviceViewModel.cancelar(
                     userLoggedData = currentUser!!,
-                    atendimentoAtual = currentService
+                    atendimentoAtual = currentService!!
                 )
             }
         )

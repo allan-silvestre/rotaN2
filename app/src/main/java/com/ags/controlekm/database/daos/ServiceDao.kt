@@ -15,10 +15,13 @@ interface ServiceDao {
     fun getAllServices(): Flow<List<Service>>
 
     @Query("SELECT * FROM service WHERE technicianId = :tecnicoId")
-    fun getViagensCurrentUser(tecnicoId: String): Flow<List<Service>>
+    fun getServicesCurrentUser(tecnicoId: String): Flow<List<Service>>
 
     @Query("SELECT * FROM service WHERE technicianId BETWEEN :firstDayWeek AND :lastDayWeek")
     fun getCurrentWeekData(firstDayWeek: Long, lastDayWeek: Long): Flow<List<Service>>
+
+    @Query("SELECT * FROM service WHERE technicianId = :technicianId AND statusService = :statusService OR statusService = :statusService2 OR statusService = :statusService3")
+    fun getCurrentService(technicianId: String, statusService: String, statusService2: String, statusService3: String): Flow<Service>?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(service: Service)

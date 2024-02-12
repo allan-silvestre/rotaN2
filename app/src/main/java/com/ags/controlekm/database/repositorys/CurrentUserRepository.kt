@@ -1,6 +1,7 @@
 package com.ags.controlekm.database.repositorys
 
 import com.ags.controlekm.database.daos.CurrentUserDao
+import com.ags.controlekm.models.Address
 import com.ags.controlekm.models.CurrentUser
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -10,7 +11,7 @@ import javax.inject.Singleton
 class CurrentUserRepository @Inject constructor(
     private val currentUserDao: CurrentUserDao
 ) {
-    val currentUser: Flow<CurrentUser> = currentUserDao.getCurrentUser()
+    fun getCurrentUser(): Flow<CurrentUser>{ return currentUserDao.getCurrentUser() }
 
     suspend fun insert(currentUser: CurrentUser) {
         currentUserDao.insert(currentUser)

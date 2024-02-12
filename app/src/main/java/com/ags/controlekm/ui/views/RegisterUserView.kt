@@ -94,7 +94,7 @@ import com.google.firebase.auth.FirebaseAuth
 @Composable
 fun RegisterUserView(
     navController: NavHostController,
-    userViewModel: UserViewModel = hiltViewModel<UserViewModel>()
+    userViewModel: UserViewModel = hiltViewModel()
 ) {
     //VARIAVEL CONTROLADORA DE CONTEUDO
     var countContent by remember { mutableStateOf(0) }

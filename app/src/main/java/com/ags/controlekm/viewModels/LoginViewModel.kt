@@ -3,6 +3,7 @@ package com.ags.controlekm.viewModels
 import android.app.Application
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ags.controlekm.database.AppDatabase
 import com.ags.controlekm.models.CurrentUser
@@ -13,22 +14,16 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class LoginViewModel(application: Application) : AndroidViewModel(application) {
+@HiltViewModel
+class LoginViewModel @Inject constructor(): ViewModel() {
     var authResult = MutableStateFlow(false)
     var isLoginEnabled = mutableStateOf(true)
-    private val repository: CurrentUserRepository
-
-    val currentUserData: Flow<CurrentUser>
-
-    init {
-        val currentUserDao = AppDatabase.getDatabase(application).currentUserDao()
-        this.repository = CurrentUserRepository(currentUserDao)
-        currentUserData = repository.currentUser
-    }
 
     fun login(email: String, senha: String) {
         if (email.isEmpty() || !checkEmailFormat(email) || senha.isEmpty()) {
