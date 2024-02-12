@@ -34,7 +34,6 @@ class FirebaseModule {
             databaseReference.child("users")
         )
     }
-
     @Singleton
     @Provides
     fun firebaseUserRepository(databaseReference: DatabaseReference): FirebaseUserRepository {

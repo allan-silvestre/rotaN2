@@ -10,11 +10,8 @@ import com.ags.controlekm.models.CurrentUser
 import com.ags.controlekm.models.Service
 import com.ags.controlekm.database.repositorys.ServiceRepository
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -27,7 +24,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ServiceViewModel @Inject constructor(
-    private val repository: ServiceRepository,
+    private val serviceRepository: ServiceRepository,
     private val currentUserRepository: CurrentUserRepository,
     private val firebaseCurrentUserRepository: FirebaseCurrentUserRepository,
     private val firebaseServiceRepository: FirebaseServiceRepository
@@ -42,51 +39,26 @@ class ServiceViewModel @Inject constructor(
             .child("rotaN2")
             .child("services")
 
-    var allTripsCurrentUser: Flow<List<Service>> =
-        repository.getViagensCurrentUser(FirebaseAuth.getInstance().currentUser?.uid.toString())
-    val allService: Flow<List<Service>> = repository.getAllServices()
-    //private val firebaseServiceRepository: FirebaseServiceRepository
+    var allServicesCurrentUser: Flow<List<Service>> =
+        serviceRepository.getViagensCurrentUser(
+            FirebaseAuth.getInstance().currentUser?.uid.toString()
+        )
 
     var countContent: MutableStateFlow<Int> = MutableStateFlow(0)
     var currentService = MutableStateFlow(Service())
 
     var currentWeekData = mutableStateOf<List<Service>>(emptyList())
 
-    val calendar = Calendar.getInstance()
-    val firstDayWeek = mutableStateOf(calendar.timeInMillis)
-    val lastDayWeek = mutableStateOf(calendar.timeInMillis)
-
     init {
-        calendar.firstDayOfWeek = Calendar.SUNDAY
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
-        firstDayWeek.value = calendar.timeInMillis
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY)
-        lastDayWeek.value = calendar.timeInMillis
-
-        //firebaseServiceRepository = FirebaseServiceRepository()
-
-        homeCountContent()
-
-        getCurrentWeekData(firstDayWeek.value, lastDayWeek.value)
-
-        databaseReference.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val dataList = mutableListOf<Service>()
-                for (childSnapshot in snapshot.children) {
-                    val data = childSnapshot.getValue(Service::class.java)
-                    viewModelScope.launch(Dispatchers.IO) {
-                        data?.let {
-                            dataList.add(it)
-                            repository.insert(it)
-                        }
-                    }
+        viewModelScope.launch(Dispatchers.IO) {
+            firebaseServiceRepository.getAllServices().collect{ serviceList ->
+                serviceList.forEach { service ->
+                    serviceRepository.insert(service)
                 }
             }
+        }
 
-            override fun onCancelled(error: DatabaseError) {
-                // Trate erros, se necessário
-            }
-        })
+        homeCountContent()
     }
 
     // FUNÇÕES DE LÓGICA DE NEGOCIO
@@ -387,15 +359,15 @@ class ServiceViewModel @Inject constructor(
     }
 
     fun getViagensCurrentUser() {
-        allTripsCurrentUser =
-            repository.getViagensCurrentUser(FirebaseAuth.getInstance().currentUser!!.uid)
+        allServicesCurrentUser =
+            serviceRepository.getViagensCurrentUser(FirebaseAuth.getInstance().currentUser!!.uid)
     }
 
     fun homeCountContent() {
         var count: MutableStateFlow<Int> = MutableStateFlow(1)
 
         viewModelScope.launch {
-            repository.getViagensCurrentUser(FirebaseAuth.getInstance().currentUser!!.uid).collect {
+            serviceRepository.getViagensCurrentUser(FirebaseAuth.getInstance().currentUser!!.uid).collect {
                 it.forEach {
                     when {
                         it.statusService?.contains("Em rota") == true ||
@@ -414,32 +386,24 @@ class ServiceViewModel @Inject constructor(
             }
         }
     }
-
-    fun getCurrentWeekData(firstDayWeek: Long, lastDayWeek: Long) {
-        viewModelScope.launch {
-            repository.getCurrentWeekData(firstDayWeek, lastDayWeek).collect {
-                currentWeekData.value = it
-            }
-        }
-    }
-
+    
     suspend fun insert(service: Service) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.insert(service)
+            serviceRepository.insert(service)
             firebaseServiceRepository.insert(service)
         }
     }
 
     suspend fun update(service: Service) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.update(service)
+            serviceRepository.update(service)
             firebaseServiceRepository.update(service)
         }
     }
 
     suspend fun delete(service: Service) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.delete(service)
+            serviceRepository.delete(service)
             firebaseServiceRepository.delete(service)
         }
     }

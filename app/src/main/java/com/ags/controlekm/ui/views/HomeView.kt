@@ -31,7 +31,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,11 +59,9 @@ import com.ags.controlekm.ui.components.progress.LoadingCircular
 import com.ags.controlekm.ui.components.text.ContentText
 import com.ags.controlekm.ui.components.text.TitleText
 import com.ags.controlekm.ui.components.textField.FormularioOutlinedTextField
-import com.ags.controlekm.database.firebaseRepositories.FirebaseCurrentUserRepository
 import com.ags.controlekm.models.Service
 import com.ags.controlekm.viewModels.CurrentUserViewModel
 import com.ags.controlekm.viewModels.ServiceViewModel
-import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flowOf
@@ -85,14 +82,10 @@ fun HomeView(
     var hora by remember { mutableStateOf("00:00:00") }
     var data by remember { mutableStateOf("00/00/0000") }
 
-    val userLoggedData by currentUserViewModel.currentUserData.collectAsState(null)
-    val allTripsCurrentUser by serviceViewModel.allTripsCurrentUser.collectAsState(emptyList())
+    val currentUser by currentUserViewModel.currentUserData.collectAsState(null)
+    val allTripsCurrentUser by serviceViewModel.allServicesCurrentUser.collectAsState(emptyList())
     val countContent by serviceViewModel.countContent.collectAsState(flowOf(0))
     val currentService by serviceViewModel.currentService.collectAsState()
-
-    var currentUser by rememberSaveable { mutableStateOf(FirebaseAuth.getInstance().currentUser) }
-
-    //val firebaseCurrentUserRepository = FirebaseCurrentUserRepository(currentUser?.uid.toString())
 
     val context = LocalContext.current
 
@@ -306,7 +299,7 @@ fun HomeView(
                         }
                         if (visibleFinalizarDialog) {
                             AfterServiceDialog(
-                                userLoggedData = userLoggedData,
+                                userLoggedData = currentUser,
                                 atendimentoAtual = currentService,
                                 novoAtendimento = novoAtendimento,
                                 resumoAtendimento = resumoAtendimento,
@@ -332,7 +325,7 @@ fun HomeView(
                             when (countContent) {
                                 1 -> {
                                     serviceViewModel.iniciarViagem(
-                                        userLoggedData = userLoggedData!!,
+                                        userLoggedData = currentUser!!,
                                         novoAtendimento = novoAtendimento,
                                         localSaida = localSaida,
                                         localAtendimento = localAtendimento,
@@ -344,7 +337,7 @@ fun HomeView(
 
                                 2 -> {
                                     serviceViewModel.confirmarChegada(
-                                        userLoggedData = userLoggedData,
+                                        userLoggedData = currentUser,
                                         atendimentoAtual = currentService,
                                         kmChegada = kmChegada,
                                         data = data,
@@ -432,7 +425,7 @@ fun HomeView(
             },
             confirmButton = {
                 serviceViewModel.cancelar(
-                    userLoggedData = userLoggedData!!,
+                    userLoggedData = currentUser!!,
                     atendimentoAtual = currentService
                 )
             }
