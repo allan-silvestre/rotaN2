@@ -102,7 +102,7 @@ fun AfterServiceDialog(
                             novoAtendimento = novoAtendimento,
                             localSaida = atendimentoAtual.serviceAddress.toString(),
                             localAtendimento = local,
-                            kmSaida = km,
+                            kmSaida = km.toInt(),
                             data = data,
                             hora = hora,
                             atendimentoAtual = atendimentoAtual,

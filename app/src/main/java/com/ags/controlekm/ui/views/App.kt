@@ -84,7 +84,7 @@ import coil.compose.rememberImagePainter
 import com.ags.controlekm.R
 import com.ags.controlekm.ui.components.dialog.EmailVerifieldDialog
 import com.ags.controlekm.viewModels.CurrentUserViewModel
-import com.ags.controlekm.functions.navigateSingleTopTo
+import com.ags.controlekm.functions.navigation.navigateSingleTopTo
 import com.ags.controlekm.models.components.BottomNavigationItem
 import com.ags.controlekm.models.components.MenuItem
 import com.google.firebase.auth.FirebaseAuth

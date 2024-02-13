@@ -10,11 +10,11 @@ data class Company(
     @PrimaryKey
     @NonNull
     val id: String = UUID.randomUUID().toString(),
-    var image: String? = "",
-    var companyName: String? = "",
-    var accessLevel: String? = "",
-    var phoneNumber: String? = "",
-    var email: String? = "",
-    var ein: String? = "",
+    var image: String = "",
+    var companyName: String = "",
+    var accessLevel: String = "",
+    var phoneNumber: String = "",
+    var email: String = "",
+    var ein: String = "",
     var emailVerification: Boolean? = false
 )

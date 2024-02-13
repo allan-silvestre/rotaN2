@@ -60,6 +60,7 @@ import com.ags.controlekm.ui.components.text.ContentText
 import com.ags.controlekm.ui.components.text.TitleText
 import com.ags.controlekm.ui.components.textField.FormularioOutlinedTextField
 import com.ags.controlekm.models.database.Service
+import com.ags.controlekm.models.params.newServiceParams
 import com.ags.controlekm.viewModels.CurrentUserViewModel
 import com.ags.controlekm.viewModels.ServiceViewModel
 import kotlinx.coroutines.Dispatchers
@@ -325,17 +326,19 @@ fun HomeView(
                             when (countContent) {
                                 1 -> {
                                     serviceViewModel.newService(
-                                        departureAddress = localSaida,
-                                        serviceAddress = localAtendimento,
-                                        departureKm = kmSaida,
-                                        date = data,
-                                        time = hora,
+                                        newServiceParams(
+                                            departureAddress = localSaida,
+                                            serviceAddress = localAtendimento,
+                                            departureKm = kmSaida.toInt(),
+                                            date = data,
+                                            time = hora,
+                                        ),
                                     )
                                 }
 
                                 2 -> {
                                     serviceViewModel.confirmarChegada(
-                                        kmChegada = kmChegada,
+                                        kmChegada = kmChegada.toInt(),
                                         data = data,
                                         hora = hora,
                                     )

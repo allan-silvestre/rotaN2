@@ -57,7 +57,7 @@ import com.ags.controlekm.R
 import com.ags.controlekm.ui.components.textField.FormularioOutlinedTextField
 import com.ags.controlekm.ui.components.textField.FormularioOutlinedTextFieldMenu
 import com.ags.controlekm.viewModels.LoginViewModel
-import com.ags.controlekm.functions.navigateSingleTopTo
+import com.ags.controlekm.functions.navigation.navigateSingleTopTo
 import com.google.firebase.auth.FirebaseAuth
 
 @SuppressLint("CoroutineCreationDuringComposition")
@@ -70,10 +70,10 @@ fun LoginView(
 
     val coroutineScope = rememberCoroutineScope()
 
-    var currentUser by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser) }
+   var currentUser by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser) }
 
     val loginIsCompleted by loginViewModel.authResult.collectAsState(false)
-
+/**
     DisposableEffect(currentUser?.uid) {
         FirebaseAuth.getInstance().addAuthStateListener { firebaseAuth ->
             currentUser = firebaseAuth.currentUser
@@ -81,6 +81,7 @@ fun LoginView(
         }
         onDispose { }
     }
+**/
     var countContent by rememberSaveable { mutableIntStateOf(0) }
 
     val progressIndicator = remember { mutableStateOf(false) }

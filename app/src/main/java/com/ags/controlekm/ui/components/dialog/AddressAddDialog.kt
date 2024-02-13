@@ -36,7 +36,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.ags.controlekm.ui.components.textField.FormularioOutlinedTextField
 import com.ags.controlekm.models.database.Address
 import com.ags.controlekm.viewModels.AddressViewModel
-import com.ags.controlekm.functions.validete_fields.validateContainsOnlyNumbers
+import com.ags.controlekm.functions.validete_text_format.validateContainsOnlyNumbers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -65,7 +65,7 @@ fun AddressAddDialog(
     var logradouro by remember { mutableStateOf("") }
     var logradouroError by rememberSaveable { mutableStateOf(true) }
 
-    var numero by remember { mutableStateOf("") }
+    var numero by remember { mutableStateOf("0") }
     var numeroError by rememberSaveable { mutableStateOf(true) }
 
     val coroutineScope = rememberCoroutineScope()
@@ -186,7 +186,7 @@ fun AddressAddDialog(
                                                 modifier = Modifier.weight(0.3f),
                                                 readOnly = false,
                                                 value = numero,
-                                                onValueChange = { numero = it.take(4) },
+                                                onValueChange = {numero = it.take(4) },
                                                 label = "Nº",
                                                 visualTransformation = VisualTransformation.None,
                                                 keyboardType = KeyboardType.Number,
@@ -205,7 +205,7 @@ fun AddressAddDialog(
                                             horizontalArrangement = Arrangement.End
                                         ) {
                                             TextButton(onClick = {
-                                                numeroError = validateContainsOnlyNumbers(numero)
+                                                numeroError = validateContainsOnlyNumbers(numero.toString())
 
                                                 if (
                                                     nome.isEmpty() ||
@@ -224,7 +224,7 @@ fun AddressAddDialog(
                                                         city = cidade,
                                                         district = bairro,
                                                         streetName = logradouro,
-                                                        number = numero
+                                                        number = numero.toInt()
                                                     )
                                                     coroutineScope.launch(Dispatchers.IO) {
                                                     addressViewModel.insert(address)

@@ -66,7 +66,7 @@ fun EditAddressDialog(
     var logradouro by remember { mutableStateOf(item.streetName) }
     var logradouroError by rememberSaveable { mutableStateOf(true) }
 
-    var numero by remember { mutableStateOf(item.number) }
+    var numero by remember { mutableStateOf(item.number.toString()) }
     var numeroError by rememberSaveable { mutableStateOf(true) }
 
     val visibleDialogEdit = remember { mutableStateOf(visible) }
@@ -229,7 +229,7 @@ fun EditAddressDialog(
                                                                     city = cidade,
                                                                     district = bairro,
                                                                     streetName = logradouro,
-                                                                    number = numero
+                                                                    number = numero.toInt()
                                                                 )
                                                             coroutineScope.launch(Dispatchers.IO) {
                                                                 addressViewModel.insert(address)

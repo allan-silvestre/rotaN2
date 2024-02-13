@@ -25,9 +25,9 @@ class ServiceViewModel @Inject constructor(
     private val serviceRepository: ServiceRepository,
     private val currentUserRepository: CurrentUserRepository,
     private val firebaseCurrentUserRepository: FirebaseCurrentUserRepository,
-    private val firebaseServiceRepository: FirebaseServiceRepository
+    private val firebaseServiceRepository: FirebaseServiceRepository,
+    private val validadeFields: ValidadeFields
 ) : ViewModel() {
-
     private val _loading = mutableStateOf(false)
     val loading get() = _loading
 
@@ -61,19 +61,8 @@ class ServiceViewModel @Inject constructor(
 
     fun newService(params: newServiceParams) {
         // CHECK IF ANY FIELD IS EMPTY
-        if (params.departureAddress.equals(null) || params.serviceAddress.equals(null) || params.departureKm.equals(null)) {
-            println("Preencha todos os campos para continuar")
-            // CHECK IF THE DEPARTURE PLACE IS THE SAME AS THE SERVICE PLACE
-        } else if (params.departureAddress.equals(params.serviceAddress)) {
-            println("O local de saida não pode ser o mesmo do atendimento")
-            // CHECK IF THE KM INFORMED IS VALID ACCORDING TO THE LAST KM INFORMED
-        } else if (params.departureKm.toInt() < currentUser.value.lastKm!!.toInt()) {
-            println("O KM não pode ser inferior ao último informado")
-        } else if(currentService.value.statusService!!.isNotEmpty()) {
-            println("Finalize o atendimento em aberto antes de iniciar um novo")
-        }else {
+        if (validadeFields.validateFieldsNewService(params.departureAddress, params.serviceAddress, params.departureKm)) {
             val newService = Service()
-
             newService.departureDate = params.date
             newService.departureTime = params.time
             newService.departureAddress = params.departureAddress
@@ -86,28 +75,29 @@ class ServiceViewModel @Inject constructor(
 
             currentUser.value.lastKm = params.departureKm
 
-            runBlocking {
-                val executar = launch(Dispatchers.IO) {
-                    _loading.value = true
-                    delay(3000)
-                    insert(newService)
-                    currentUserRepository.update(currentUser.value)
-                    firebaseCurrentUserRepository.updateLastKm(params.departureKm)
-                    homeCountContent()
+            viewModelScope.launch(Dispatchers.IO) {
+                _loading.value = true
+                try {
+                        _loading.value = true
+                        delay(1000)
+                        insert(newService)
+                        currentUserRepository.update(currentUser.value)
+                        firebaseCurrentUserRepository.updateLastKm(params.departureKm)
+                        homeCountContent()
+                } finally {
+                    _loading.value = false
                 }
-                executar.join()
-                _loading.value = false
             }
         }
     }
 
     fun confirmarChegada(
-        kmChegada: String,
+        kmChegada: Int,
         data: String,
         hora: String,
     ) {
         // VERIFICA SE O CAMPO ESTA VAZIO
-        if (kmChegada.isEmpty()) {
+        if (kmChegada.toString().isEmpty()) {
             println("Você precisa informar o KM ao chegar no local de atendimento para continuar")
             // VERIFICA SE O KM INFORMADO É VALIDO DE ACORDO COM O ULTIMO KM INFORMADO
         } else if (kmChegada.toInt() < currentUser.value.lastKm!!.toInt()) {
@@ -117,8 +107,7 @@ class ServiceViewModel @Inject constructor(
                 currentService.value.dateArrival = data
                 currentService.value.timeArrival = hora
                 currentService.value.arrivalKm = kmChegada
-                currentService.value.kmDriven =
-                    (kmChegada.toInt() - currentService.value.departureKm!!.toInt()).toString()
+                currentService.value.kmDriven = (kmChegada - currentService.value.departureKm)
                 currentService.value.statusService = "Em andamento"
 
                 currentUser.value.lastKm = kmChegada
@@ -139,8 +128,7 @@ class ServiceViewModel @Inject constructor(
                 currentService.value.arrivalKm = kmChegada
                 currentService.value.statusService = "Finalizado"
                 firebaseCurrentUserRepository.updateLastKm(kmChegada)
-                currentService.value.kmDriven =
-                    (kmChegada.toInt() - currentService.value.departureKm!!.toInt()).toString()
+                currentService.value.kmDriven = (kmChegada - currentService.value.departureKm)
 
                 currentUser.value.lastKm = kmChegada
                 currentUser.value.kmBackup = kmChegada
@@ -204,7 +192,7 @@ class ServiceViewModel @Inject constructor(
                     atendimentoAtual.addressReturn = ""
                     atendimentoAtual.statusService = "Em andamento"
 
-                    userLoggedData.lastKm = userLoggedData?.kmBackup.toString()
+                    userLoggedData.lastKm = userLoggedData.kmBackup
 
                     viewModelScope.launch(Dispatchers.IO) {
                         update(atendimentoAtual)
@@ -221,7 +209,7 @@ class ServiceViewModel @Inject constructor(
                         currentUserRepository.update(userLoggedData)
                         // NO FIREBASE
                         // DEFINE O VALOR DO (ULTIMO KM) DO USUÁRIO PARA O ULTIMO INFORMADO AO CONCLUIR A ULTIMA VIAGEM
-                        firebaseCurrentUserRepository.updateLastKm(userLoggedData.kmBackup.toString())
+                        firebaseCurrentUserRepository.updateLastKm(userLoggedData.kmBackup)
                     }
                     count.value = 1
                 }
@@ -236,14 +224,14 @@ class ServiceViewModel @Inject constructor(
         novoAtendimento: Service,
         localSaida: String,
         localAtendimento: String,
-        kmSaida: String,
+        kmSaida: Int,
         data: String,
         hora: String,
         atendimentoAtual: Service,
         resumoAtendimento: String,
     ) {
         // VERIFICA SE ALGUM CAMPO ESTA VAZIO
-        if (localSaida.equals(null) || localAtendimento.equals(null) || kmSaida.equals(null)) {
+        if (localSaida.equals(null) || localAtendimento.equals(null) || kmSaida.toString().equals(null)) {
             println("Preencha todos os campos para continuar")
             // VERIFICA SE O LOCAL DE SAIDA É IGUAL AO LOCAL DE ATENDIMENTO
         } else if (localSaida.equals(localAtendimento)) {
@@ -270,12 +258,12 @@ class ServiceViewModel @Inject constructor(
 
             executar(
                 function = {
-                    userLoggedData.kmBackup = userLoggedData.lastKm.toString()
+                    userLoggedData.kmBackup = userLoggedData.lastKm
                     // FINALIZA O ATENDIMENTO ATUAL
                     viewModelScope.launch(Dispatchers.IO) {
                         update(atendimentoAtual)
                         currentUserRepository.update(userLoggedData)
-                        firebaseCurrentUserRepository.updateKmBackup(userLoggedData.lastKm.toString())
+                        firebaseCurrentUserRepository.updateKmBackup(userLoggedData.lastKm)
                     }
 
 

@@ -3,7 +3,7 @@ package com.ags.controlekm.viewModels
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ags.controlekm.functions.validete_fields.validateEmailFormat
+import com.ags.controlekm.functions.validete_text_format.validateEmailFormat
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
@@ -18,7 +18,6 @@ import javax.inject.Inject
 class LoginViewModel @Inject constructor(): ViewModel() {
     var authResult = MutableStateFlow(false)
     var isLoginEnabled = mutableStateOf(true)
-
     fun login(email: String, senha: String) {
         if (email.isEmpty() || !validateEmailFormat(email) || senha.isEmpty()) {
             authResult.value = false

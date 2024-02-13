@@ -1,4 +1,4 @@
-package com.ags.controlekm.functions
+package com.ags.controlekm.functions.firebase
 
 import android.graphics.Bitmap
 import androidx.activity.ComponentActivity

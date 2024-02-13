@@ -1,4 +1,4 @@
-package com.ags.controlekm.functions.validete_fields
+package com.ags.controlekm.functions.validete_text_format
 
 import android.util.Patterns
 

@@ -32,7 +32,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.ags.controlekm.ui.components.dialog.AddressAddDialog
 import com.ags.controlekm.ui.components.dialog.EditAddressDialog
-import com.ags.controlekm.functions.navigateSingleTopTo
+import com.ags.controlekm.functions.navigation.navigateSingleTopTo
 import com.ags.controlekm.models.database.Address
 import com.ags.controlekm.viewModels.AddressViewModel
 import kotlinx.coroutines.Dispatchers

@@ -9,6 +9,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.unit.dp
 import com.ags.controlekm.database.daos.AddressDao
 import com.example.compose.AppTheme
+import com.google.firebase.FirebaseApp
 import com.google.firebase.appcheck.ktx.appCheck
 import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
 import com.google.firebase.ktx.Firebase
@@ -16,7 +17,6 @@ import com.google.firebase.ktx.initialize
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-@Suppress("DEPRECATION")
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -29,7 +29,7 @@ class MainActivity : ComponentActivity() {
                     tonalElevation = 5.dp,
                     shadowElevation = 5.dp
                 ) {
-                    Firebase.initialize(applicationContext)
+                    FirebaseApp.initializeApp(this)
                     Firebase.appCheck.installAppCheckProviderFactory(
                         PlayIntegrityAppCheckProviderFactory.getInstance(),
                     )

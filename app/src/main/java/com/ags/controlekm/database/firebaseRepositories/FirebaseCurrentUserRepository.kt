@@ -42,11 +42,11 @@ class FirebaseCurrentUserRepository @Inject constructor(
         databaseReference.child(id).child("emailVerification").setValue(emailIsVerifield)
     }
 
-    fun updateLastKm(km: String){
+    fun updateLastKm(km: Int){
         databaseReference.child(id).child("lastKm").setValue(km)
     }
 
-    fun updateKmBackup(km: String){
+    fun updateKmBackup(km: Int){
         databaseReference.child(id).child("kmBackup").setValue(km)
     }
 }

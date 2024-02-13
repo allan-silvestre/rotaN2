@@ -1,4 +1,4 @@
-package com.ags.controlekm.functions
+package com.ags.controlekm.functions.navigation
 
 import androidx.navigation.NavHostController
 

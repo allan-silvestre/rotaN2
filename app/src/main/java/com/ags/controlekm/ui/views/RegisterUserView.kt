@@ -81,13 +81,13 @@ import com.ags.controlekm.ui.components.textField.FormularioTextField
 import com.ags.controlekm.ui.components.textField.FormularioTextFieldMenu
 import com.ags.controlekm.viewModels.UserViewModel
 import com.ags.controlekm.mask_transformations.MaskVisualTransformation
-import com.ags.controlekm.functions.uploadImage
-import com.ags.controlekm.functions.validete_fields.validateContainsOnlyNumbers
-import com.ags.controlekm.functions.validete_fields.validateContainsOnlyText
-import com.ags.controlekm.functions.validete_fields.validateCpfFormat
-import com.ags.controlekm.functions.validete_fields.validateEmailFormat
-import com.ags.controlekm.functions.validete_fields.validatePasswordFormat
-import com.ags.controlekm.functions.navigateSingleTopTo
+import com.ags.controlekm.functions.firebase.uploadImage
+import com.ags.controlekm.functions.validete_text_format.validateContainsOnlyNumbers
+import com.ags.controlekm.functions.validete_text_format.validateContainsOnlyText
+import com.ags.controlekm.functions.validete_text_format.validateCpfFormat
+import com.ags.controlekm.functions.validete_text_format.validateEmailFormat
+import com.ags.controlekm.functions.validete_text_format.validatePasswordFormat
+import com.ags.controlekm.functions.navigation.navigateSingleTopTo
 import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalAnimationApi::class)
