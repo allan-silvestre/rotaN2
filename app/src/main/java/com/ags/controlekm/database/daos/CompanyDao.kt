@@ -6,7 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.ags.controlekm.models.Company
+import com.ags.controlekm.models.database.Company
 import kotlinx.coroutines.flow.Flow
 
 @Dao

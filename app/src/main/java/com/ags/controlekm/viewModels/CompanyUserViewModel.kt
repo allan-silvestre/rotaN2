@@ -1,11 +1,8 @@
 package com.ags.controlekm.viewModels
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ags.controlekm.database.AppDatabase
-import com.ags.controlekm.models.Company
+import com.ags.controlekm.models.database.Company
 import com.ags.controlekm.database.repositorys.CompanyRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow

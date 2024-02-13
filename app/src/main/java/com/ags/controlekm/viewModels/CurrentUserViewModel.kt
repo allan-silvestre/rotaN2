@@ -3,7 +3,7 @@ package com.ags.controlekm.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ags.controlekm.database.firebaseRepositories.FirebaseCurrentUserRepository
-import com.ags.controlekm.models.CurrentUser
+import com.ags.controlekm.models.database.CurrentUser
 import com.ags.controlekm.database.repositorys.CurrentUserRepository
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,7 +24,7 @@ class CurrentUserViewModel @Inject constructor(
             firebaseRepository.getCurrentUser().collect{ currentUser ->
                 if (currentUser != null) {
                     repository.insert(currentUser)
-                    firebaseRepository.emailIsVerifield(
+                    firebaseRepository.updateEmailVerification(
                         FirebaseAuth.getInstance().currentUser?.isEmailVerified ?: false
                     )
                 }

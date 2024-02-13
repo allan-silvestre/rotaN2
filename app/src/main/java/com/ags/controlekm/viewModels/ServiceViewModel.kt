@@ -6,17 +6,18 @@ import androidx.lifecycle.viewModelScope
 import com.ags.controlekm.database.firebaseRepositories.FirebaseCurrentUserRepository
 import com.ags.controlekm.database.firebaseRepositories.FirebaseServiceRepository
 import com.ags.controlekm.database.repositorys.CurrentUserRepository
-import com.ags.controlekm.models.CurrentUser
-import com.ags.controlekm.models.Service
+import com.ags.controlekm.models.database.CurrentUser
+import com.ags.controlekm.models.database.Service
 import com.ags.controlekm.database.repositorys.ServiceRepository
+import com.ags.controlekm.models.params.newServiceParams
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,94 +26,82 @@ class ServiceViewModel @Inject constructor(
     private val currentUserRepository: CurrentUserRepository,
     private val firebaseCurrentUserRepository: FirebaseCurrentUserRepository,
     private val firebaseServiceRepository: FirebaseServiceRepository
-): ViewModel() {
+) : ViewModel() {
 
     private val _loading = mutableStateOf(false)
     val loading get() = _loading
 
-    var servicesCurrentUser: Flow<List<Service>> = serviceRepository.getServicesCurrentUser()
-    var currentService: Flow<Service> = serviceRepository.getcurrentService()
-
     var countContent: MutableStateFlow<Int> = MutableStateFlow(0)
+
+    val currentUser: MutableStateFlow<CurrentUser> = MutableStateFlow(CurrentUser())
+    var servicesCurrentUser: Flow<List<Service>> = serviceRepository.getServicesCurrentUser()
+    val currentService: MutableStateFlow<Service> = MutableStateFlow(Service())
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            // SINCRONIZA O BANCO DE DADOS O FIREBASE
-            firebaseServiceRepository.getAllServices().collect{ serviceList ->
-                serviceList.forEach { service ->
-                    serviceRepository.insert(service)
+            launch {
+                currentUserRepository.getCurrentUser().firstOrNull()?.let {
+                    currentUser.value = it
+                }
+                serviceRepository.getcurrentService().firstOrNull()?.let {
+                    currentService.value = it
                 }
             }
+            launch {
+                // SINCRONIZA O BANCO DE DADOS COM O FIREBASE
+                firebaseServiceRepository.getAllServices().collect { serviceList ->
+                    serviceList.forEach { service ->
+                        serviceRepository.insert(service)
+                    }
+                }
+            }
+            homeCountContent()
         }
-        homeCountContent()
     }
 
-    // FUNÇÕES DE LÓGICA DE NEGOCIO
-    fun iniciarViagem(
-        userLoggedData: CurrentUser,
-        novoAtendimento: Service,
-        localSaida: String,
-        localAtendimento: String,
-        kmSaida: String,
-        data: String,
-        hora: String,
-    ) {
-        // VERIFICA SE ALGUM CAMPO ESTA VAZIO
-        if (localSaida.equals(null) || localAtendimento.equals(null) || kmSaida.equals(null)) {
+    fun newService(params: newServiceParams) {
+        // CHECK IF ANY FIELD IS EMPTY
+        if (params.departureAddress.equals(null) || params.serviceAddress.equals(null) || params.departureKm.equals(null)) {
             println("Preencha todos os campos para continuar")
-            // VERIFICA SE O LOCAL DE SAIDA É IGUAL AO LOCAL DE ATENDIMENTO
-        } else if (localSaida.equals(localAtendimento)) {
-            println("O local de saida não pode ser o mesmo local do atendimento")
-            // VERIFICA SE O KM INFORMADO É VALIDO DE ACORDO COM O ULTIMO KM INFORMADO
-        } else if (kmSaida.toInt() < userLoggedData.lastKm!!.toInt()) {
+            // CHECK IF THE DEPARTURE PLACE IS THE SAME AS THE SERVICE PLACE
+        } else if (params.departureAddress.equals(params.serviceAddress)) {
+            println("O local de saida não pode ser o mesmo do atendimento")
+            // CHECK IF THE KM INFORMED IS VALID ACCORDING TO THE LAST KM INFORMED
+        } else if (params.departureKm.toInt() < currentUser.value.lastKm!!.toInt()) {
             println("O KM não pode ser inferior ao último informado")
-        } else {
+        } else if(currentService.value.statusService!!.isNotEmpty()) {
+            println("Finalize o atendimento em aberto antes de iniciar um novo")
+        }else {
+            val newService = Service()
+
+            newService.departureDate = params.date
+            newService.departureTime = params.time
+            newService.departureAddress = params.departureAddress
+            newService.serviceAddress = params.serviceAddress
+            newService.departureKm = params.departureKm
+            newService.technicianId = currentUser.value.id
+            newService.technicianName = "${currentUser.value.name} ${currentUser.value.lastName}"
+            newService.profileImgTechnician = currentUser.value.image.toString()
+            newService.statusService = "Em rota"
+
+            currentUser.value.lastKm = params.departureKm
+
             runBlocking {
-                this.launch{
-                    novoAtendimento.departureDate = data
-                    novoAtendimento.departureTime = hora
-                    novoAtendimento.departureAddress = localSaida
-                    novoAtendimento.serviceAddress = localAtendimento
-                    novoAtendimento.departureKm = kmSaida
-                    novoAtendimento.technicianId = userLoggedData.id
-                    novoAtendimento.technicianName = "${userLoggedData.name} ${userLoggedData.lastName}"
-                    novoAtendimento.profileImgTechnician = userLoggedData.image.toString()
-                    novoAtendimento.statusService = "Em rota"
-
-                    userLoggedData.lastKm = kmSaida
+                val executar = launch(Dispatchers.IO) {
+                    _loading.value = true
+                    delay(3000)
+                    insert(newService)
+                    currentUserRepository.update(currentUser.value)
+                    firebaseCurrentUserRepository.updateLastKm(params.departureKm)
+                    homeCountContent()
                 }
-
-                this.launch {
-
-                }
-
-
+                executar.join()
+                _loading.value = false
             }
-
-/*
-            executar(
-                function = {
-                    viewModelScope.launch(Dispatchers.IO) {
-                        insert(novoAtendimento)
-                        currentUserRepository.update(userLoggedData)
-                        firebaseCurrentUserRepository.addUltimoKm(kmSaida)
-                    }
-                },
-                onExecuted = {
-                    if(it) {
-                        countContent.value = 2
-                        _loading.value = false
-                    }
-                },
-                onError = {}
-            )*/
         }
     }
 
-    /*
     fun confirmarChegada(
-        userLoggedData: CurrentUser?,
-        atendimentoAtual: Service,
         kmChegada: String,
         data: String,
         hora: String,
@@ -121,68 +110,58 @@ class ServiceViewModel @Inject constructor(
         if (kmChegada.isEmpty()) {
             println("Você precisa informar o KM ao chegar no local de atendimento para continuar")
             // VERIFICA SE O KM INFORMADO É VALIDO DE ACORDO COM O ULTIMO KM INFORMADO
-        } else if (kmChegada.toInt() < userLoggedData?.lastKm!!.toInt()) {
+        } else if (kmChegada.toInt() < currentUser.value.lastKm!!.toInt()) {
             println("O KM não pode ser inferior ao último informado")
         } else {
-            if (atendimentoAtual.statusService.equals("Em rota")) {
-                atendimentoAtual.dateArrival = data
-                atendimentoAtual.timeArrival = hora
-                atendimentoAtual.arrivalKm = kmChegada
-                atendimentoAtual.kmDriven =
-                    (kmChegada.toInt() - atendimentoAtual.departureKm!!.toInt()).toString()
-                atendimentoAtual.statusService = "Em andamento"
+            if (currentService.value.statusService.equals("Em rota")) {
+                currentService.value.dateArrival = data
+                currentService.value.timeArrival = hora
+                currentService.value.arrivalKm = kmChegada
+                currentService.value.kmDriven =
+                    (kmChegada.toInt() - currentService.value.departureKm!!.toInt()).toString()
+                currentService.value.statusService = "Em andamento"
 
-                userLoggedData.lastKm = kmChegada
+                currentUser.value.lastKm = kmChegada
 
                 executar(
                     function = {
                         viewModelScope.launch(Dispatchers.IO) {
-                            update(atendimentoAtual)
-                            currentUserRepository.update(userLoggedData)
-                            firebaseCurrentUserRepository.addUltimoKm(kmChegada)
-                        }
-                    },
-                    onExecuted = {
-                        if(it) {
-                            countContent.value = 3
-                            _loading.value = false
+                            update(currentService.value)
+                            currentUserRepository.update(currentUser.value)
+                            firebaseCurrentUserRepository.updateLastKm(kmChegada)
                         }
                     },
                     onError = {}
                 )
-            } else if (atendimentoAtual.statusService.equals("Em rota, retornando")) {
-                atendimentoAtual.dateArrivalReturn = data
-                atendimentoAtual.timeCompletedReturn = hora
-                atendimentoAtual.arrivalKm = kmChegada
-                atendimentoAtual.statusService = "Finalizado"
-                firebaseCurrentUserRepository.addUltimoKm(kmChegada)
-                atendimentoAtual.kmDriven =
-                    (kmChegada.toInt() - atendimentoAtual.departureKm!!.toInt()).toString()
+            } else if (currentService.value.statusService.equals("Em rota, retornando")) {
+                currentService.value.dateArrivalReturn = data
+                currentService.value.timeCompletedReturn = hora
+                currentService.value.arrivalKm = kmChegada
+                currentService.value.statusService = "Finalizado"
+                firebaseCurrentUserRepository.updateLastKm(kmChegada)
+                currentService.value.kmDriven =
+                    (kmChegada.toInt() - currentService.value.departureKm!!.toInt()).toString()
 
-                userLoggedData.lastKm = kmChegada
-                userLoggedData.kmBackup = kmChegada
+                currentUser.value.lastKm = kmChegada
+                currentUser.value.kmBackup = kmChegada
 
                 executar(
                     function = {
                         viewModelScope.launch(Dispatchers.IO) {
-                            update(atendimentoAtual)
-                            currentUserRepository.update(userLoggedData)
-                            firebaseCurrentUserRepository.addUltimoKm(kmChegada)
-                            firebaseCurrentUserRepository.addKmBackup(kmChegada)
+                            update(currentService.value)
+                            currentUserRepository.update(currentUser.value)
+                            firebaseCurrentUserRepository.updateLastKm(kmChegada)
+                            firebaseCurrentUserRepository.updateKmBackup(kmChegada)
                             countContent.value = 1
                         }
-                    },
-                    onExecuted = {
-                        if (it) { _loading.value = false}
                     },
                     onError = {}
                 )
             }
         }
     }
-*/
 
-/*
+
     fun iniciarRetorno(
         atendimento: Service,
         localRetorno: String,
@@ -206,18 +185,11 @@ class ServiceViewModel @Inject constructor(
                 }
                 homeCountContent()
             },
-            onExecuted = {
-                if(it) {
-                    countContent.value = 2
-                    _loading.value = false
-                }
-            },
             onError = {}
         )
     }
-*/
 
-/*
+
     fun cancelar(
         userLoggedData: CurrentUser,
         atendimentoAtual: Service,
@@ -249,23 +221,16 @@ class ServiceViewModel @Inject constructor(
                         currentUserRepository.update(userLoggedData)
                         // NO FIREBASE
                         // DEFINE O VALOR DO (ULTIMO KM) DO USUÁRIO PARA O ULTIMO INFORMADO AO CONCLUIR A ULTIMA VIAGEM
-                        firebaseCurrentUserRepository.addUltimoKm(userLoggedData.kmBackup.toString())
+                        firebaseCurrentUserRepository.updateLastKm(userLoggedData.kmBackup.toString())
                     }
                     count.value = 1
-                }
-            },
-            onExecuted = {
-                if(it) {
-                    countContent.value = count.value
-                    _loading.value = false
                 }
             },
             onError = {}
         )
     }
-*/
 
-/*
+
     fun novoAtendimento(
         userLoggedData: CurrentUser?,
         novoAtendimento: Service,
@@ -310,36 +275,25 @@ class ServiceViewModel @Inject constructor(
                     viewModelScope.launch(Dispatchers.IO) {
                         update(atendimentoAtual)
                         currentUserRepository.update(userLoggedData)
-                        firebaseCurrentUserRepository.addKmBackup(userLoggedData.lastKm.toString())
+                        firebaseCurrentUserRepository.updateKmBackup(userLoggedData.lastKm.toString())
+                    }
+
+
+                    userLoggedData.lastKm = kmSaida
+                    //INICIA UM NOVO ATENDIMENTO
+                    viewModelScope.launch(Dispatchers.IO) {
+                        insert(novoAtendimento)
+                        currentUserRepository.update(userLoggedData)
+                        firebaseCurrentUserRepository.updateLastKm(kmSaida)
                     }
                 },
-                onExecuted = {
-                    if(it) {
-                        executar(
-                            function = {
-                                userLoggedData.lastKm = kmSaida
-                                //INICIA UM NOVO ATENDIMENTO
-                                viewModelScope.launch(Dispatchers.IO) {
-                                    insert(novoAtendimento)
-                                    currentUserRepository.update(userLoggedData)
-                                    firebaseCurrentUserRepository.addUltimoKm(kmSaida)
-                                }
-                            },
-                            onExecuted = {
-                                if(it) {
-                                    countContent.value = 2
-                                    _loading.value = false
-                                }
-                            },
-                            onError = {}
-                        )
-                    }
-                },
+
+
                 onError = {}
             )
         }
     }
-*/
+
     fun homeCountContent() {
         var count: MutableStateFlow<Int> = MutableStateFlow(1)
 
@@ -358,6 +312,19 @@ class ServiceViewModel @Inject constructor(
                     }
                 }
                 countContent = count
+            }
+        }
+    }
+
+    fun executar(function: () -> Unit, onError: () -> Unit) {
+        _loading.value = true
+        viewModelScope.launch {
+            try {
+                function()
+            } catch (e: Exception) {
+                onError()
+            } finally {
+                _loading.value = false
             }
         }
     }

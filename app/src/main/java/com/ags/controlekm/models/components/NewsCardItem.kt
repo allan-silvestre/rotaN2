@@ -1,4 +1,4 @@
-package com.ags.controlekm.models
+package com.ags.controlekm.models.components
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter

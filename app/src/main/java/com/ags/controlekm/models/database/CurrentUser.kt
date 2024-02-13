@@ -1,12 +1,12 @@
-package com.ags.controlekm.models
+package com.ags.controlekm.models.database
 
 import androidx.annotation.NonNull
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.util.UUID
 
-@Entity()
-data class User(
+@Entity
+data class CurrentUser(
     @PrimaryKey
     @NonNull
     val id: String = UUID.randomUUID().toString(),

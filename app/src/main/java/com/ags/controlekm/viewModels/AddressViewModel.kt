@@ -3,7 +3,7 @@ package com.ags.controlekm.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ags.controlekm.database.firebaseRepositories.FirebaseAddressRepository
-import com.ags.controlekm.models.Address
+import com.ags.controlekm.models.database.Address
 import com.ags.controlekm.database.repositorys.AddressRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers

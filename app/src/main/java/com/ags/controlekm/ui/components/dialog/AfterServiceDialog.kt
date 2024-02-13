@@ -21,10 +21,8 @@ import com.ags.controlekm.ui.components.buttons.ButtonText
 import com.ags.controlekm.ui.components.dropDownMenu.SelectAddressDropDownMenu
 import com.ags.controlekm.ui.components.progress.LoadingCircular
 import com.ags.controlekm.ui.components.text.TitleText
-import com.ags.controlekm.database.firebaseRepositories.FirebaseCurrentUserRepository
-import com.ags.controlekm.models.CurrentUser
-import com.ags.controlekm.models.Service
-import com.ags.controlekm.viewModels.CurrentUserViewModel
+import com.ags.controlekm.models.database.CurrentUser
+import com.ags.controlekm.models.database.Service
 import com.ags.controlekm.viewModels.ServiceViewModel
 import com.ags.controlekm.viewModels.PerformFunctionViewModel
 

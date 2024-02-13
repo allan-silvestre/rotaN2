@@ -33,11 +33,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ags.controlekm.ui.components.textField.FormularioOutlinedTextField
-import com.ags.controlekm.models.Address
+import com.ags.controlekm.models.database.Address
 import com.ags.controlekm.viewModels.AddressViewModel
-import com.ags.controlekm.functions.checkOnlyNumbers
+import com.ags.controlekm.functions.validete_fields.validateContainsOnlyNumbers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -206,7 +205,7 @@ fun AddressAddDialog(
                                             horizontalArrangement = Arrangement.End
                                         ) {
                                             TextButton(onClick = {
-                                                numeroError = checkOnlyNumbers(numero)
+                                                numeroError = validateContainsOnlyNumbers(numero)
 
                                                 if (
                                                     nome.isEmpty() ||

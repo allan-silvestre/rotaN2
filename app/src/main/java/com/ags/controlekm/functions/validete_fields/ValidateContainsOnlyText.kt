@@ -1,7 +1,7 @@
-package com.ags.controlekm.functions
+package com.ags.controlekm.functions.validete_fields
 
 //VERIFICAÇÃO SIMPLES APENAS TEXTO
-fun checkOnlyText(text: String): Boolean {
+fun validateContainsOnlyText(text: String): Boolean {
     if (text.equals("Selecionar") || text.equals("")) {
         return false
     }

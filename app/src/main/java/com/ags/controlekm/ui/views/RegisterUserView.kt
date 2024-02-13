@@ -82,11 +82,11 @@ import com.ags.controlekm.ui.components.textField.FormularioTextFieldMenu
 import com.ags.controlekm.viewModels.UserViewModel
 import com.ags.controlekm.mask_transformations.MaskVisualTransformation
 import com.ags.controlekm.functions.uploadImage
-import com.ags.controlekm.functions.checkOnlyNumbers
-import com.ags.controlekm.functions.checkOnlyText
-import com.ags.controlekm.functions.checkCpfFormat
-import com.ags.controlekm.functions.checkEmailFormat
-import com.ags.controlekm.functions.checkPasswordFormat
+import com.ags.controlekm.functions.validete_fields.validateContainsOnlyNumbers
+import com.ags.controlekm.functions.validete_fields.validateContainsOnlyText
+import com.ags.controlekm.functions.validete_fields.validateCpfFormat
+import com.ags.controlekm.functions.validete_fields.validateEmailFormat
+import com.ags.controlekm.functions.validete_fields.validatePasswordFormat
 import com.ags.controlekm.functions.navigateSingleTopTo
 import com.google.firebase.auth.FirebaseAuth
 
@@ -332,8 +332,8 @@ fun RegisterUserView(
                                 }
                             }
 
-                            nomeError = checkOnlyText(nome)
-                            sobrenomeError = checkOnlyText(sobrenome)
+                            nomeError = validateContainsOnlyText(nome)
+                            sobrenomeError = validateContainsOnlyText(sobrenome)
                             if (!nomeError || !sobrenomeError) {
                                 countContent = 0
                             } else {
@@ -415,7 +415,7 @@ fun RegisterUserView(
                                     value = cpf,
                                     onValueChange = {
                                         cpf = it.take(CPF_INPUT_LENGTH)
-                                        checkCpfFormat(cpf)
+                                        validateCpfFormat(cpf)
                                     },
                                     label = "CPF",
                                     visualTransformation = MaskVisualTransformation(CPF_MASK),
@@ -446,8 +446,8 @@ fun RegisterUserView(
                                         trackColor = MaterialTheme.colorScheme.surfaceVariant,
                                     )
                                 }
-                                generoError = checkOnlyText(generoSelected)
-                                if (!checkOnlyNumbers(nascimento) || nascimento.length < 8) {
+                                generoError = validateContainsOnlyText(generoSelected)
+                                if (!validateContainsOnlyNumbers(nascimento) || nascimento.length < 8) {
                                     nascimentoError = false
                                     nascimentoErrorMessage = "informe a data completa"
                                 } else {
@@ -457,7 +457,7 @@ fun RegisterUserView(
                                     cpfError = false
                                     cpfErrorMessage = "CPF vinculado a outra conta"
                                 } else {
-                                    if (!checkCpfFormat(cpf)) {
+                                    if (!validateCpfFormat(cpf)) {
                                         cpfError = false
                                         cpfErrorMessage = "Informe um CPF válido"
                                     } else {
@@ -536,7 +536,7 @@ fun RegisterUserView(
                                     telefoneError = false
                                     telefoneErrorMessage = "Número vinculado a outra conta"
                                 } else {
-                                    if (!checkOnlyNumbers(telefone) || telefone.length < 11) {
+                                    if (!validateContainsOnlyNumbers(telefone) || telefone.length < 11) {
                                         telefoneErrorMessage = "Informe um número válido"
                                         telefoneError = false
                                     } else {
@@ -547,7 +547,7 @@ fun RegisterUserView(
                                     emailError = false
                                     emailErrorMessage = "Email vinculado a outra conta"
                                 } else {
-                                    if (!checkEmailFormat(email)) {
+                                    if (!validateEmailFormat(email)) {
                                         emailErrorMessage = "Informe um Email válido"
                                         emailError = false
                                     } else {
@@ -637,12 +637,12 @@ fun RegisterUserView(
                                     )
                                 }
                                 cargoError = cargo.isNotEmpty()
-                                setorError = checkOnlyText(setor)
+                                setorError = validateContainsOnlyText(setor)
                                 if (matriculaList.contains(matricula)) {
                                     matriculaError = false
                                     matriculaErrorMessage = "Matricula vinculado a outra conta"
                                 } else {
-                                    if (!checkOnlyNumbers(matricula) || matricula.length < 3) {
+                                    if (!validateContainsOnlyNumbers(matricula) || matricula.length < 3) {
                                         matriculaErrorMessage = "Informe uma matrícula válida"
                                         matriculaError = false
                                     } else {
@@ -723,7 +723,7 @@ fun RegisterUserView(
                                         trackColor = MaterialTheme.colorScheme.surfaceVariant,
                                     )
                                 }
-                                nivelAcessoError = checkOnlyText(nivelAcessoSelected)
+                                nivelAcessoError = validateContainsOnlyText(nivelAcessoSelected)
                                 if (
                                     !nivelAcessoError
                                 ) {
@@ -773,7 +773,7 @@ fun RegisterUserView(
                                         trackColor = MaterialTheme.colorScheme.surfaceVariant,
                                     )
                                 }
-                                senhaError = checkPasswordFormat(senha)
+                                senhaError = validatePasswordFormat(senha)
                                 if (!senhaError) {
                                     countContent = 10
                                 } else {

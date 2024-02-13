@@ -59,7 +59,7 @@ import com.ags.controlekm.ui.components.progress.LoadingCircular
 import com.ags.controlekm.ui.components.text.ContentText
 import com.ags.controlekm.ui.components.text.TitleText
 import com.ags.controlekm.ui.components.textField.FormularioOutlinedTextField
-import com.ags.controlekm.models.Service
+import com.ags.controlekm.models.database.Service
 import com.ags.controlekm.viewModels.CurrentUserViewModel
 import com.ags.controlekm.viewModels.ServiceViewModel
 import kotlinx.coroutines.Dispatchers
@@ -85,7 +85,7 @@ fun HomeView(
     val currentUser by currentUserViewModel.currentUserData.collectAsState(null)
     val allTripsCurrentUser by serviceViewModel.servicesCurrentUser.collectAsState(emptyList())
     val countContent by serviceViewModel.countContent.collectAsState(flowOf(0))
-    val currentService by serviceViewModel.currentService.collectAsState(null)
+    val currentService by serviceViewModel.currentService.collectAsState(Service())
 
     val context = LocalContext.current
 
@@ -324,21 +324,17 @@ fun HomeView(
                         ) {
                             when (countContent) {
                                 1 -> {
-                                    serviceViewModel.iniciarViagem(
-                                        userLoggedData = currentUser!!,
-                                        novoAtendimento = novoAtendimento,
-                                        localSaida = localSaida,
-                                        localAtendimento = localAtendimento,
-                                        kmSaida = kmSaida,
-                                        data = data,
-                                        hora = hora,
+                                    serviceViewModel.newService(
+                                        departureAddress = localSaida,
+                                        serviceAddress = localAtendimento,
+                                        departureKm = kmSaida,
+                                        date = data,
+                                        time = hora,
                                     )
                                 }
 
                                 2 -> {
                                     serviceViewModel.confirmarChegada(
-                                        userLoggedData = currentUser,
-                                        atendimentoAtual = currentService!!,
                                         kmChegada = kmChegada,
                                         data = data,
                                         hora = hora,

@@ -1,8 +1,7 @@
 package com.ags.controlekm.database.firebaseRepositories
 
-import com.ags.controlekm.models.CurrentUser
-import com.ags.controlekm.models.Service
-import com.ags.controlekm.models.User
+import com.ags.controlekm.models.database.CurrentUser
+import com.ags.controlekm.models.database.User
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -39,15 +38,15 @@ class FirebaseCurrentUserRepository @Inject constructor(
     fun update(user: User) {
         databaseReference.child(id).setValue(user)
     }
-    fun emailIsVerifield(emailIsVerifield: Boolean){
+    fun updateEmailVerification(emailIsVerifield: Boolean){
         databaseReference.child(id).child("emailVerification").setValue(emailIsVerifield)
     }
 
-    fun addUltimoKm(km: String){
+    fun updateLastKm(km: String){
         databaseReference.child(id).child("lastKm").setValue(km)
     }
 
-    fun addKmBackup(km: String){
+    fun updateKmBackup(km: String){
         databaseReference.child(id).child("kmBackup").setValue(km)
     }
 }

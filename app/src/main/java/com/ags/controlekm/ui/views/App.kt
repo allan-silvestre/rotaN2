@@ -76,7 +76,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -86,8 +85,8 @@ import com.ags.controlekm.R
 import com.ags.controlekm.ui.components.dialog.EmailVerifieldDialog
 import com.ags.controlekm.viewModels.CurrentUserViewModel
 import com.ags.controlekm.functions.navigateSingleTopTo
-import com.ags.controlekm.models.BottomNavigationItem
-import com.ags.controlekm.models.MenuItem
+import com.ags.controlekm.models.components.BottomNavigationItem
+import com.ags.controlekm.models.components.MenuItem
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase

@@ -1,11 +1,9 @@
 package com.ags.controlekm.database.firebaseRepositories
 
-import com.ags.controlekm.models.Address
-import com.ags.controlekm.models.User
+import com.ags.controlekm.models.database.User
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
