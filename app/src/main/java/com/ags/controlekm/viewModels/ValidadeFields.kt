@@ -31,11 +31,12 @@ class ValidadeFields @Inject constructor(
         }
     }
     fun validateFieldsNewService(
-        departureAddress: String?,
-        serviceAddress: String?,
-        departureKm: Int?): Boolean {
+        departureAddress: String,
+        serviceAddress: String,
+        departureKm: Int
+    ): Boolean {
         // CHECK IF ANY FIELD IS EMPTY
-        if (departureAddress.equals(null) || serviceAddress.equals(null) || departureKm.toString().equals(null)) {
+        if (departureAddress.isEmpty() || serviceAddress.isEmpty() || departureKm.toString().isEmpty()) {
             println("Preencha todos os campos para continuar")
             return false
             // CHECK IF THE DEPARTURE PLACE IS THE SAME AS THE SERVICE PLACE
@@ -43,10 +44,10 @@ class ValidadeFields @Inject constructor(
             println("O local de saida não pode ser o mesmo do atendimento")
             return false
             // CHECK IF THE KM INFORMED IS VALID ACCORDING TO THE LAST KM INFORMED
-        } else if (departureKm!! < currentUser.lastKm) {
+        } else if (departureKm < currentUser.lastKm) {
             println("O KM não pode ser inferior ao último informado")
             return false
-        } else if(currentService.statusService!!.isNotEmpty()) {
+        } else if(currentService.statusService.isNotEmpty()) {
             println("Finalize o atendimento em aberto antes de iniciar um novo")
             return false
         }else { return true }

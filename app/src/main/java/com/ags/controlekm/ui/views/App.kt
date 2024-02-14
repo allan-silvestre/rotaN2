@@ -87,6 +87,7 @@ import com.ags.controlekm.viewModels.CurrentUserViewModel
 import com.ags.controlekm.functions.navigation.navigateSingleTopTo
 import com.ags.controlekm.models.components.BottomNavigationItem
 import com.ags.controlekm.models.components.MenuItem
+import com.ags.controlekm.ui.views.NavHostNavigation
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
@@ -103,8 +104,6 @@ fun App(
 ) {
     val userLoggedData by currentUserViewModel.currentUserData.collectAsState(null)
 
-    val databaseReference: DatabaseReference = FirebaseDatabase.getInstance().reference
-    val context = LocalContext.current
     val navController = rememberNavController()
 
     var currentUser by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser) }
@@ -114,7 +113,7 @@ fun App(
     var selectedItemIndex by rememberSaveable { mutableStateOf(0) }
     var selectedBottomBarItemIndex by rememberSaveable { mutableStateOf(0) }
 
-    var itemsVisible by rememberSaveable { mutableStateOf(false) }
+    var itemsVisible by rememberSaveable { mutableStateOf(true) }
 
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by rememberSaveable { mutableStateOf(false) }
@@ -420,41 +419,7 @@ fun App(
                     onDismissRequest = { dialogEmailVisible.value = false }
                 )
             }
-            NavHost(
-                modifier = Modifier.padding(innerPadding),
-                navController = navController,
-                startDestination = "login"
-            ) {
-                composable("login") {
-                    LoginView(navController)
-                    DisposableEffect(Unit) {
-                        itemsVisible = false
-                        onDispose {
-                        }
-                    }
-                }
-                composable("newUser") {
-                    RegisterUserView(navController)
-                }
-                composable("forgotPassword") {
-                    ForgotPasswordView(navController)
-                }
-                composable("home") {
-                    HomeView(navController)
-                    DisposableEffect(Unit) {
-                        itemsVisible = true
-                        onDispose {
-                        }
-                    }
-                }
-                composable("news") {
-                    NewsView(navController)
-                }
-                composable("enderecosAtendimento") {
-                    AllAddressView(navController)
-                }
-            }
-
+            NavHostNavigation(innerPadding, navController)
             if (showBottomSheet) {
                 ModalBottomSheet(
                     onDismissRequest = {

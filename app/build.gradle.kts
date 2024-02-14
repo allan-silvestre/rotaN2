@@ -69,14 +69,19 @@ dependencies {
     implementation("androidx.compose.runtime:runtime-livedata:1.6.1")
     implementation("androidx.compose.runtime:runtime-rxjava2:1.6.1")
     implementation("androidx.navigation:navigation-compose:2.7.7")
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.compose.material:material-icons-extended:1.6.1")
     implementation("androidx.annotation:annotation:1.7.1")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.21")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    // Jetbrains
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.21")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
 
     // Dangger - Hilt
     implementation("com.google.dagger:hilt-android:2.48")

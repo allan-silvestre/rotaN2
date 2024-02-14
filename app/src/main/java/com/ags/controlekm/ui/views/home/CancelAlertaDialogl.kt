@@ -1,4 +1,4 @@
-package com.ags.controlekm.ui.components.dialog
+package com.ags.controlekm.ui.views.home
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth

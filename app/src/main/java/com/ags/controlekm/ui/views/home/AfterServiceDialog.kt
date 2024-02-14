@@ -1,4 +1,4 @@
-package com.ags.controlekm.ui.components.dialog
+package com.ags.controlekm.ui.views.home
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement

@@ -1,4 +1,4 @@
-package com.ags.controlekm.ui.components.cards
+package com.ags.controlekm.ui.views.home
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable

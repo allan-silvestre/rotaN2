@@ -4,6 +4,7 @@ import com.ags.controlekm.database.daos.ServiceDao
 import com.ags.controlekm.models.database.Service
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -26,6 +27,7 @@ class ServiceRepository @Inject constructor(
             "Em andamento",
             "Em rota, retornando")!!
     }
+
     suspend fun insert(service: Service) {
         serviceDao.insert(service)
     }

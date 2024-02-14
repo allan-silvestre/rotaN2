@@ -3,6 +3,7 @@ package com.ags.controlekm.models.database
 import androidx.annotation.NonNull
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import coil.compose.AsyncImagePainter
 import java.util.UUID
 
 @Entity

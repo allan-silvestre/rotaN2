@@ -10,6 +10,7 @@ import com.ags.controlekm.models.database.CurrentUser
 import com.ags.controlekm.models.database.Service
 import com.ags.controlekm.database.repositorys.ServiceRepository
 import com.ags.controlekm.models.params.newServiceParams
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -17,7 +18,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,14 +28,14 @@ class ServiceViewModel @Inject constructor(
     private val firebaseServiceRepository: FirebaseServiceRepository,
     private val validadeFields: ValidadeFields
 ) : ViewModel() {
+
     private val _loading = mutableStateOf(false)
     val loading get() = _loading
 
-    var countContent: MutableStateFlow<Int> = MutableStateFlow(0)
-
-    val currentUser: MutableStateFlow<CurrentUser> = MutableStateFlow(CurrentUser())
+    var currentUser = MutableStateFlow(CurrentUser())
+    var currentU: Flow<CurrentUser> = currentUserRepository.getCurrentUser()
+    var currentService = MutableStateFlow(Service())
     var servicesCurrentUser: Flow<List<Service>> = serviceRepository.getServicesCurrentUser()
-    val currentService: MutableStateFlow<Service> = MutableStateFlow(Service())
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
@@ -46,29 +46,30 @@ class ServiceViewModel @Inject constructor(
                 serviceRepository.getcurrentService().firstOrNull()?.let {
                     currentService.value = it
                 }
+
             }
             launch {
-                // SINCRONIZA O BANCO DE DADOS COM O FIREBASE
                 firebaseServiceRepository.getAllServices().collect { serviceList ->
                     serviceList.forEach { service ->
                         serviceRepository.insert(service)
                     }
                 }
             }
-            homeCountContent()
         }
     }
 
     fun newService(params: newServiceParams) {
         // CHECK IF ANY FIELD IS EMPTY
         if (validadeFields.validateFieldsNewService(params.departureAddress, params.serviceAddress, params.departureKm)) {
+
             val newService = Service()
+
             newService.departureDate = params.date
             newService.departureTime = params.time
             newService.departureAddress = params.departureAddress
             newService.serviceAddress = params.serviceAddress
             newService.departureKm = params.departureKm
-            newService.technicianId = currentUser.value.id
+            newService.technicianId = FirebaseAuth.getInstance().currentUser!!.uid
             newService.technicianName = "${currentUser.value.name} ${currentUser.value.lastName}"
             newService.profileImgTechnician = currentUser.value.image.toString()
             newService.statusService = "Em rota"
@@ -76,14 +77,12 @@ class ServiceViewModel @Inject constructor(
             currentUser.value.lastKm = params.departureKm
 
             viewModelScope.launch(Dispatchers.IO) {
-                _loading.value = true
                 try {
-                        _loading.value = true
-                        delay(1000)
-                        insert(newService)
-                        currentUserRepository.update(currentUser.value)
-                        firebaseCurrentUserRepository.updateLastKm(params.departureKm)
-                        homeCountContent()
+                    _loading.value = true
+                    delay(2000)
+                    insert(newService)
+                    currentUserRepository.update(currentUser.value)
+                    firebaseCurrentUserRepository.updateLastKm(params.departureKm)
                 } finally {
                     _loading.value = false
                 }
@@ -140,7 +139,6 @@ class ServiceViewModel @Inject constructor(
                             currentUserRepository.update(currentUser.value)
                             firebaseCurrentUserRepository.updateLastKm(kmChegada)
                             firebaseCurrentUserRepository.updateKmBackup(kmChegada)
-                            countContent.value = 1
                         }
                     },
                     onError = {}
@@ -171,7 +169,6 @@ class ServiceViewModel @Inject constructor(
                 viewModelScope.launch(Dispatchers.IO) {
                     update(atendimento)
                 }
-                homeCountContent()
             },
             onError = {}
         )
@@ -182,7 +179,6 @@ class ServiceViewModel @Inject constructor(
         userLoggedData: CurrentUser,
         atendimentoAtual: Service,
     ) {
-        var count: MutableStateFlow<Int> = MutableStateFlow(0)
         executar(
             function = {
                 if (atendimentoAtual.statusService.equals("Em rota, retornando")) {
@@ -197,7 +193,6 @@ class ServiceViewModel @Inject constructor(
                     viewModelScope.launch(Dispatchers.IO) {
                         update(atendimentoAtual)
                     }
-                    count.value = 3
                 } else {
                     viewModelScope.launch(Dispatchers.IO) {
                         // NO ROOM
@@ -211,13 +206,11 @@ class ServiceViewModel @Inject constructor(
                         // DEFINE O VALOR DO (ULTIMO KM) DO USUÁRIO PARA O ULTIMO INFORMADO AO CONCLUIR A ULTIMA VIAGEM
                         firebaseCurrentUserRepository.updateLastKm(userLoggedData.kmBackup)
                     }
-                    count.value = 1
                 }
             },
             onError = {}
         )
     }
-
 
     fun novoAtendimento(
         userLoggedData: CurrentUser?,
@@ -231,7 +224,9 @@ class ServiceViewModel @Inject constructor(
         resumoAtendimento: String,
     ) {
         // VERIFICA SE ALGUM CAMPO ESTA VAZIO
-        if (localSaida.equals(null) || localAtendimento.equals(null) || kmSaida.toString().equals(null)) {
+        if (localSaida.equals(null) || localAtendimento.equals(null) || kmSaida.toString()
+                .equals(null)
+        ) {
             println("Preencha todos os campos para continuar")
             // VERIFICA SE O LOCAL DE SAIDA É IGUAL AO LOCAL DE ATENDIMENTO
         } else if (localSaida.equals(localAtendimento)) {
@@ -282,26 +277,25 @@ class ServiceViewModel @Inject constructor(
         }
     }
 
-    fun homeCountContent() {
-        var count: MutableStateFlow<Int> = MutableStateFlow(1)
-
-        viewModelScope.launch {
-            serviceRepository.getServicesCurrentUser().collect {
-                it.forEach {
-                    when {
-                        it.statusService?.contains("Em rota") == true ||
-                                it.statusService?.contains("Em rota, retornando") == true -> {
-                            count = MutableStateFlow(2)
-                        }
-
-                        it.statusService?.contains("Em andamento") == true -> {
-                            count = MutableStateFlow(3)
-                        }
-                    }
-                }
-                countContent = count
-            }
+    fun controlContent(
+        visibleButtonDefault: (Boolean) -> Unit,
+        visibleButtonCancel:  (Boolean) -> Unit,
+        contenText: (String) -> Unit,
+        buttonTitle: (String) -> Unit
+    ) {
+        if (currentService.value.statusService.equals("Em rota")) {
+            contenText("${currentService.value.statusService} entre ${currentService.value.departureAddress} \n e ${currentService.value.serviceAddress}")
+            buttonTitle("Confirmar chegada")
+            visibleButtonCancel(true)
+            visibleButtonDefault(true)
+        } else if (currentService.value.statusService.equals("Em rota, retornando")) {
+            contenText("${currentService.value.statusService} de ${currentService.value.serviceAddress} \n para ${currentService.value.addressReturn}")
+            buttonTitle("Confirmar chegada")
+            visibleButtonCancel(true)
+            visibleButtonDefault(true)
         }
+
+
     }
 
     fun executar(function: () -> Unit, onError: () -> Unit) {
