@@ -59,7 +59,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -71,26 +70,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.rememberImagePainter
 import com.ags.controlekm.R
-import com.ags.controlekm.ui.components.dialog.EmailVerifieldDialog
+import com.ags.controlekm.ui.views.serviceManager.components.EmailVerifieldDialog
 import com.ags.controlekm.viewModels.CurrentUserViewModel
 import com.ags.controlekm.functions.navigation.navigateSingleTopTo
 import com.ags.controlekm.models.components.BottomNavigationItem
 import com.ags.controlekm.models.components.MenuItem
-import com.ags.controlekm.ui.views.NavHostNavigation
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)

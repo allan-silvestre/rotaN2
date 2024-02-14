@@ -1,4 +1,4 @@
-package com.ags.controlekm.ui.views
+package com.ags.controlekm.ui.views.addressManager
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -30,8 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.ags.controlekm.ui.components.dialog.AddressAddDialog
-import com.ags.controlekm.ui.components.dialog.EditAddressDialog
 import com.ags.controlekm.functions.navigation.navigateSingleTopTo
 import com.ags.controlekm.models.database.Address
 import com.ags.controlekm.viewModels.AddressViewModel
@@ -115,7 +113,7 @@ fun AllAddressView(
         }
     }
     if(visibleShowDialogAdd.value){
-        AddressAddDialog(
+        AddAddressDialog(
             visible = visibleShowDialogAdd.value,
             onSave = {
                 navController.navigateSingleTopTo("enderecosAtendimento")

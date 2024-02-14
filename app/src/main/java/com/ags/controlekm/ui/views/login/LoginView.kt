@@ -1,4 +1,4 @@
-package com.ags.controlekm.ui.views
+package com.ags.controlekm.ui.views.login
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedContent

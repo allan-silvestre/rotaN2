@@ -1,4 +1,4 @@
-package com.ags.controlekm.mask_transformations
+package com.ags.controlekm.maskTransformations
 
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping

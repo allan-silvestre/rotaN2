@@ -1,6 +1,6 @@
-package com.ags.controlekm.ui.views.home
+package com.ags.controlekm.ui.views.serviceManager.components
 
-import android.widget.Toast
+import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,6 +16,7 @@ import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -29,7 +30,6 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -39,40 +39,50 @@ import com.ags.controlekm.ui.components.buttons.ButtonDefault
 import com.ags.controlekm.ui.components.buttons.ButtonIcon
 import com.ags.controlekm.ui.components.progress.LoadingCircular
 import com.ags.controlekm.ui.components.text.TitleText
+import com.ags.controlekm.ui.views.serviceManager.fragments.InProgress
+import com.ags.controlekm.ui.views.serviceManager.fragments.NewService
+import com.ags.controlekm.ui.views.serviceManager.fragments.Traveling
 import com.ags.controlekm.viewModels.ServiceViewModel
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun ServiceManagerCard(serviceViewModel: ServiceViewModel = hiltViewModel()) {
-    var time by remember { mutableStateOf("00:00:00") }
+fun ServiceManagerCard(serviceViewModel: ServiceViewModel = hiltViewModel<ServiceViewModel>()) {
+
     var date by remember { mutableStateOf("00/00/0000") }
+    var time by remember { mutableStateOf("00:00:00") }
 
-    val currentUser by serviceViewModel.currentU.collectAsStateWithLifecycle(null)
-    val currentService by serviceViewModel.currentService.collectAsState(Service())
-
-    val context = LocalContext.current
+    DateAndTime({ date = it }, { time = it })
 
     var departureKm by remember { mutableStateOf("0") }
-
     var arrivalKm by remember { mutableStateOf("0") }
-
     var serviceSummary by remember { mutableStateOf("") }
     var serviceSummaryError by remember { mutableStateOf(true) }
-
     var departureAddress by remember { mutableStateOf("") }
     var serviceAddress by remember { mutableStateOf("") }
 
-    var textStatus by remember { mutableStateOf("") }
-    var textButton by remember { mutableStateOf("") }
+    var contentText by remember { mutableStateOf(serviceViewModel.contentText) }
+    var buttonTitle by remember { mutableStateOf(serviceViewModel.buttonTitle) }
 
-    var visibleFinishDialog by remember { mutableStateOf(false) }
+    // VISIBLE DIALOGS
+    var visibleAfterServiceDialog by remember { mutableStateOf(false) }
+    var visibleCancelDialog by remember { mutableStateOf(false) }
 
-    //REMOVER ESSA VARIAVEL
+    // VISIBLE BUTTONS
+    var visibleButtonDefault by remember { mutableStateOf(serviceViewModel.visibleButtonDefault) }
+    var visibleButtonCancel by remember { mutableStateOf(serviceViewModel.visibleButtonCancel) }
+
+    val currentUser by serviceViewModel.currentU.collectAsState(null)
+    val currentService by serviceViewModel.currentService.collectAsStateWithLifecycle(Service())
+
+    val vNewService by serviceViewModel.visibleNewService.collectAsState(false)
+    val vTraveling by serviceViewModel.visibleTraveling.collectAsState(false)
+    val vInProgress by serviceViewModel.visibleInProgress.collectAsState(false)
+
+    LaunchedEffect(time) {
+        serviceViewModel.serviceManagerCardControlContent()
+    }
+    // VARIAVEL SERÁ REMOVIDA
     var novoAtendimento by remember { mutableStateOf(Service()) }
-
-    var visibleButtonDefault by remember { mutableStateOf(false) }
-    var visibleAlertCancel by remember { mutableStateOf(false) }
-    var visibleButtonCancel by remember { mutableStateOf(false) }
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -155,46 +165,32 @@ fun ServiceManagerCard(serviceViewModel: ServiceViewModel = hiltViewModel()) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                if (serviceViewModel.loading.value) {
+                Text(currentService.statusService + vNewService.toString())
+                if(serviceViewModel.loading.value) {
                     LoadingCircular()
-                } else if (currentService.statusService.isEmpty()) {
-                    visibleButtonDefault = true
-                    visibleButtonCancel = false
-                    textStatus = ""
-                    textButton = "Iniciar percurso"
-                    NewService(date, time, {departureAddress = it}, {serviceAddress = it}, {departureKm = it})
-
-                } else if (
-                    currentService.statusService.equals("Em rota") ||
-                    currentService.statusService.equals("Em rota, retornando")
-                ) {
-                    visibleButtonDefault = true
-                    visibleButtonCancel = true
-                    if (currentService?.statusService.equals("Em rota")) {
-                        textStatus =
-                            "${currentService?.statusService} entre ${currentService?.departureAddress} \n e ${currentService?.serviceAddress}"
-                        textButton = "Confirmar chegada"
+                } else {
+                    AnimatedVisibility(vNewService) {
+                        NewService(
+                            date,
+                            time,
+                            { departureAddress = it },
+                            { serviceAddress = it },
+                            { departureKm = it })
                     }
-                    if (currentService?.statusService.equals("Em rota, retornando")) {
-                        textStatus =
-                            "${currentService?.statusService} de ${currentService?.serviceAddress} \n para ${currentService?.addressReturn}"
-                        textButton = "Confirmar chegada"
+                    AnimatedVisibility(vTraveling) {
+                        Traveling(contentText.value, date, time) { arrivalKm = it }
                     }
-                    Traveling(textStatus, date , time) { arrivalKm = it }
-
-                } else if (currentService.statusService.equals("Em andamento")) {
-                    visibleButtonDefault = true
-                    visibleButtonCancel = true
-                    textButton = "Finalizar atendimento"
-                    InProgress(serviceSummaryError){serviceSummary = it}
+                    AnimatedVisibility(vInProgress) {
+                        InProgress(serviceSummaryError) { serviceSummary = it }
+                    }
                 }
+
             }
             Spacer(modifier = Modifier.height(4.dp))
             Row(modifier = Modifier.fillMaxWidth()) {
-                AnimatedVisibility(visible = visibleButtonDefault) {
+                AnimatedVisibility(visible = visibleButtonDefault.value) {
                     ButtonDefault(
-                        textButton,
-                        //enable = if (countContent == 0) false else true,
+                        buttonTitle.value,
                         topStart = 0.dp,
                         topEnd = 0.dp,
                         fraction = 1f,
@@ -221,15 +217,11 @@ fun ServiceManagerCard(serviceViewModel: ServiceViewModel = hiltViewModel()) {
                         } else if (currentService.statusService.equals("Em andamento")) {
                             if (serviceSummary.isNotEmpty() && serviceSummary.length > 5) {
                                 serviceSummaryError = true
-                                visibleFinishDialog = true
+                                visibleAfterServiceDialog = true
                             } else {
                                 serviceSummaryError = false
-                                visibleFinishDialog = false
-                                Toast.makeText(
-                                    context,
-                                    "Descrição em branco ou muito curta.",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                visibleAfterServiceDialog = false
+                                println("Descrição em branco ou muito curta")
                             }
                         }
                     }
@@ -242,25 +234,25 @@ fun ServiceManagerCard(serviceViewModel: ServiceViewModel = hiltViewModel()) {
                 .padding(end = 20.dp),
             horizontalArrangement = Arrangement.End
         ) {
-            AnimatedVisibility(visible = visibleButtonCancel) {
+            AnimatedVisibility(visible = visibleButtonCancel.value) {
                 ButtonIcon(
                     icon = Icons.Outlined.Cancel,
                     color = MaterialTheme.colorScheme.error
                 ) {
-                    visibleAlertCancel = true
+                    visibleCancelDialog = true
                 }
             }
         }
     }
-    // AlertDialog Cancelar
-    if (visibleAlertCancel) {
-        CancelAlertDialog(
-            onDismissRequest = { visibleAlertCancel = false },
+    // AlertDialog CancelDialog
+    AnimatedVisibility(visibleCancelDialog) {
+        CancelDialog(
+            onDismissRequest = { visibleCancelDialog = false },
             title = {
-                if (currentService?.statusService.equals("Em rota, retornando")) {
-                    TitleText("Cancelar o retorno para \n ${currentService?.addressReturn}")
+                if (currentService.statusService.equals("Em rota, retornando")) {
+                    TitleText("Cancelar o retorno para \n ${currentService.addressReturn}")
                 } else {
-                    TitleText("Cancelar o atendimento \n ${currentService?.serviceAddress}")
+                    TitleText("Cancelar o atendimento \n ${currentService.serviceAddress}")
                 }
             },
             confirmButton = {
@@ -272,8 +264,8 @@ fun ServiceManagerCard(serviceViewModel: ServiceViewModel = hiltViewModel()) {
         )
     }
 
-    //AlertDialog Fininalizar
-    if (visibleFinishDialog) {
+    //AlertDialog AfterServiceDialog
+    AnimatedVisibility(visibleAfterServiceDialog) {
         AfterServiceDialog(
             userLoggedData = currentUser,
             atendimentoAtual = currentService,
@@ -282,7 +274,7 @@ fun ServiceManagerCard(serviceViewModel: ServiceViewModel = hiltViewModel()) {
             data = date,
             hora = time,
             onDismissRequest = {
-                visibleFinishDialog = false
+                visibleAfterServiceDialog = false
             }
         )
     }

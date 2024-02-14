@@ -1,4 +1,4 @@
-package com.ags.controlekm.ui.components.dialog
+package com.ags.controlekm.ui.views.addressManager
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
@@ -41,7 +41,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
-fun AddressAddDialog(
+fun AddAddressDialog(
     visible: Boolean,
     onSave: () -> Unit,
     onCancel: () -> Unit,

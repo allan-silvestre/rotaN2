@@ -1,4 +1,4 @@
-package com.ags.controlekm.ui.views.home
+package com.ags.controlekm.ui.views.serviceManager.fragments
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

@@ -1,7 +1,7 @@
 package com.ags.controlekm.viewModels
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.ags.controlekm.database.firebaseRepositories.FirebaseCurrentUserRepository
 import com.ags.controlekm.database.firebaseRepositories.FirebaseServiceRepository
@@ -16,6 +16,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -29,14 +31,30 @@ class ServiceViewModel @Inject constructor(
     private val validadeFields: ValidadeFields
 ) : ViewModel() {
 
-    private val _loading = mutableStateOf(false)
-    val loading get() = _loading
+    private var _visibleNewService = MutableStateFlow(false)
+    val visibleNewService = _visibleNewService.asStateFlow()
+    private var _visibleTraveling = MutableStateFlow(false)
+    val visibleTraveling = _visibleTraveling.asStateFlow()
+    private var _visibleInProgress = MutableStateFlow(false)
+    val visibleInProgress = _visibleInProgress.asStateFlow()
+    private var _visibleButtonDefault = MutableStateFlow(false)
+    val visibleButtonDefault = _visibleButtonDefault.asStateFlow()
+    private var _visibleButtonCancel  = MutableStateFlow(false)
+    val visibleButtonCancel = _visibleButtonCancel.asStateFlow()
+
+    private var _contentText = MutableStateFlow("")
+    val contentText = _contentText.asStateFlow()
+    private var _buttonTitle = MutableStateFlow("")
+    val buttonTitle = _buttonTitle.asStateFlow()
+
+    private val _loading = MutableStateFlow(false)
+    val loading = _loading.asStateFlow()
 
     var currentUser = MutableStateFlow(CurrentUser())
     var currentU: Flow<CurrentUser> = currentUserRepository.getCurrentUser()
     var currentService = MutableStateFlow(Service())
-    var servicesCurrentUser: Flow<List<Service>> = serviceRepository.getServicesCurrentUser()
 
+    var servicesCurrentUser: Flow<List<Service>> = serviceRepository.getServicesCurrentUser()
     init {
         viewModelScope.launch(Dispatchers.IO) {
             launch {
@@ -56,6 +74,7 @@ class ServiceViewModel @Inject constructor(
                 }
             }
         }
+
     }
 
     fun newService(params: newServiceParams) {
@@ -79,7 +98,7 @@ class ServiceViewModel @Inject constructor(
             viewModelScope.launch(Dispatchers.IO) {
                 try {
                     _loading.value = true
-                    delay(2000)
+                    delay(3000)
                     insert(newService)
                     currentUserRepository.update(currentUser.value)
                     firebaseCurrentUserRepository.updateLastKm(params.departureKm)
@@ -198,7 +217,6 @@ class ServiceViewModel @Inject constructor(
                         // NO ROOM
                         // DELETA O ATENDIMENTO ATUAL DA TABELA
                         delete(Service(atendimentoAtual.id))
-
                         // NO ROOM
                         // DEFINE O VALOR DO (ULTIMO KM) DO USUÁRIO PARA O ULTIMO INFORMADO AO CONCLUIR A ULTIMA VIAGEM
                         currentUserRepository.update(userLoggedData)
@@ -277,31 +295,47 @@ class ServiceViewModel @Inject constructor(
         }
     }
 
-    fun controlContent(
-        visibleButtonDefault: (Boolean) -> Unit,
-        visibleButtonCancel:  (Boolean) -> Unit,
-        contenText: (String) -> Unit,
-        buttonTitle: (String) -> Unit
-    ) {
-        if (currentService.value.statusService.equals("Em rota")) {
-            contenText("${currentService.value.statusService} entre ${currentService.value.departureAddress} \n e ${currentService.value.serviceAddress}")
-            buttonTitle("Confirmar chegada")
-            visibleButtonCancel(true)
-            visibleButtonDefault(true)
-        } else if (currentService.value.statusService.equals("Em rota, retornando")) {
-            contenText("${currentService.value.statusService} de ${currentService.value.serviceAddress} \n para ${currentService.value.addressReturn}")
-            buttonTitle("Confirmar chegada")
-            visibleButtonCancel(true)
-            visibleButtonDefault(true)
+    fun serviceManagerCardControlContent() {
+        if (currentService.value.statusService.isEmpty()) {
+            _contentText.value = ""
+            _buttonTitle.value = "Iniciar percurso"
+            _visibleButtonDefault.value = true
+            _visibleButtonCancel.value = false
+            _visibleNewService.value = true
+            _visibleTraveling.value = false
+            _visibleInProgress.value = false
+        } else if (currentService.value.statusService == "Em rota") {
+            _contentText.value ="${currentService.value.statusService} entre ${currentService.value.departureAddress} \n e ${currentService.value.serviceAddress}"
+            _buttonTitle.value = "Confirmar chegada"
+            _visibleButtonDefault.value = true
+            _visibleButtonCancel.value = true
+            _visibleNewService.value = false
+            _visibleTraveling.value = true
+            _visibleInProgress.value = false
+        } else if (currentService.value.statusService == "Em rota, retornando") {
+            _contentText.value = "${currentService.value.statusService} de ${currentService.value.serviceAddress} \n para ${currentService.value.addressReturn}"
+            _buttonTitle.value = "Confirmar chegada"
+            _visibleButtonDefault.value = true
+            _visibleButtonCancel.value = true
+            _visibleNewService.value = false
+            _visibleTraveling.value = true
+            _visibleInProgress.value = false
+        } else if(currentService.value.statusService == "Em andamento") {
+            _contentText.value = "Em andamento"
+            _buttonTitle.value = "Finalizar Atendimento"
+            _visibleButtonDefault.value = true
+            _visibleButtonCancel.value = true
+            _visibleNewService.value = false
+            _visibleTraveling.value = false
+            _visibleInProgress.value = true
         }
-
-
     }
 
     fun executar(function: () -> Unit, onError: () -> Unit) {
         _loading.value = true
         viewModelScope.launch {
             try {
+                delay(2000)
                 function()
             } catch (e: Exception) {
                 onError()

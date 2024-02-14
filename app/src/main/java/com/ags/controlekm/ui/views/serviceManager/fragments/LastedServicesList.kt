@@ -1,4 +1,4 @@
-package com.ags.controlekm.ui.views.home
+package com.ags.controlekm.ui.views.serviceManager.fragments
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ags.controlekm.models.database.Service
+import com.ags.controlekm.ui.views.serviceManager.components.LatestServicesCard
 import java.text.SimpleDateFormat
 import java.util.Locale
 

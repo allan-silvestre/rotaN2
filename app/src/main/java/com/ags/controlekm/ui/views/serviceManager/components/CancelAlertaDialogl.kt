@@ -1,4 +1,4 @@
-package com.ags.controlekm.ui.views.home
+package com.ags.controlekm.ui.views.serviceManager.components
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.dp
 import com.ags.controlekm.ui.components.buttons.ButtonText
 
 @Composable
-fun CancelAlertDialog(
+fun CancelDialog(
     onDismissRequest: () -> Unit,
     title: @Composable () -> Unit,
     confirmButton: () -> Unit

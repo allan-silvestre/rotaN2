@@ -1,11 +1,14 @@
-package com.ags.controlekm.ui.views.home
+package com.ags.controlekm.ui.views.serviceManager.components
 
 import android.os.Handler
 import android.os.Looper
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -18,7 +21,6 @@ fun DateAndTime(
     time: (String) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
-
     val handler = remember { Handler(Looper.getMainLooper()) }
 
     LaunchedEffect(Unit) {

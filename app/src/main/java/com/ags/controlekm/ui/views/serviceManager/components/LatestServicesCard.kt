@@ -1,4 +1,4 @@
-package com.ags.controlekm.ui.views.home
+package com.ags.controlekm.ui.views.serviceManager.components
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable

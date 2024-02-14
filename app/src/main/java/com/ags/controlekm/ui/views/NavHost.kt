@@ -7,8 +7,9 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.ags.controlekm.ui.views.home.HomeView
-import com.ags.controlekm.ui.views.home.ServiceManagerCard
+import com.ags.controlekm.ui.views.addressManager.AllAddressView
+import com.ags.controlekm.ui.views.serviceManager.ServiceManagerView
+import com.ags.controlekm.ui.views.login.LoginView
 
 @Composable
 fun NavHostNavigation(
@@ -30,7 +31,7 @@ fun NavHostNavigation(
             ForgotPasswordView(navController)
         }
         composable("home") {
-            HomeView(navController)
+            ServiceManagerView(navController)
         }
         composable("news") {
             NewsView(navController)
