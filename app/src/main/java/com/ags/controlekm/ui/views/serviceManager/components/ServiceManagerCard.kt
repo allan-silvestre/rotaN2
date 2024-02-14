@@ -18,7 +18,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -68,19 +67,16 @@ fun ServiceManagerCard(serviceViewModel: ServiceViewModel = hiltViewModel<Servic
     var visibleCancelDialog by remember { mutableStateOf(false) }
 
     // VISIBLE BUTTONS
-    var visibleButtonDefault by remember { mutableStateOf(serviceViewModel.visibleButtonDefault) }
-    var visibleButtonCancel by remember { mutableStateOf(serviceViewModel.visibleButtonCancel) }
+    val visibleButtonDefault by serviceViewModel.visibleButtonDefault.collectAsState(false)
+    val visibleButtonCancel by serviceViewModel.visibleButtonCancel.collectAsState(false)
 
-    val currentUser by serviceViewModel.currentU.collectAsState(null)
+    val currentUser by serviceViewModel.currentUser.collectAsState(null)
     val currentService by serviceViewModel.currentService.collectAsStateWithLifecycle(Service())
 
     val vNewService by serviceViewModel.visibleNewService.collectAsState(false)
     val vTraveling by serviceViewModel.visibleTraveling.collectAsState(false)
     val vInProgress by serviceViewModel.visibleInProgress.collectAsState(false)
 
-    LaunchedEffect(time) {
-        serviceViewModel.serviceManagerCardControlContent()
-    }
     // VARIAVEL SERÁ REMOVIDA
     var novoAtendimento by remember { mutableStateOf(Service()) }
     Box(
@@ -165,7 +161,6 @@ fun ServiceManagerCard(serviceViewModel: ServiceViewModel = hiltViewModel<Servic
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(currentService.statusService + vNewService.toString())
                 if(serviceViewModel.loading.value) {
                     LoadingCircular()
                 } else {
@@ -188,7 +183,7 @@ fun ServiceManagerCard(serviceViewModel: ServiceViewModel = hiltViewModel<Servic
             }
             Spacer(modifier = Modifier.height(4.dp))
             Row(modifier = Modifier.fillMaxWidth()) {
-                AnimatedVisibility(visible = visibleButtonDefault.value) {
+                AnimatedVisibility(visible = visibleButtonDefault) {
                     ButtonDefault(
                         buttonTitle.value,
                         topStart = 0.dp,
@@ -234,7 +229,7 @@ fun ServiceManagerCard(serviceViewModel: ServiceViewModel = hiltViewModel<Servic
                 .padding(end = 20.dp),
             horizontalArrangement = Arrangement.End
         ) {
-            AnimatedVisibility(visible = visibleButtonCancel.value) {
+            AnimatedVisibility(visible = visibleButtonCancel) {
                 ButtonIcon(
                     icon = Icons.Outlined.Cancel,
                     color = MaterialTheme.colorScheme.error

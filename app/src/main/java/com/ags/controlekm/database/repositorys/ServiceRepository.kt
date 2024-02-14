@@ -20,12 +20,12 @@ class ServiceRepository @Inject constructor(
     fun getServicesCurrentUser(): Flow<List<Service>> {
         return serviceDao.getServicesCurrentUser(currentUserId)
     }
-    fun getcurrentService(): Flow<Service> {
+    fun getcurrentService(): Flow<Service>? {
         return serviceDao.getCurrentService(
             currentUserId,
             "Em rota",
             "Em andamento",
-            "Em rota, retornando")!!
+            "Em rota, retornando")
     }
 
     suspend fun insert(service: Service) {

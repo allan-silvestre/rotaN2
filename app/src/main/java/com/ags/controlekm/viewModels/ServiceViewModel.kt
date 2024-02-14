@@ -1,7 +1,7 @@
 package com.ags.controlekm.viewModels
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.ags.controlekm.database.firebaseRepositories.FirebaseCurrentUserRepository
 import com.ags.controlekm.database.firebaseRepositories.FirebaseServiceRepository
@@ -16,9 +16,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -39,7 +41,7 @@ class ServiceViewModel @Inject constructor(
     val visibleInProgress = _visibleInProgress.asStateFlow()
     private var _visibleButtonDefault = MutableStateFlow(false)
     val visibleButtonDefault = _visibleButtonDefault.asStateFlow()
-    private var _visibleButtonCancel  = MutableStateFlow(false)
+    private var _visibleButtonCancel = MutableStateFlow(false)
     val visibleButtonCancel = _visibleButtonCancel.asStateFlow()
 
     private var _contentText = MutableStateFlow("")
@@ -47,24 +49,33 @@ class ServiceViewModel @Inject constructor(
     private var _buttonTitle = MutableStateFlow("")
     val buttonTitle = _buttonTitle.asStateFlow()
 
-    private val _loading = MutableStateFlow(false)
-    val loading = _loading.asStateFlow()
-
-    var currentUser = MutableStateFlow(CurrentUser())
-    var currentU: Flow<CurrentUser> = currentUserRepository.getCurrentUser()
-    var currentService = MutableStateFlow(Service())
+    private val _loading = mutableStateOf(false)
+    val loading get() = _loading
 
     var servicesCurrentUser: Flow<List<Service>> = serviceRepository.getServicesCurrentUser()
+    var currentUser = MutableStateFlow(CurrentUser())
+
+    val currentService = flow<Service> {
+        while (true) {
+            val _currentService = MutableStateFlow(Service())
+            serviceRepository.getcurrentService()!!.firstOrNull()?.let {
+                _currentService.value = it
+            }
+            emit(_currentService.value)
+            serviceManagerCardControlContent()
+        }
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(),
+        Service()
+    )
+
     init {
         viewModelScope.launch(Dispatchers.IO) {
             launch {
                 currentUserRepository.getCurrentUser().firstOrNull()?.let {
                     currentUser.value = it
                 }
-                serviceRepository.getcurrentService().firstOrNull()?.let {
-                    currentService.value = it
-                }
-
             }
             launch {
                 firebaseServiceRepository.getAllServices().collect { serviceList ->
@@ -79,8 +90,12 @@ class ServiceViewModel @Inject constructor(
 
     fun newService(params: newServiceParams) {
         // CHECK IF ANY FIELD IS EMPTY
-        if (validadeFields.validateFieldsNewService(params.departureAddress, params.serviceAddress, params.departureKm)) {
-
+        if (validadeFields.validateFieldsNewService(
+                params.departureAddress,
+                params.serviceAddress,
+                params.departureKm
+            )
+        ) {
             val newService = Service()
 
             newService.departureDate = params.date
@@ -96,15 +111,12 @@ class ServiceViewModel @Inject constructor(
             currentUser.value.lastKm = params.departureKm
 
             viewModelScope.launch(Dispatchers.IO) {
-                try {
                     _loading.value = true
-                    delay(3000)
                     insert(newService)
                     currentUserRepository.update(currentUser.value)
                     firebaseCurrentUserRepository.updateLastKm(params.departureKm)
-                } finally {
+                    delay(1000L)
                     _loading.value = false
-                }
             }
         }
     }
@@ -198,36 +210,37 @@ class ServiceViewModel @Inject constructor(
         userLoggedData: CurrentUser,
         atendimentoAtual: Service,
     ) {
-        executar(
-            function = {
-                if (atendimentoAtual.statusService.equals("Em rota, retornando")) {
-                    // CANCELA VIAGEM DE RETORNO
-                    atendimentoAtual.departureDateToReturn = ""
-                    atendimentoAtual.startTimeReturn = ""
-                    atendimentoAtual.addressReturn = ""
-                    atendimentoAtual.statusService = "Em andamento"
+        if (atendimentoAtual.statusService.equals("Em rota, retornando")) {
+            // CANCELA VIAGEM DE RETORNO
+            atendimentoAtual.departureDateToReturn = ""
+            atendimentoAtual.startTimeReturn = ""
+            atendimentoAtual.addressReturn = ""
+            atendimentoAtual.statusService = "Em andamento"
 
-                    userLoggedData.lastKm = userLoggedData.kmBackup
+            userLoggedData.lastKm = userLoggedData.kmBackup
 
-                    viewModelScope.launch(Dispatchers.IO) {
-                        update(atendimentoAtual)
-                    }
-                } else {
-                    viewModelScope.launch(Dispatchers.IO) {
-                        // NO ROOM
-                        // DELETA O ATENDIMENTO ATUAL DA TABELA
-                        delete(Service(atendimentoAtual.id))
-                        // NO ROOM
-                        // DEFINE O VALOR DO (ULTIMO KM) DO USUÁRIO PARA O ULTIMO INFORMADO AO CONCLUIR A ULTIMA VIAGEM
-                        currentUserRepository.update(userLoggedData)
-                        // NO FIREBASE
-                        // DEFINE O VALOR DO (ULTIMO KM) DO USUÁRIO PARA O ULTIMO INFORMADO AO CONCLUIR A ULTIMA VIAGEM
-                        firebaseCurrentUserRepository.updateLastKm(userLoggedData.kmBackup)
-                    }
-                }
-            },
-            onError = {}
-        )
+            viewModelScope.launch(Dispatchers.IO) {
+                    _loading.value = true
+                    update(atendimentoAtual)
+                    delay(1000L)
+                    _loading.value = false
+            }
+        } else {
+            viewModelScope.launch(Dispatchers.IO) {
+                    // NO ROOM
+                    // DELETA O ATENDIMENTO ATUAL DA TABELA
+                    delete(Service(atendimentoAtual.id))
+                    // NO ROOM
+                    // DEFINE O VALOR DO (ULTIMO KM) DO USUÁRIO PARA O ULTIMO INFORMADO AO CONCLUIR A ULTIMA VIAGEM
+                    currentUserRepository.update(userLoggedData)
+                    // NO FIREBASE
+                    // DEFINE O VALOR DO (ULTIMO KM) DO USUÁRIO PARA O ULTIMO INFORMADO AO CONCLUIR A ULTIMA VIAGEM
+                    firebaseCurrentUserRepository.updateLastKm(userLoggedData.kmBackup)
+                    delay(1000L)
+                    _loading.value = false
+
+            }
+        }
     }
 
     fun novoAtendimento(
@@ -295,43 +308,53 @@ class ServiceViewModel @Inject constructor(
         }
     }
 
-    fun serviceManagerCardControlContent() {
-        if (currentService.value.statusService.isEmpty()) {
-            _contentText.value = ""
-            _buttonTitle.value = "Iniciar percurso"
-            _visibleButtonDefault.value = true
-            _visibleButtonCancel.value = false
-            _visibleNewService.value = true
-            _visibleTraveling.value = false
-            _visibleInProgress.value = false
-        } else if (currentService.value.statusService == "Em rota") {
-            _contentText.value ="${currentService.value.statusService} entre ${currentService.value.departureAddress} \n e ${currentService.value.serviceAddress}"
-            _buttonTitle.value = "Confirmar chegada"
-            _visibleButtonDefault.value = true
-            _visibleButtonCancel.value = true
-            _visibleNewService.value = false
-            _visibleTraveling.value = true
-            _visibleInProgress.value = false
-        } else if (currentService.value.statusService == "Em rota, retornando") {
-            _contentText.value = "${currentService.value.statusService} de ${currentService.value.serviceAddress} \n para ${currentService.value.addressReturn}"
-            _buttonTitle.value = "Confirmar chegada"
-            _visibleButtonDefault.value = true
-            _visibleButtonCancel.value = true
-            _visibleNewService.value = false
-            _visibleTraveling.value = true
-            _visibleInProgress.value = false
-        } else if(currentService.value.statusService == "Em andamento") {
-            _contentText.value = "Em andamento"
-            _buttonTitle.value = "Finalizar Atendimento"
-            _visibleButtonDefault.value = true
-            _visibleButtonCancel.value = true
-            _visibleNewService.value = false
-            _visibleTraveling.value = false
-            _visibleInProgress.value = true
+    private fun serviceManagerCardControlContent() {
+        when (currentService.value.statusService) {
+            "" -> {
+                _contentText.value = ""
+                _buttonTitle.value = "Iniciar percurso"
+                _visibleButtonDefault.value = true
+                _visibleButtonCancel.value = false
+                _visibleNewService.value = true
+                _visibleTraveling.value = false
+                _visibleInProgress.value = false
+            }
+
+            "Em rota" -> {
+                _contentText.value =
+                    "${currentService.value.statusService} entre ${currentService.value.departureAddress} \n e ${currentService.value.serviceAddress}"
+                _buttonTitle.value = "Confirmar chegada"
+                _visibleButtonDefault.value = true
+                _visibleNewService.value = false
+                _visibleTraveling.value = true
+                _visibleInProgress.value = false
+                _visibleButtonCancel.value = true
+            }
+
+            "Em rota, retornando" -> {
+                _contentText.value =
+                    "${currentService.value.statusService} de ${currentService.value.serviceAddress} \n para ${currentService.value.addressReturn}"
+                _buttonTitle.value = "Confirmar chegada"
+                _visibleButtonDefault.value = true
+                _visibleButtonCancel.value = true
+                _visibleNewService.value = false
+                _visibleTraveling.value = true
+                _visibleInProgress.value = false
+            }
+
+            "Em andamento" -> {
+                _contentText.value = "Em andamento"
+                _buttonTitle.value = "Finalizar Atendimento"
+                _visibleButtonDefault.value = true
+                _visibleNewService.value = false
+                _visibleTraveling.value = false
+                _visibleInProgress.value = true
+                _visibleButtonCancel.value = true
+            }
         }
     }
 
-    fun executar(function: () -> Unit, onError: () -> Unit) {
+    private fun executar(function: () -> Unit, onError: () -> Unit) {
         _loading.value = true
         viewModelScope.launch {
             try {

@@ -24,7 +24,7 @@ class ValidadeFields @Inject constructor(
                 currentUserRepository.getCurrentUser().firstOrNull()?.let {
                     currentUser = it
                 }
-                serviceRepository.getcurrentService().firstOrNull()?.let {
+                serviceRepository.getcurrentService()!!.firstOrNull()?.let {
                     currentService = it
                 }
             }

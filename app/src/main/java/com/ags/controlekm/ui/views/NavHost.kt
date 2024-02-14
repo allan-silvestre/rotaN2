@@ -8,8 +8,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.ags.controlekm.ui.views.addressManager.AllAddressView
+import com.ags.controlekm.ui.views.login.ForgotPasswordView
 import com.ags.controlekm.ui.views.serviceManager.ServiceManagerView
 import com.ags.controlekm.ui.views.login.LoginView
+import com.ags.controlekm.ui.views.login.RegisterUserView
+import com.ags.controlekm.ui.views.news.NewsView
 
 @Composable
 fun NavHostNavigation(
