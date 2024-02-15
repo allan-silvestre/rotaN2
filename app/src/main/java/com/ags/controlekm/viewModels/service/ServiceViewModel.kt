@@ -9,10 +9,10 @@ import com.ags.controlekm.database.repositorys.CurrentUserRepository
 import com.ags.controlekm.database.models.database.CurrentUser
 import com.ags.controlekm.database.models.database.Service
 import com.ags.controlekm.database.repositorys.ServiceRepository
-import com.ags.controlekm.viewModels.service.modelsParams.ConfirmArrivalParams
-import com.ags.controlekm.viewModels.service.modelsParams.FinishCurrentServiceAndGenerateNewServiceParams
-import com.ags.controlekm.viewModels.service.modelsParams.NewServiceParams
-import com.ags.controlekm.viewModels.service.modelsParams.StartReturnParams
+import com.ags.controlekm.viewModels.service.modelsParamsFunctions.ConfirmArrivalParams
+import com.ags.controlekm.viewModels.service.modelsParamsFunctions.FinishCurrentServiceAndGenerateNewServiceParams
+import com.ags.controlekm.viewModels.service.modelsParamsFunctions.NewServiceParams
+import com.ags.controlekm.viewModels.service.modelsParamsFunctions.StartReturnParams
 import com.ags.controlekm.viewModels.service.validateFields.ValidadeFields
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel

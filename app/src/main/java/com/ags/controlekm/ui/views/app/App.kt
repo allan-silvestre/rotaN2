@@ -93,9 +93,7 @@ import kotlinx.coroutines.launch
     "UnrememberedMutableState"
 )
 @Composable
-fun App(
-    currentUserViewModel: CurrentUserViewModel = hiltViewModel()
-) {
+fun App(currentUserViewModel: CurrentUserViewModel = hiltViewModel()) {
     val userLoggedData by currentUserViewModel.currentUserData.collectAsState(null)
 
     val navController = rememberNavController()

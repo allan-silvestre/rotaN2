@@ -1,4 +1,4 @@
-package com.ags.controlekm.viewModels.service.modelsParams
+package com.ags.controlekm.viewModels.service.modelsParamsFunctions
 
 data class ConfirmArrivalParams(
     var arrivalKm: Int,
