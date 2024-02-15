@@ -28,6 +28,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
+import coil.request.CachePolicy
+import coil.transform.CircleCropTransformation
 import com.ags.controlekm.R
 import com.ags.controlekm.viewModels.CurrentUserViewModel
 import kotlinx.coroutines.launch
@@ -45,9 +47,10 @@ fun TopBar(
     val currentUserImage = rememberImagePainter(
         data = currentUserViewModel.currentUser.value.image,
         builder = {
-            CircularProgressIndicator()
-            //placeholder(R.drawable.perfil)
-            //error(R.drawable.perfil)
+            transformations(CircleCropTransformation())
+            placeholder(R.drawable.perfil)
+            crossfade(true)
+            diskCachePolicy(CachePolicy.ENABLED)
         }
     )
 
@@ -85,7 +88,7 @@ fun TopBar(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .clickable { scope.launch { drawerState.open() } },
+                    .clickable { scope.launch { drawerState.open()} },
             )
         },
         actions = {

@@ -1,9 +1,11 @@
 package com.ags.controlekm.navigation
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -14,11 +16,14 @@ import com.ags.controlekm.ui.views.serviceManager.ServiceManagerView
 import com.ags.controlekm.ui.views.login.LoginView
 import com.ags.controlekm.ui.views.login.RegisterUserView
 import com.ags.controlekm.ui.views.news.NewsView
+import com.ags.controlekm.viewModels.app.AppViewModel
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun NavHostNavigation(
     padding: PaddingValues,
-    navController: NavHostController
+    navController: NavHostController,
+    appViewModel: AppViewModel = hiltViewModel<AppViewModel>()
 ) {
     NavHost(
         modifier = Modifier.padding(padding),

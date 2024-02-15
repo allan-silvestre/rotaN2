@@ -1,6 +1,7 @@
 package com.ags.controlekm.ui.views.app.fragments
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -37,6 +38,10 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
+import com.ags.controlekm.R
+import coil.compose.rememberImagePainter
+import coil.request.CachePolicy
+import coil.transform.CircleCropTransformation
 import com.ags.controlekm.navigation.navigateSingleTopTo
 import com.ags.controlekm.viewModels.CurrentUserViewModel
 import com.google.firebase.auth.FirebaseAuth
@@ -51,6 +56,16 @@ fun NavigationDrawer(
 ) {
     val scope = rememberCoroutineScope()
 
+    val currentUserImage = rememberImagePainter(
+        data = currentUserViewModel.currentUser.value.image,
+        builder = {
+            transformations(CircleCropTransformation())
+            placeholder(R.drawable.perfil)
+            crossfade(true)
+            diskCachePolicy(CachePolicy.ENABLED)
+        }
+    )
+
     ModalDrawerSheet(
         modifier = Modifier
             .fillMaxWidth(0.7f),
@@ -64,25 +79,13 @@ fun NavigationDrawer(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Spacer(modifier = Modifier.height(32.dp))
-            SubcomposeAsyncImage(
+            Image(
+                painter = currentUserImage,
+                contentDescription = "user imagem",
                 modifier = Modifier
                     .size(100.dp)
                     .clip(CircleShape)
-                    .clickable {
-                        scope.launch {
-                            drawerState.open()
-                        }
-                    },
-                model = currentUserViewModel.currentUser.value.image,
-                contentDescription = "",
-                loading = {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .size(35.dp),
-                        color = MaterialTheme.colorScheme.secondary,
-                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                    )
-                },
+                    .clickable { scope.launch { drawerState.open()} },
             )
             if (currentUserViewModel.currentUser.value.emailVerification == true) {
                 Icon(
