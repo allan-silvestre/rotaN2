@@ -22,5 +22,5 @@ O app funciona para controle de quilometragem, registro de viagens e atendimento
 <h4>
 
 <div>
-<img  alt="screen" src="https://github.com/allangoncalvess/rotaN2/assets/55851020/8784a8d4-9073-46f6-920e-39d725c68297.jpg" height="800" width="370">
+<img  alt="screen" src="https://github.com/allangoncalvess/rotaN2/blob/main/Screenshot_20240209_063630.png" height="800" width="370">
 </div>
