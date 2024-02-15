@@ -15,32 +15,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ags.controlekm.ui.components.buttons.ButtonDefault
 import com.ags.controlekm.ui.components.buttons.ButtonText
 import com.ags.controlekm.ui.components.dropDownMenu.SelectAddressDropDownMenu
 import com.ags.controlekm.ui.components.progress.LoadingCircular
 import com.ags.controlekm.ui.components.text.TitleText
-import com.ags.controlekm.models.database.CurrentUser
-import com.ags.controlekm.models.database.Service
-import com.ags.controlekm.viewModels.ServiceViewModel
-import com.ags.controlekm.viewModels.PerformFunctionViewModel
+import com.ags.controlekm.viewModels.service.ServiceViewModel
+import com.ags.controlekm.viewModels.service.modelsParams.FinishCurrentServiceAndGenerateNewServiceParams
+import com.ags.controlekm.viewModels.service.modelsParams.StartReturnParams
 
 @Composable
 fun AfterServiceDialog(
-    performFunctionViewModel: PerformFunctionViewModel = viewModel(),
-    userLoggedData: CurrentUser?,
-    atendimentoAtual: Service,
-    novoAtendimento: Service,
-    resumoAtendimento: String,
-    data: String,
-    hora: String,
+    serviceSummary: String,
+    date: String,
+    time: String,
     onDismissRequest: () -> Unit,
     serviceViewModel: ServiceViewModel = hiltViewModel<ServiceViewModel>()
 ) {
-    var visibleOpcoes by remember { mutableStateOf(true) }
-    var visibleRetornar by remember { mutableStateOf(false) }
-    var visibleNovoAtendimento by remember { mutableStateOf(false) }
+    var visibleOptions by remember { mutableStateOf(true) }
+    var visibleReturn by remember { mutableStateOf(false) }
+    var visibleNewService by remember { mutableStateOf(false) }
 
     var titleDialog by remember { mutableStateOf("Finalizar atendimento") }
 
@@ -53,30 +47,30 @@ fun AfterServiceDialog(
         onDismissRequest = { onDismissRequest() },
         title = { TitleText(titleDialog) },
         text = {
-            if (performFunctionViewModel.loading.value) {
-                visibleRetornar = false
-                visibleNovoAtendimento = false
+            if (serviceViewModel.loading.value) {
+                visibleReturn = false
+                visibleNewService = false
                 LoadingCircular()
             }
             // OPÇÕES FINALIZAR ATENDIMENTO
-            AnimatedVisibility(visibleOpcoes) {
+            AnimatedVisibility(visibleOptions) {
                 Row(modifier = Modifier.fillMaxWidth()) {
                     ButtonText(modifier = Modifier.fillMaxWidth(0.5f), text = "Retornar") {
                         titleDialog = "Para onde vai retornar?"
-                        visibleRetornar = true
-                        visibleNovoAtendimento = false
-                        visibleOpcoes = false
+                        visibleReturn = true
+                        visibleNewService = false
+                        visibleOptions = false
                     }
                     ButtonText(modifier = Modifier, text = "Novo atendimento") {
                         titleDialog = "Qual o local do novo atendimento?"
-                        visibleNovoAtendimento = true
-                        visibleRetornar = false
-                        visibleOpcoes = false
+                        visibleNewService = true
+                        visibleReturn = false
+                        visibleOptions = false
                     }
                 }
             }
             // INICIAR UM NOVO ATENDIMENTO
-            AnimatedVisibility(visible = visibleNovoAtendimento) {
+            AnimatedVisibility(visible = visibleNewService) {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.Center,
@@ -85,8 +79,8 @@ fun AfterServiceDialog(
                     SelectAddressDropDownMenu(
                         labelAddress = "Local do atendimento",
                         labelKm = "KM de saída",
-                        data = data,
-                        time = hora,
+                        data = date,
+                        time = time,
                         visibleAddress = true,
                         visibleKm = true,
                         SelectedAddres = { localSelecionado -> local = localSelecionado },
@@ -97,23 +91,23 @@ fun AfterServiceDialog(
                         "Iniciar percurso",
                         padding = paddingButton
                     ) {
-                        serviceViewModel.novoAtendimento(
-                            userLoggedData = userLoggedData,
-                            novoAtendimento = novoAtendimento,
-                            localSaida = atendimentoAtual.serviceAddress.toString(),
-                            localAtendimento = local,
-                            kmSaida = km.toInt(),
-                            data = data,
-                            hora = hora,
-                            atendimentoAtual = atendimentoAtual,
-                            resumoAtendimento = resumoAtendimento,
+                        serviceViewModel.finishCurrentServiceAndGenerateNewService(
+                           FinishCurrentServiceAndGenerateNewServiceParams(
+                                departureAddress = serviceViewModel.currentService.value.departureAddress,
+                                serviceAddress = local,
+                                departureKm = km.toInt(),
+                                date = date,
+                                time = time,
+                                serviceSummary = serviceSummary,
+                            ),
+
                         )
                         onDismissRequest()
                     }
                 }
             }
             // SELECIONAR CIDADE DE RETORNO
-            AnimatedVisibility(visible = visibleRetornar) {
+            AnimatedVisibility(visible = visibleReturn) {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.Center,
@@ -121,8 +115,8 @@ fun AfterServiceDialog(
                 ) {
                     SelectAddressDropDownMenu(
                         labelAddress = "Retornar para",
-                        data = data,
-                        time = hora,
+                        data = date,
+                        time = time,
                         visibleAddress = true,
                         SelectedAddres = { localSelecionado -> local = localSelecionado },
                     )
@@ -130,20 +124,20 @@ fun AfterServiceDialog(
                         "Iniciar percurso",
                         padding = paddingButton
                     ) {
-                        serviceViewModel.iniciarRetorno(
-                            atendimento = atendimentoAtual,
-                            localRetorno = local,
-                            resumoAtendimento = resumoAtendimento,
-                            data = data,
-                            hora = hora,
+                        serviceViewModel.startReturn(
+                            StartReturnParams(
+                                returnAddress = local,
+                                serviceSummary = serviceSummary,
+                                date = date,
+                                time = time,
+                            )
+
                         )
                         onDismissRequest()
                     }
                 }
             }
         },
-
         confirmButton = {}
     )
-
 }

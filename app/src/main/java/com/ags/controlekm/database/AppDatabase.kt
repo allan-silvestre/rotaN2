@@ -9,11 +9,11 @@ import com.ags.controlekm.database.daos.CompanyDao
 import com.ags.controlekm.database.daos.CurrentUserDao
 import com.ags.controlekm.database.daos.ServiceDao
 import com.ags.controlekm.database.daos.UserDao
-import com.ags.controlekm.models.database.CurrentUser
-import com.ags.controlekm.models.database.Company
-import com.ags.controlekm.models.database.Address
-import com.ags.controlekm.models.database.User
-import com.ags.controlekm.models.database.Service
+import com.ags.controlekm.database.models.database.CurrentUser
+import com.ags.controlekm.database.models.database.Company
+import com.ags.controlekm.database.models.database.Address
+import com.ags.controlekm.database.models.database.User
+import com.ags.controlekm.database.models.database.Service
 
 @Database(
     entities = [

@@ -1,4 +1,4 @@
-package com.ags.controlekm.ui.views
+package com.ags.controlekm.navigation
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.ags.controlekm.ui.views.loading.LoadingView
 import com.ags.controlekm.ui.views.addressManager.AllAddressView
 import com.ags.controlekm.ui.views.login.ForgotPasswordView
 import com.ags.controlekm.ui.views.serviceManager.ServiceManagerView

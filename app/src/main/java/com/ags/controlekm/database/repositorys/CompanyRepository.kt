@@ -1,7 +1,7 @@
 package com.ags.controlekm.database.repositorys
 
 import com.ags.controlekm.database.daos.CompanyDao
-import com.ags.controlekm.models.database.Company
+import com.ags.controlekm.database.models.database.Company
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton

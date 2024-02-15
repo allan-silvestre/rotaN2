@@ -1,8 +1,6 @@
-package com.ags.controlekm.models.params
+package com.ags.controlekm.viewModels.service.modelsParams
 
-import com.ags.controlekm.models.database.CurrentUser
-
-data class newServiceParams(
+data class NewServiceParams(
     val departureAddress: String,
     val serviceAddress: String,
     val departureKm: Int,

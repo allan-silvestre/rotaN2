@@ -42,7 +42,7 @@ import androidx.compose.ui.window.PopupProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ags.controlekm.ui.components.textField.FormularioTextField
 import com.ags.controlekm.ui.components.textField.FormularioTextFieldMenu
-import com.ags.controlekm.models.database.Address
+import com.ags.controlekm.database.models.database.Address
 import com.ags.controlekm.viewModels.AddressViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -81,6 +81,7 @@ fun SelectAddressDropDownMenu(
 
     var address by remember { mutableStateOf("") }
     var departureTime by remember { mutableStateOf("") }
+
 if(visibleAddress){
     Row(
         modifier = Modifier.fillMaxWidth(),

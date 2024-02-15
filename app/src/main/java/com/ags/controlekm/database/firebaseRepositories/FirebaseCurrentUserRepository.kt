@@ -1,7 +1,7 @@
 package com.ags.controlekm.database.firebaseRepositories
 
-import com.ags.controlekm.models.database.CurrentUser
-import com.ags.controlekm.models.database.User
+import com.ags.controlekm.database.models.database.CurrentUser
+import com.ags.controlekm.database.models.database.User
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference

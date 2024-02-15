@@ -1,12 +1,11 @@
-package com.ags.controlekm.viewModels
+package com.ags.controlekm.viewModels.service.validateFields
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ags.controlekm.database.repositorys.CurrentUserRepository
 import com.ags.controlekm.database.repositorys.ServiceRepository
-import com.ags.controlekm.models.database.CurrentUser
-import com.ags.controlekm.models.database.Service
-import dagger.hilt.android.lifecycle.HiltViewModel
+import com.ags.controlekm.database.models.database.CurrentUser
+import com.ags.controlekm.database.models.database.Service
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
@@ -30,6 +29,7 @@ class ValidadeFields @Inject constructor(
             }
         }
     }
+
     fun validateFieldsNewService(
         departureAddress: String,
         serviceAddress: String,
@@ -51,5 +51,36 @@ class ValidadeFields @Inject constructor(
             println("Finalize o atendimento em aberto antes de iniciar um novo")
             return false
         }else { return true }
+    }
+
+    fun validateFieldsConfirmArrival(arrivalKM: Int): Boolean {
+        if (arrivalKM.toString().isEmpty()) {
+            println("Você precisa informar o KM ao chegar no local de atendimento para continuar")
+            return false
+        } else if (arrivalKM < currentUser.lastKm) {
+            println("O KM não pode ser inferior ao último informado")
+            return false
+        } else {
+            return true
+        }
+    }
+
+    fun validateFieldsFinishCurrentServiceAndGenerateNewService(
+        departureAddress: String,
+        serviceAddress: String,
+        departureKm: Int,
+    ): Boolean {
+        if (departureAddress.isEmpty() || serviceAddress.isEmpty() || departureKm.toString().isEmpty()) {
+            println("Preencha todos os campos para continuar")
+            return false
+        } else if (departureAddress == serviceAddress) {
+            println("O local de saida não pode ser o mesmo local do atendimento")
+            return false
+        } else if (departureKm < currentUser.lastKm) {
+            println("O KM não pode ser inferior ao último informado")
+            return false
+        } else {
+            return true
+        }
     }
 }

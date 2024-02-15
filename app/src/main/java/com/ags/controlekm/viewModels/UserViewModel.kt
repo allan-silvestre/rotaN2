@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ags.controlekm.database.firebaseRepositories.FirebaseUserRepository
 import com.ags.controlekm.database.repositorys.UserRepository
-import com.ags.controlekm.models.database.User
+import com.ags.controlekm.database.models.database.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow

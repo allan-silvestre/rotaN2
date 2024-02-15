@@ -86,7 +86,7 @@ import com.ags.controlekm.functions.validete_text_format.validateContainsOnlyTex
 import com.ags.controlekm.functions.validete_text_format.validateCpfFormat
 import com.ags.controlekm.functions.validete_text_format.validateEmailFormat
 import com.ags.controlekm.functions.validete_text_format.validatePasswordFormat
-import com.ags.controlekm.functions.navigation.navigateSingleTopTo
+import com.ags.controlekm.navigation.navigateSingleTopTo
 import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalAnimationApi::class)

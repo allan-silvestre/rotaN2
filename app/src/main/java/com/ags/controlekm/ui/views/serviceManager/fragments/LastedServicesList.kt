@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.ags.controlekm.models.database.Service
+import com.ags.controlekm.database.models.database.Service
 import com.ags.controlekm.ui.views.serviceManager.components.LatestServicesCard
 import java.text.SimpleDateFormat
 import java.util.Locale

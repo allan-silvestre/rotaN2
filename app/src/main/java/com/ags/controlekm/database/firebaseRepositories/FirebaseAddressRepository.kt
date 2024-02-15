@@ -1,6 +1,6 @@
 package com.ags.controlekm.database.firebaseRepositories
 
-import com.ags.controlekm.models.database.Address
+import com.ags.controlekm.database.models.database.Address
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference

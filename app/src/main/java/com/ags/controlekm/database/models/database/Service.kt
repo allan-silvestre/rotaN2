@@ -1,4 +1,4 @@
-package com.ags.controlekm.models.database
+package com.ags.controlekm.database.models.database
 
 import androidx.annotation.NonNull
 import androidx.room.Entity

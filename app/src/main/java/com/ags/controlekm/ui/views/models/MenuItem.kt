@@ -1,4 +1,4 @@
-package com.ags.controlekm.models.components
+package com.ags.controlekm.ui.views.models
 
 import androidx.compose.ui.graphics.vector.ImageVector
 

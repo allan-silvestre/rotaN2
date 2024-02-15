@@ -1,4 +1,4 @@
-package com.ags.controlekm.ui.views
+package com.ags.controlekm.ui.views.loading
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

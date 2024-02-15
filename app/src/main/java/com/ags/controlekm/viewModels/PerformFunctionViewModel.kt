@@ -16,7 +16,7 @@ class PerformFunctionViewModel(application: Application) : AndroidViewModel(appl
     private val _loading = mutableStateOf(false)
     val loading get() = _loading
 
-    fun performFunction(function: () -> Unit, onError: () -> Unit) {
+    fun performFunctionTry(function: () -> Unit, onError: () -> Unit) {
         _loading.value = true
         viewModelScope.launch {
             try {
@@ -28,4 +28,7 @@ class PerformFunctionViewModel(application: Application) : AndroidViewModel(appl
             }
         }
     }
+
+
+
 }

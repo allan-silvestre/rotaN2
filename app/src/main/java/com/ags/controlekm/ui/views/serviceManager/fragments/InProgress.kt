@@ -6,6 +6,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
@@ -22,6 +26,7 @@ fun InProgress(
     error: Boolean = true,
     serviceSummary: (String) -> Unit
 ) {
+    var summary by remember { mutableStateOf("") }
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.Center,
@@ -33,8 +38,11 @@ fun InProgress(
         Spacer(modifier = Modifier.height(24.dp))
         FormularioOutlinedTextField(
             readOnly = false,
-            value = serviceSummary.toString(),
-            onValueChange = { serviceSummary(it.take(50)) },
+            value = summary,
+            onValueChange = {
+                summary = it.take(50)
+                serviceSummary(summary)
+            },
             label = "Resumo do atendimento",
             visualTransformation = VisualTransformation.None,
             keyboardType = KeyboardType.Text,

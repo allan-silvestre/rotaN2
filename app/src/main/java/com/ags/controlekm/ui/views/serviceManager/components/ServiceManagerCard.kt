@@ -16,7 +16,6 @@ import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -32,8 +31,8 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.ags.controlekm.models.database.Service
-import com.ags.controlekm.models.params.newServiceParams
+import com.ags.controlekm.database.models.database.Service
+import com.ags.controlekm.viewModels.service.modelsParams.NewServiceParams
 import com.ags.controlekm.ui.components.buttons.ButtonDefault
 import com.ags.controlekm.ui.components.buttons.ButtonIcon
 import com.ags.controlekm.ui.components.progress.LoadingCircular
@@ -41,7 +40,8 @@ import com.ags.controlekm.ui.components.text.TitleText
 import com.ags.controlekm.ui.views.serviceManager.fragments.InProgress
 import com.ags.controlekm.ui.views.serviceManager.fragments.NewService
 import com.ags.controlekm.ui.views.serviceManager.fragments.Traveling
-import com.ags.controlekm.viewModels.ServiceViewModel
+import com.ags.controlekm.viewModels.service.ServiceViewModel
+import com.ags.controlekm.viewModels.service.modelsParams.ConfirmArrivalParams
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
@@ -70,15 +70,12 @@ fun ServiceManagerCard(serviceViewModel: ServiceViewModel = hiltViewModel<Servic
     val visibleButtonDefault by serviceViewModel.visibleButtonDefault.collectAsState(false)
     val visibleButtonCancel by serviceViewModel.visibleButtonCancel.collectAsState(false)
 
-    val currentUser by serviceViewModel.currentUser.collectAsState(null)
     val currentService by serviceViewModel.currentService.collectAsStateWithLifecycle(Service())
 
     val vNewService by serviceViewModel.visibleNewService.collectAsState(false)
     val vTraveling by serviceViewModel.visibleTraveling.collectAsState(false)
     val vInProgress by serviceViewModel.visibleInProgress.collectAsState(false)
 
-    // VARIAVEL SERÁ REMOVIDA
-    var novoAtendimento by remember { mutableStateOf(Service()) }
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -192,7 +189,7 @@ fun ServiceManagerCard(serviceViewModel: ServiceViewModel = hiltViewModel<Servic
                     ) {
                         if (currentService.statusService.isEmpty()) {
                             serviceViewModel.newService(
-                                newServiceParams(
+                                NewServiceParams(
                                     departureAddress = departureAddress,
                                     serviceAddress = serviceAddress,
                                     departureKm = departureKm.toInt(),
@@ -204,10 +201,13 @@ fun ServiceManagerCard(serviceViewModel: ServiceViewModel = hiltViewModel<Servic
                             currentService.statusService.equals("Em rota") ||
                             currentService.statusService.equals("Em rota, retornando")
                         ) {
-                            serviceViewModel.confirmarChegada(
-                                kmChegada = arrivalKm.toInt(),
-                                data = date,
-                                hora = time,
+                            serviceViewModel.confirmArrival(
+                                ConfirmArrivalParams(
+                                    arrivalKm = arrivalKm.toInt(),
+                                    date = date,
+                                    time = time,
+                                )
+
                             )
                         } else if (currentService.statusService.equals("Em andamento")) {
                             if (serviceSummary.isNotEmpty() && serviceSummary.length > 5) {
@@ -251,10 +251,7 @@ fun ServiceManagerCard(serviceViewModel: ServiceViewModel = hiltViewModel<Servic
                 }
             },
             confirmButton = {
-                serviceViewModel.cancelar(
-                    userLoggedData = currentUser!!,
-                    atendimentoAtual = currentService!!
-                )
+                serviceViewModel.cancel()
             }
         )
     }
@@ -262,12 +259,9 @@ fun ServiceManagerCard(serviceViewModel: ServiceViewModel = hiltViewModel<Servic
     //AlertDialog AfterServiceDialog
     AnimatedVisibility(visibleAfterServiceDialog) {
         AfterServiceDialog(
-            userLoggedData = currentUser,
-            atendimentoAtual = currentService,
-            novoAtendimento = novoAtendimento,
-            resumoAtendimento = serviceSummary,
-            data = date,
-            hora = time,
+            serviceSummary = serviceSummary,
+            date = date,
+            time = time,
             onDismissRequest = {
                 visibleAfterServiceDialog = false
             }

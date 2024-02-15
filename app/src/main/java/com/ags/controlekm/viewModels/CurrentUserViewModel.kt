@@ -3,7 +3,7 @@ package com.ags.controlekm.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ags.controlekm.database.firebaseRepositories.FirebaseCurrentUserRepository
-import com.ags.controlekm.models.database.CurrentUser
+import com.ags.controlekm.database.models.database.CurrentUser
 import com.ags.controlekm.database.repositorys.CurrentUserRepository
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel

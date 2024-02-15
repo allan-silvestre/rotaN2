@@ -1,4 +1,4 @@
-package com.ags.controlekm.ui.views
+package com.ags.controlekm.ui.views.app
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
@@ -80,9 +80,10 @@ import coil.compose.rememberImagePainter
 import com.ags.controlekm.R
 import com.ags.controlekm.ui.views.serviceManager.components.EmailVerifieldDialog
 import com.ags.controlekm.viewModels.CurrentUserViewModel
-import com.ags.controlekm.functions.navigation.navigateSingleTopTo
-import com.ags.controlekm.models.components.BottomNavigationItem
-import com.ags.controlekm.models.components.MenuItem
+import com.ags.controlekm.navigation.navigateSingleTopTo
+import com.ags.controlekm.ui.views.models.BottomNavigationItem
+import com.ags.controlekm.ui.views.models.MenuItem
+import com.ags.controlekm.navigation.NavHostNavigation
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
@@ -99,14 +100,14 @@ fun App(
 
     val navController = rememberNavController()
 
-    var currentUser by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser) }
+    val currentUser by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser) }
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var selectedItemIndex by rememberSaveable { mutableStateOf(0) }
     var selectedBottomBarItemIndex by rememberSaveable { mutableStateOf(0) }
 
-    var itemsVisible by rememberSaveable { mutableStateOf(true) }
+    val itemsVisible by rememberSaveable { mutableStateOf(true) }
 
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by rememberSaveable { mutableStateOf(false) }

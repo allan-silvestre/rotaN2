@@ -1,7 +1,7 @@
 package com.ags.controlekm.database.repositorys
 
 import com.ags.controlekm.database.daos.ServiceDao
-import com.ags.controlekm.models.database.Service
+import com.ags.controlekm.database.models.database.Service
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow

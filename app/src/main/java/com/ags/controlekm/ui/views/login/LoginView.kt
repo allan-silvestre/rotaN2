@@ -57,7 +57,7 @@ import com.ags.controlekm.R
 import com.ags.controlekm.ui.components.textField.FormularioOutlinedTextField
 import com.ags.controlekm.ui.components.textField.FormularioOutlinedTextFieldMenu
 import com.ags.controlekm.viewModels.LoginViewModel
-import com.ags.controlekm.functions.navigation.navigateSingleTopTo
+import com.ags.controlekm.navigation.navigateSingleTopTo
 import com.google.firebase.auth.FirebaseAuth
 
 @SuppressLint("CoroutineCreationDuringComposition")

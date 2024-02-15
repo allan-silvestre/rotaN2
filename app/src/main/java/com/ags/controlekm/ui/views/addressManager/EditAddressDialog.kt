@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ags.controlekm.ui.components.textField.FormularioTextField
-import com.ags.controlekm.models.database.Address
+import com.ags.controlekm.database.models.database.Address
 import com.ags.controlekm.viewModels.AddressViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
