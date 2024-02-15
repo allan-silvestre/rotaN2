@@ -229,39 +229,40 @@ class ServiceViewModel @Inject constructor(
 
             val currentUser = currentUser.value
             val currentService = currentService.value
-
             val newService = Service()
-
-            newService.departureDate = params.date
-            newService.departureTime = params.time
-            newService.departureAddress = params.departureAddress
-            newService.serviceAddress = params.serviceAddress
-            newService.departureKm = params.departureKm
-            newService.technicianId = currentUser.id
-            newService.technicianName = "${currentUser.name} ${currentUser.lastName}"
-            newService.profileImgTechnician = currentUser.image
-            newService.statusService = "Em rota"
-
-            // completionTime OK / dateCompletion OK / descrition OK / statusServices  /
 
             viewModelScope.launch {
                 try {
+                    // FINISH THE CURRENT SERVICE
                     delay(1000L)
                     launch {
-                        // FINALIZA O ATENDIMENTO ATUAL
+                        currentService.statusService = "Finalizado"
+
+                        currentUser.kmBackup = currentUser.lastKm
+
                         viewModelScope.launch(Dispatchers.IO) {
-                            currentUser.kmBackup = currentUser.lastKm
                             update(currentService)
                             currentUserRepository.update(currentUser)
                             firebaseCurrentUserRepository.updateKmBackup(currentUser.lastKm)
                         }
                     }
 
+                    // START A NEW SERVICE
                     delay(2000L)
                     launch {
-                        //INICIA UM NOVO ATENDIMENTO
+                        newService.departureDate = params.date
+                        newService.departureTime = params.time
+                        newService.departureAddress = params.departureAddress
+                        newService.serviceAddress = params.serviceAddress
+                        newService.departureKm = params.departureKm
+                        newService.technicianId = currentUser.id
+                        newService.technicianName = "${currentUser.name} ${currentUser.lastName}"
+                        newService.profileImgTechnician = currentUser.image
+                        newService.statusService = "Em rota"
+
+                        currentUser.lastKm = params.departureKm
+
                         viewModelScope.launch(Dispatchers.IO) {
-                            currentUser.lastKm = params.departureKm
                             insert(newService)
                             currentUserRepository.update(currentUser)
                             firebaseCurrentUserRepository.updateLastKm(params.departureKm)
