@@ -125,95 +125,121 @@ class ServiceViewModel @Inject constructor(
     }
 
     fun confirmArrival(params: ConfirmArrivalParams) {
+        _loading.value = true
         if (validadeFields.validateFieldsConfirmArrival(params.arrivalKm)) {
             if (currentService.value.statusService == "Em rota") {
-                currentService.value.dateArrival = params.date
-                currentService.value.timeArrival = params.time
-                currentService.value.arrivalKm = params.arrivalKm
-                currentService.value.kmDriven =
-                    (params.arrivalKm - currentService.value.departureKm)
-                currentService.value.statusService = "Em andamento"
+                viewModelScope.launch {
+                    try {
+                        currentService.value.dateArrival = params.date
+                        currentService.value.timeArrival = params.time
+                        currentService.value.arrivalKm = params.arrivalKm
+                        currentService.value.kmDriven =
+                            (params.arrivalKm - currentService.value.departureKm)
+                        currentService.value.statusService = "Em andamento"
 
-                currentUser.value.lastKm = params.arrivalKm
+                        currentUser.value.lastKm = params.arrivalKm
 
-                viewModelScope.launch(Dispatchers.IO) {
-                    update(currentService.value)
-                    currentUserRepository.update(currentUser.value)
-                    firebaseCurrentUserRepository.updateLastKm(params.arrivalKm)
+                        update(currentService.value)
+                        currentUserRepository.update(currentUser.value)
+                        firebaseCurrentUserRepository.updateLastKm(params.arrivalKm)
+                        delay(1000L)
+                        _loading.value = false
+                    } finally {
+
+                    }
                 }
             } else if (currentService.value.statusService == "Em rota, retornando") {
-                currentService.value.dateArrivalReturn = params.date
-                currentService.value.timeCompletedReturn = params.time
-                currentService.value.arrivalKm = params.arrivalKm
-                currentService.value.statusService = "Finalizado"
-                firebaseCurrentUserRepository.updateLastKm(params.arrivalKm)
-                currentService.value.kmDriven =
-                    (params.arrivalKm - currentService.value.departureKm)
+                viewModelScope.launch {
+                    try {
+                        currentService.value.dateArrivalReturn = params.date
+                        currentService.value.timeCompletedReturn = params.time
+                        currentService.value.arrivalKm = params.arrivalKm
+                        currentService.value.statusService = "Finalizado"
+                        firebaseCurrentUserRepository.updateLastKm(params.arrivalKm)
+                        currentService.value.kmDriven =
+                            (params.arrivalKm - currentService.value.departureKm)
 
-                currentUser.value.lastKm = params.arrivalKm
-                currentUser.value.kmBackup = params.arrivalKm
+                        currentUser.value.lastKm = params.arrivalKm
+                        currentUser.value.kmBackup = params.arrivalKm
 
-                viewModelScope.launch(Dispatchers.IO) {
-                    update(currentService.value)
-                    currentUserRepository.update(currentUser.value)
-                    firebaseCurrentUserRepository.updateLastKm(params.arrivalKm)
-                    firebaseCurrentUserRepository.updateKmBackup(params.arrivalKm)
+                        update(currentService.value)
+                        currentUserRepository.update(currentUser.value)
+                        firebaseCurrentUserRepository.updateLastKm(params.arrivalKm)
+                        firebaseCurrentUserRepository.updateKmBackup(params.arrivalKm)
+                        delay(1000L)
+                        _loading.value = false
+                    } finally {
+
+                    }
                 }
+
             }
         }
     }
 
     fun startReturn(params: StartReturnParams) {
-        val currentService = currentService.value
+        _loading.value = true
+        viewModelScope.launch {
+            try {
+                val currentService = currentService.value
 
-        currentService.dateCompletion = params.date
-        currentService.CompletionTime = params.time
+                currentService.dateCompletion = params.date
+                currentService.CompletionTime = params.time
 
-        currentService.description = params.serviceSummary
-        currentService.departureDateToReturn = params.date
-        currentService.startTimeReturn = params.time
-        currentService.addressReturn = params.returnAddress
-        currentService.statusService = "Em rota, retornando"
+                currentService.description = params.serviceSummary
+                currentService.departureDateToReturn = params.date
+                currentService.startTimeReturn = params.time
+                currentService.addressReturn = params.returnAddress
+                currentService.statusService = "Em rota, retornando"
 
-        viewModelScope.launch(Dispatchers.IO) {
-            update(currentService)
+                update(currentService)
+
+                delay(1000L)
+                _loading.value = false
+            }finally {
+
+            }
         }
     }
 
     fun cancel() {
+        _loading.value = true
+
         val currentUser = currentUser.value
         val currentService = currentService.value
 
         if (currentService.statusService == "Em rota, retornando") {
-            // CANCELA VIAGEM DE RETORNO
-            currentService.departureDateToReturn = ""
-            currentService.startTimeReturn = ""
-            currentService.addressReturn = ""
-            currentService.statusService = "Em andamento"
-
-            currentUser.lastKm = currentUser.kmBackup
-
             viewModelScope.launch(Dispatchers.IO) {
-                _loading.value = true
-                update(currentService)
-                delay(1000L)
-                _loading.value = false
+                try {
+                    // CANCELA VIAGEM DE RETORNO
+                    currentService.departureDateToReturn = ""
+                    currentService.startTimeReturn = ""
+                    currentService.addressReturn = ""
+                    currentService.statusService = "Em andamento"
+
+                    currentUser.lastKm = currentUser.kmBackup
+
+                    update(currentService)
+                    delay(1000L)
+                    _loading.value = false
+                }finally {}
             }
         } else {
             viewModelScope.launch(Dispatchers.IO) {
-                _loading.value = true
-                // NO ROOM
-                // DELETA O ATENDIMENTO ATUAL DA TABELA
-                delete(Service(currentService.id))
-                // NO ROOM
-                // DEFINE O VALOR DO (ULTIMO KM) DO USUÁRIO PARA O ULTIMO INFORMADO AO CONCLUIR A ULTIMA VIAGEM
-                currentUserRepository.update(currentUser)
-                // NO FIREBASE
-                // DEFINE O VALOR DO (ULTIMO KM) DO USUÁRIO PARA O ULTIMO INFORMADO AO CONCLUIR A ULTIMA VIAGEM
-                firebaseCurrentUserRepository.updateLastKm(currentUser.kmBackup)
-                delay(1000L)
-                _loading.value = false
+                try {
+                    // NO ROOM
+                    // DELETA O ATENDIMENTO ATUAL DA TABELA
+                    delete(Service(currentService.id))
+                    // NO ROOM
+                    // DEFINE O VALOR DO (ULTIMO KM) DO USUÁRIO PARA O ULTIMO INFORMADO AO CONCLUIR A ULTIMA VIAGEM
+                    currentUserRepository.update(currentUser)
+                    // NO FIREBASE
+                    // DEFINE O VALOR DO (ULTIMO KM) DO USUÁRIO PARA O ULTIMO INFORMADO AO CONCLUIR A ULTIMA VIAGEM
+                    firebaseCurrentUserRepository.updateLastKm(currentUser.kmBackup)
 
+                    delay(1000L)
+                    _loading.value = false
+                }finally {}
             }
         }
     }
@@ -221,10 +247,11 @@ class ServiceViewModel @Inject constructor(
     fun finishCurrentServiceAndGenerateNewService(params: FinishCurrentServiceAndGenerateNewServiceParams) {
         // VERIFICA SE ALGUM CAMPO ESTA VAZIO
         if (validadeFields.validateFieldsFinishCurrentServiceAndGenerateNewService(
-            params.departureAddress,
-            params.serviceAddress,
-            params.departureKm
-        )) {
+                params.departureAddress,
+                params.serviceAddress,
+                params.departureKm
+            )
+        ) {
             _loading.value = true
 
             val currentUser = currentUser.value
@@ -270,7 +297,7 @@ class ServiceViewModel @Inject constructor(
                     }
                     delay(3000L)
                     _loading.value = false
-                }finally {
+                } finally {
                 }
             }
         }

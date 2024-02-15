@@ -17,6 +17,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -70,11 +71,11 @@ fun ServiceManagerCard(serviceViewModel: ServiceViewModel = hiltViewModel<Servic
     val visibleButtonDefault by serviceViewModel.visibleButtonDefault.collectAsState(false)
     val visibleButtonCancel by serviceViewModel.visibleButtonCancel.collectAsState(false)
 
-    val currentService by serviceViewModel.currentService.collectAsStateWithLifecycle(Service())
-
     val vNewService by serviceViewModel.visibleNewService.collectAsState(false)
     val vTraveling by serviceViewModel.visibleTraveling.collectAsState(false)
     val vInProgress by serviceViewModel.visibleInProgress.collectAsState(false)
+
+    val currentService by serviceViewModel.currentService.collectAsStateWithLifecycle(Service())
 
     Box(
         modifier = Modifier
@@ -158,7 +159,7 @@ fun ServiceManagerCard(serviceViewModel: ServiceViewModel = hiltViewModel<Servic
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                if(serviceViewModel.loading.value) {
+                if (serviceViewModel.loading.value) {
                     LoadingCircular()
                 } else {
                     AnimatedVisibility(vNewService) {
