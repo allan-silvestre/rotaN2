@@ -72,8 +72,8 @@ fun LatestServicesCard(
                         contentDescription = "",
                         tint = Color(0xFF228B22)
                     )
-                    SubTitleText("${data}")
-                    ContentText("${address}")
+                    SubTitleText(data)
+                    ContentText(address)
                 } else {
                     SubTitleText("Em andamento")
                     LinearProgressIndicator(
@@ -81,7 +81,7 @@ fun LatestServicesCard(
                             .padding(start = 50.dp, end = 50.dp, top = 6.dp, bottom = 6.dp),
                         strokeCap = StrokeCap.Round
                     )
-                    ContentText("${address}")
+                    ContentText(address)
                 }
             }
         }

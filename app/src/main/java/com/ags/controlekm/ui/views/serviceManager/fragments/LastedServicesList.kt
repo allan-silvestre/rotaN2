@@ -45,15 +45,12 @@ fun LastestServicesList(
     }
     LazyRow(modifier = Modifier) {
         items(servicesCurrentUser.sortedByDescending {
-            SimpleDateFormat(
-                "dd/MM/yyyy",
-                Locale.getDefault()
-            )
-                .parse(it.departureDate)
+            SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+                .parse("${it.departureDate} ${it.departureTime}")
         }.take(5)) {
             LatestServicesCard(
-                data = it.dateCompletion.toString(),
-                address = it.serviceAddress.toString(),
+                data = it.dateCompletion,
+                address = it.serviceAddress,
             )
         }
     }
