@@ -66,11 +66,10 @@ fun ForgotPasswordView(navController: NavHostController) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // RECUPERAÇÃO DE EMAILS CADASTRADOS
         Image(
             modifier = Modifier
-                .size(150.dp),
-            painter = painterResource(id = R.drawable.logo),
+                .size(120.dp),
+            painter = painterResource(id = R.drawable.nlogo),
             contentDescription = ""
         )
         Text(

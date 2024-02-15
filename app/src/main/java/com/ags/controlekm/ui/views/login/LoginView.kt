@@ -169,18 +169,18 @@ fun LoginView(
                         item {
                             Image(
                                 modifier = Modifier
-                                    .size(150.dp),
-                                painter = painterResource(id = R.drawable.logo),
+                                    .size(120.dp),
+                                painter = painterResource(id = R.drawable.nlogo),
                                 contentDescription = ""
                             )
+                            Spacer(modifier = Modifier.height(32.dp))
                         }
                         item {
                             Text(
                                 text = "Login",
                                 fontSize = 18.sp,
-                                fontWeight = FontWeight.SemiBold
+                                fontWeight = FontWeight.W900
                             )
-                            Spacer(modifier = Modifier.height(32.dp))
                         }
                         item {
                             FormularioOutlinedTextField(
@@ -277,6 +277,19 @@ fun LoginView(
                                     color = MaterialTheme.colorScheme.surfaceTint
                                 )
                             }
+                            Spacer(modifier = Modifier.height(100.dp))
+                        }
+                        item {
+                            Text(
+                                "Uma solução",
+                                fontWeight = FontWeight.Medium,
+                                fontSize = 11.sp
+                                )
+                            Image(
+                                modifier = Modifier.size(70.dp),
+                                painter = painterResource(id = R.drawable.aglogo),
+                                contentDescription = ""
+                            )
                         }
                     }
                 }
