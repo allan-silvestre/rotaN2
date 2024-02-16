@@ -77,7 +77,7 @@ class ServiceViewModel @Inject constructor(
     init {
         viewModelScope.launch(Dispatchers.IO) {
             launch {
-                currentUserRepository.getCurrentUser().firstOrNull()?.let {
+                currentUserRepository.getCurrentUser()!!.firstOrNull()?.let {
                     currentUser.value = it
                 }
             }

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -52,7 +53,7 @@ fun FormularioTextFieldMenu(
 
     Column(modifier = modifier) {
         TextField(
-            //shape = RoundedCornerShape(50.dp),
+            shape = RoundedCornerShape(50.dp),
             modifier = Modifier.fillMaxWidth(),
             readOnly = readOnly,
             trailingIcon = {
@@ -149,7 +150,7 @@ fun FormularioOutlinedTextFieldMenu(
 
     Column(modifier = modifier) {
         OutlinedTextField(
-            //shape = RoundedCornerShape(50.dp),
+            shape = RoundedCornerShape(50.dp),
             modifier = Modifier.fillMaxWidth(),
             readOnly = readOnly,
             trailingIcon = {

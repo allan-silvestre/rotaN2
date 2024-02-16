@@ -23,7 +23,6 @@ import com.ags.controlekm.viewModels.app.AppViewModel
 fun NavHostNavigation(
     padding: PaddingValues,
     navController: NavHostController,
-    appViewModel: AppViewModel = hiltViewModel<AppViewModel>()
 ) {
     NavHost(
         modifier = Modifier.padding(padding),
@@ -47,9 +46,6 @@ fun NavHostNavigation(
         }
         composable("enderecosAtendimento") {
             AllAddressView(navController)
-        }
-        composable("loading") {
-            LoadingView(navController)
         }
     }
 }

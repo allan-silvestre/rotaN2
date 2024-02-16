@@ -20,7 +20,7 @@ class ValidadeFields @Inject constructor(
     init {
         viewModelScope.launch(Dispatchers.IO) {
             launch {
-                currentUserRepository.getCurrentUser().firstOrNull()?.let {
+                currentUserRepository.getCurrentUser()!!.firstOrNull()?.let {
                     currentUser = it
                 }
                 serviceRepository.getcurrentService()!!.firstOrNull()?.let {

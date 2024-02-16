@@ -11,16 +11,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
 
 @Composable
-fun LoadingView(navController: NavHostController) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
+fun LoadingView() {
+    Dialog(onDismissRequest = {}) {
         LinearProgressIndicator(
             modifier = Modifier
                 .padding(start = 30.dp, end = 30.dp),

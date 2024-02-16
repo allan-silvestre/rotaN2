@@ -25,5 +25,5 @@ data class CurrentUser(
     var sector: String = "",
     var kmBackup: Int = 0,
     var lastKm: Int = 0,
-    var emailVerification: Boolean? = false
+    var emailVerification: Boolean? = true
 )

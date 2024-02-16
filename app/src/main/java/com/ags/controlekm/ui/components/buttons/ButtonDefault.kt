@@ -35,12 +35,7 @@ fun ButtonDefault(
             .height(50.dp)
             .padding(padding),
         enabled = enable,
-        shape = RoundedCornerShape(
-            topStart = topStart,
-            topEnd = topEnd,
-            bottomStart = bottomStart,
-            bottomEnd = bottomEnd
-        ),
+        shape = RoundedCornerShape(50.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = color
         ),

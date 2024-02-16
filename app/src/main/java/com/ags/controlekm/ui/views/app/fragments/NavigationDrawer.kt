@@ -17,16 +17,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Verified
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerState
-import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,14 +33,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import coil.compose.SubcomposeAsyncImage
 import com.ags.controlekm.R
 import coil.compose.rememberImagePainter
 import coil.request.CachePolicy
 import coil.transform.CircleCropTransformation
 import com.ags.controlekm.navigation.navigateSingleTopTo
 import com.ags.controlekm.viewModels.CurrentUserViewModel
+import com.ags.controlekm.viewModels.service.ServiceViewModel
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
@@ -52,12 +50,13 @@ import kotlinx.coroutines.launch
 fun NavigationDrawer(
     navController: NavHostController,
     drawerState: DrawerState,
-    currentUserViewModel: CurrentUserViewModel = hiltViewModel<CurrentUserViewModel>()
+    currentUserViewModel: CurrentUserViewModel = hiltViewModel<CurrentUserViewModel>(),
 ) {
     val scope = rememberCoroutineScope()
+    val currentUser by currentUserViewModel.currentUser.collectAsStateWithLifecycle()
 
     val currentUserImage = rememberImagePainter(
-        data = currentUserViewModel.currentUser.value.image,
+        data = currentUser.image,
         builder = {
             transformations(CircleCropTransformation())
             placeholder(R.drawable.perfil)
@@ -75,7 +74,6 @@ fun NavigationDrawer(
         Column(
             modifier = Modifier
                 .fillMaxSize(),
-            //verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Spacer(modifier = Modifier.height(32.dp))
@@ -85,9 +83,9 @@ fun NavigationDrawer(
                 modifier = Modifier
                     .size(100.dp)
                     .clip(CircleShape)
-                    .clickable { scope.launch { drawerState.open()} },
+                    .clickable { scope.launch { drawerState.open() } },
             )
-            if (currentUserViewModel.currentUser.value.emailVerification == true) {
+            if (currentUser.emailVerification == true) {
                 Icon(
                     modifier = Modifier
                         .size(16.dp),
@@ -105,23 +103,23 @@ fun NavigationDrawer(
                 )
             }
             Text(
-                text = currentUserViewModel.currentUser.value.email.toString(),
+                text = currentUser.email,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Normal
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "${currentUserViewModel.currentUser.value.name} ${currentUserViewModel.currentUser.value.lastName}",
+                text = "${currentUser.name} ${currentUser.lastName}",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Normal
             )
             Text(
-                text = currentUserViewModel.currentUser.value.position,
+                text = currentUser.position,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Light
             )
             Text(
-                text = currentUserViewModel.currentUser.value.sector,
+                text = currentUser.sector,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Light
             )
@@ -134,6 +132,7 @@ fun NavigationDrawer(
                             FirebaseAuth
                                 .getInstance()
                                 .signOut()
+                            currentUserViewModel.deleteCurrentUser()
                             navController.popBackStack()
                             navController.navigateSingleTopTo("login")
                         }
@@ -145,7 +144,6 @@ fun NavigationDrawer(
                 modifier = Modifier
                     .padding(top = 8.dp, start = 6.dp, end = 6.dp),
             )
-            // CONTEUDO PARTE INFERIOR
             Column(
                 modifier = Modifier.fillMaxHeight(),
                 verticalArrangement = Arrangement.Bottom,

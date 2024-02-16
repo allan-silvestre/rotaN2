@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 class AppViewModel @Inject constructor(): ViewModel() {
-
     private var _showAppbarAndBottomBar = MutableStateFlow(false)
     val showAppbarAndBottomBar = _showAppbarAndBottomBar.asStateFlow()
 

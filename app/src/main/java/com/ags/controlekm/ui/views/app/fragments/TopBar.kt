@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -20,6 +19,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,6 +32,7 @@ import coil.compose.rememberImagePainter
 import coil.request.CachePolicy
 import coil.transform.CircleCropTransformation
 import com.ags.controlekm.R
+import com.ags.controlekm.database.models.database.CurrentUser
 import com.ags.controlekm.viewModels.CurrentUserViewModel
 import kotlinx.coroutines.launch
 
@@ -44,8 +46,10 @@ fun TopBar(
 ) {
     val scope = rememberCoroutineScope()
 
+    val currentUser by currentUserViewModel.currentUser.collectAsState(CurrentUser())
+
     val currentUserImage = rememberImagePainter(
-        data = currentUserViewModel.currentUser.value.image,
+        data = currentUser.image,
         builder = {
             transformations(CircleCropTransformation())
             placeholder(R.drawable.perfil)
@@ -62,14 +66,14 @@ fun TopBar(
                     verticalArrangement = Arrangement.Center,
                 ) {
                     Text(
-                        text = "${currentUserViewModel.currentUser.value.name} ${currentUserViewModel.currentUser.value.lastName}",
+                        text = "${currentUser.name} ${currentUser.lastName}",
                         fontSize = 12.sp,
                         lineHeight = 12.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSecondary
                     )
                     Text(
-                        text = currentUserViewModel.currentUser.value.position,
+                        text = currentUser.position,
                         fontSize = 11.sp,
                         lineHeight = 11.sp,
                         fontWeight = FontWeight.Normal,
@@ -88,7 +92,7 @@ fun TopBar(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .clickable { scope.launch { drawerState.open()} },
+                    .clickable { scope.launch { drawerState.open() } },
             )
         },
         actions = {

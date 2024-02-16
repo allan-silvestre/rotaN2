@@ -81,11 +81,11 @@ import com.ags.controlekm.ui.components.textField.FormularioTextFieldMenu
 import com.ags.controlekm.viewModels.UserViewModel
 import com.ags.controlekm.maskTransformations.MaskVisualTransformation
 import com.ags.controlekm.functions.firebase.uploadImage
-import com.ags.controlekm.functions.validete_text_format.validateContainsOnlyNumbers
-import com.ags.controlekm.functions.validete_text_format.validateContainsOnlyText
-import com.ags.controlekm.functions.validete_text_format.validateCpfFormat
-import com.ags.controlekm.functions.validete_text_format.validateEmailFormat
-import com.ags.controlekm.functions.validete_text_format.validatePasswordFormat
+import com.ags.controlekm.functions.validete_format.validateContainsOnlyNumbers
+import com.ags.controlekm.functions.validete_format.validateContainsOnlyText
+import com.ags.controlekm.functions.validete_format.validateCpfFormat
+import com.ags.controlekm.functions.validete_format.validateEmailFormat
+import com.ags.controlekm.functions.validete_format.validatePasswordFormat
 import com.ags.controlekm.navigation.navigateSingleTopTo
 import com.google.firebase.auth.FirebaseAuth
 

@@ -35,12 +35,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -51,283 +49,164 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.ags.controlekm.R
 import com.ags.controlekm.ui.components.textField.FormularioOutlinedTextField
 import com.ags.controlekm.ui.components.textField.FormularioOutlinedTextFieldMenu
-import com.ags.controlekm.viewModels.LoginViewModel
+import com.ags.controlekm.viewModels.login.LoginViewModel
 import com.ags.controlekm.navigation.navigateSingleTopTo
+import com.ags.controlekm.ui.components.buttons.ButtonDefault
+import com.ags.controlekm.ui.views.loading.LoadingView
+import com.ags.controlekm.viewModels.login.modelsParamsFunctions.LoginParams
 import com.google.firebase.auth.FirebaseAuth
 
-@SuppressLint("CoroutineCreationDuringComposition")
+@SuppressLint("CoroutineCreationDuringComposition", "StateFlowValueCalledInComposition")
 @Composable
 fun LoginView(
     navController: NavHostController,
-    loginViewModel: LoginViewModel = hiltViewModel(),
+    loginViewModel: LoginViewModel = hiltViewModel<LoginViewModel>(),
 ) {
-    val context = LocalContext.current
+    val loading by loginViewModel.loading.collectAsState(false)
 
-    val coroutineScope = rememberCoroutineScope()
+    val showLoginView by loginViewModel.showLoginview.collectAsState(false)
 
-   var currentUser by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser) }
-
-    val loginIsCompleted by loginViewModel.authResult.collectAsState(false)
-/**
-    DisposableEffect(currentUser?.uid) {
-        FirebaseAuth.getInstance().addAuthStateListener { firebaseAuth ->
-            currentUser = firebaseAuth.currentUser
-            currentUser?.reload()
-        }
-        onDispose { }
-    }
-**/
-    var countContent by rememberSaveable { mutableIntStateOf(0) }
-
-    val progressIndicator = remember { mutableStateOf(false) }
+    val loginResult by loginViewModel.loginResult.collectAsState(false)
 
     var email by remember { mutableStateOf("") }
     var emailError by rememberSaveable { mutableStateOf(true) }
     var emailErrorMessage by remember { mutableStateOf("") }
 
-    var senha by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
     var passwordVisibility by remember { mutableStateOf(false) }
     var senhaError by rememberSaveable { mutableStateOf(true) }
     var senhaErrorMessage by remember { mutableStateOf("") }
 
-    val espacoEntreCampos = 6.dp
-
-    var buttonProximoVisible by rememberSaveable { mutableStateOf(false) }
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        AnimatedContent(
-            targetState = countContent,
-            label = "",
-            transitionSpec = {
-                (fadeIn() + slideInHorizontally(animationSpec = tween(600),
-                    initialOffsetX = { fullHeight -> fullHeight })).togetherWith(
-                    fadeOut(
-                        animationSpec = tween(400)
-                    )
+    if (loading) {
+        LoadingView()
+    } else if (loginResult) {
+        navController.popBackStack()
+        navController.navigateSingleTopTo("home")
+    } else if(showLoginView) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(30.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            item {
+                Image(
+                    modifier = Modifier
+                        .size(120.dp),
+                    painter = painterResource(id = R.drawable.nlogo),
+                    contentDescription = ""
                 )
             }
-        ) { targetCount ->
-            when (targetCount) {
-                0 -> {
-                    progressIndicator.value = true
-                    buttonProximoVisible = false
-                    //AUTENTICAÇÃO DO APARELHO
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(32.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
-                    ) {
-                        Spacer(modifier = Modifier.height(espacoEntreCampos))
-                        if (progressIndicator.value) {
-                            CircularProgressIndicator(
-                                modifier = Modifier
-                                    .size(50.dp),
-                                progress = 0.89f,
-                                color = MaterialTheme.colorScheme.secondary,
-                                trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                            )
-                        }
-
-                        if (currentUser != null) {
-
-                            navController.popBackStack("login", true)
-                            navController.navigateSingleTopTo("home")
-
-                            progressIndicator.value = false
-                        } else {
-                            DisposableEffect(Unit) {
-                                countContent = 1
-                                onDispose {
-                                    // Limpa recursos, se necessário
-                                }
-                            }
-                        }
-                    }
-                }
-
-                1 -> {
-                    buttonProximoVisible = true
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        item {
-                            Image(
-                                modifier = Modifier
-                                    .size(120.dp),
-                                painter = painterResource(id = R.drawable.nlogo),
-                                contentDescription = ""
-                            )
-                            Spacer(modifier = Modifier.height(32.dp))
-                        }
-                        item {
-                            Text(
-                                text = "Login",
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.W900
-                            )
-                        }
-                        item {
-                            FormularioOutlinedTextField(
-                                modifier = Modifier.fillMaxWidth(),
-                                readOnly = false,
-                                value = email,
-                                onValueChange = { email = it },
-                                label = "E-mail",
-                                visualTransformation = VisualTransformation.None,
-                                keyboardType = KeyboardType.Email,
-                                imeAction = ImeAction.Next,
-                                capitalization = KeyboardCapitalization.None,
-                                erro = emailError,
-                                erroMensagem = emailErrorMessage
-                            )
-                            Spacer(modifier = Modifier.height(6.dp))
-                        }
-                        item {
-                            FormularioOutlinedTextFieldMenu(
-                                modifier = Modifier.fillMaxWidth(),
-                                readOnly = false,
-                                value = senha,
-                                onValueChange = { senha = it },
-                                trailingIconVector = if (passwordVisibility) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-                                trailingOnClick = { passwordVisibility = !passwordVisibility },
-                                label = "Senha",
-                                visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
-                                keyboardType = KeyboardType.Password,
-                                imeAction = ImeAction.Next,
-                                capitalization = KeyboardCapitalization.None,
-                                erro = senhaError,
-                                erroMensagem = senhaErrorMessage
-                            )
-                        }
-                        item {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.End
-                            ) {
-                                Text(
-                                    modifier = Modifier
-                                        .padding(start = 3.dp, end = 6.dp)
-                                        .clickable {
-                                            navController.navigateSingleTopTo("forgotPassword")
-                                        },
-                                    text = "Esqueceu sua senha?",
-                                    fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.surfaceTint
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(16.dp))
-                        }
-                        item {
-                            Button(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(50.dp),
-                                shape = RoundedCornerShape(5.dp),
-                                elevation = ButtonDefaults.elevatedButtonElevation(
-                                    defaultElevation = 5.dp,
-                                    pressedElevation = 2.dp
-                                ),
-                                onClick = { countContent++ }) {
-                                Text(
-                                    text = "Entrar",
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 16.sp
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(32.dp))
-                        }
-                        item {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.End
-                            ) {
-                                Text(
-                                    text = "Não tem uma conta?",
-                                    fontWeight = FontWeight.Medium,
-                                    fontSize = 12.sp
-                                )
-                                Text(
-                                    modifier = Modifier
-                                        .padding(start = 3.dp, end = 6.dp)
-                                        .clickable {
-                                            navController.navigateSingleTopTo("newUser")
-                                        },
-                                    text = "Cadastre-se",
-                                    fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.surfaceTint
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(100.dp))
-                        }
-                        item {
-                            Text(
-                                "Uma solução",
-                                fontWeight = FontWeight.Medium,
-                                fontSize = 11.sp
-                                )
-                            Image(
-                                modifier = Modifier.size(70.dp),
-                                painter = painterResource(id = R.drawable.aglogo),
-                                contentDescription = ""
-                            )
-                        }
-                    }
-                }
-
-                2 -> {
-                    loginViewModel.login(email, senha)
-                    progressIndicator.value = true
-                    buttonProximoVisible = false
-                    //AUTENTICAÇÃO DO APARELHO
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(32.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
-                    ) {
-                        Spacer(modifier = Modifier.height(espacoEntreCampos))
-                        if (progressIndicator.value) {
-                            CircularProgressIndicator(
-                                modifier = Modifier
-                                    .size(50.dp),
-                                progress = 0.89f,
-                                color = MaterialTheme.colorScheme.secondary,
-                                trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                            )
-
-                        }
-                        if (loginIsCompleted) {
-                            progressIndicator.value = false
-                            navController.popBackStack()
-                            navController.navigateSingleTopTo("home")
-                        } else {
-                            navController.popBackStack()
-                            navController.navigateSingleTopTo("login")
-                        }
-                    }
-                }
+            item {
+                Text(
+                    text = "Login",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.W900
+                )
             }
-        }//FIM DO LAÇO WHEN
+            item {
+                FormularioOutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    readOnly = false,
+                    value = email,
+                    onValueChange = { email = it },
+                    label = "E-mail",
+                    visualTransformation = VisualTransformation.None,
+                    keyboardType = KeyboardType.Email,
+                    imeAction = ImeAction.Next,
+                    capitalization = KeyboardCapitalization.None,
+                    erro = emailError,
+                    erroMensagem = emailErrorMessage
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+            }
+            item {
+                FormularioOutlinedTextFieldMenu(
+                    modifier = Modifier.fillMaxWidth(),
+                    readOnly = false,
+                    value = password,
+                    onValueChange = { password = it },
+                    trailingIconVector = if (passwordVisibility) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                    trailingOnClick = { passwordVisibility = !passwordVisibility },
+                    label = "Senha",
+                    visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Next,
+                    capitalization = KeyboardCapitalization.None,
+                    erro = senhaError,
+                    erroMensagem = senhaErrorMessage
+                )
+            }
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Text(
+                        modifier = Modifier
+                            .padding(start = 3.dp, end = 6.dp)
+                            .clickable {
+                                navController.navigateSingleTopTo("forgotPassword")
+                            },
+                        text = "Esqueceu sua senha?",
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.surfaceTint
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+            item {
+                ButtonDefault(
+                    "Entrar",
+                    onClick = {
+                        loginViewModel.login(LoginParams(email, password))
+                    })
+                Spacer(modifier = Modifier.height(32.dp))
+            }
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Text(
+                        text = "Não tem uma conta?",
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 12.sp
+                    )
+                    Text(
+                        modifier = Modifier
+                            .padding(start = 3.dp, end = 6.dp)
+                            .clickable {
+                                navController.navigateSingleTopTo("newUser")
+                            },
+                        text = "Cadastre-se",
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.surfaceTint
+                    )
+                }
+                Spacer(modifier = Modifier.height(100.dp))
+            }
+            item {
+                Text(
+                    "Uma solução",
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 11.sp
+                )
+                Image(
+                    modifier = Modifier.size(70.dp),
+                    painter = painterResource(id = R.drawable.aglogo),
+                    contentDescription = ""
+                )
+            }
+        }
     }
-}//FIM COLUMN
+}

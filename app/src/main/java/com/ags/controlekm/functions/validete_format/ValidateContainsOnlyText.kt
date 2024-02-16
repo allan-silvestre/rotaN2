@@ -1,4 +1,4 @@
-package com.ags.controlekm.functions.validete_text_format
+package com.ags.controlekm.functions.validete_format
 
 //VERIFICAÇÃO SIMPLES APENAS TEXTO
 fun validateContainsOnlyText(text: String): Boolean {
@@ -6,5 +6,4 @@ fun validateContainsOnlyText(text: String): Boolean {
         return false
     }
     return text.matches(Regex("[\\p{L}-]+"))
-    return true
 }

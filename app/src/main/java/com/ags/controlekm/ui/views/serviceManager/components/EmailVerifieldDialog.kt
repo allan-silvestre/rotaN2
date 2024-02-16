@@ -93,7 +93,7 @@ fun EmailVerifieldDialog(
                             verticalArrangement = Arrangement.Center
                         ) {
                             Text(
-                                text = "Seu email não foi verificado, \n por favor, realize a verificação para ter acesso a todas as funcionalidades disponivéis para seu você.",
+                                text = "Seu email não foi verificado, \n por favor, realize a verificação para ter acesso a todas as funcionalidades disponivéis para você.",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
                                 textAlign = TextAlign.Center

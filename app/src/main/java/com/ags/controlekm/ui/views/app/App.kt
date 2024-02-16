@@ -45,8 +45,6 @@ fun App(
     val itemsVisible by appViewModel.showAppbarAndBottomBar.collectAsState()
 
     var showBottomSheet by remember { mutableStateOf(false) }
-    
-    val showVerificationEmail = remember { mutableStateOf(true) }
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
@@ -70,9 +68,7 @@ fun App(
                 }
             }
         ) { innerPadding ->
-            if (currentUser?.emailVerification == false && showVerificationEmail.value) {
-                EmailVerifieldDialog(onDismissRequest = { showVerificationEmail.value = false })
-            } else { NavHostNavigation(innerPadding, navController) }
+             NavHostNavigation(innerPadding, navController)
         }
     }
     if (showBottomSheet) {

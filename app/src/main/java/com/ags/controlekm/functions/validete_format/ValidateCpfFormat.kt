@@ -1,4 +1,4 @@
-package com.ags.controlekm.functions.validete_text_format
+package com.ags.controlekm.functions.validete_format
 
 //VERIFICAÇÃO DO CPF
 fun validateCpfFormat(digitos: String): Boolean {

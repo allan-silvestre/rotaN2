@@ -12,14 +12,11 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface CurrentUserDao {
     @Query("SELECT * FROM currentuser")
-    fun getCurrentUser(): Flow<CurrentUser>
-
+    fun getCurrentUser(): Flow<CurrentUser>?
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(currentuser: CurrentUser)
-
     @Update
     suspend fun update(currentuser: CurrentUser)
-
-    @Delete
-    suspend fun delete(currentuser: CurrentUser)
+    @Query("DELETE FROM currentuser")
+    suspend fun deleteCurrentUser()
 }

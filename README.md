@@ -1,7 +1,7 @@
 # <h2>rotaN2 (PROJETO EM DESENVOLVIMENTO)<h2>
 
 <h4>
-Projeto de controle de rota de equipe de suporte N2.<br><br>
+Projeto de controle de rota de equipe de suporte N2.<br><br> (EM DESENVOLVIMENTO)
 ## ⚒️ Funcionalidades<br>
 O app funciona para controle de quilometragem, registro de viagens e atendimentos realizados, além de relatorio de atendimentos e valores a receber.
 
