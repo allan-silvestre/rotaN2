@@ -1,16 +1,9 @@
 package com.ags.controlekm.ui.views.login
 
 import android.annotation.SuppressLint
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,20 +12,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -57,8 +44,7 @@ import com.ags.controlekm.viewModels.login.LoginViewModel
 import com.ags.controlekm.navigation.navigateSingleTopTo
 import com.ags.controlekm.ui.components.buttons.ButtonDefault
 import com.ags.controlekm.ui.views.loading.LoadingView
-import com.ags.controlekm.viewModels.login.modelsParamsFunctions.LoginParams
-import com.google.firebase.auth.FirebaseAuth
+import com.ags.controlekm.viewModels.login.modelsParams.LoginParams
 
 @SuppressLint("CoroutineCreationDuringComposition", "StateFlowValueCalledInComposition")
 @Composable
