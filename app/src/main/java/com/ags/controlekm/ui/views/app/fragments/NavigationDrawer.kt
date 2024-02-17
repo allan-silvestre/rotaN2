@@ -132,7 +132,7 @@ fun NavigationDrawer(
                             FirebaseAuth
                                 .getInstance()
                                 .signOut()
-                            currentUserViewModel.deleteCurrentUser()
+                            //currentUserViewModel.deleteCurrentUser()
                             navController.popBackStack()
                             navController.navigateSingleTopTo("login")
                         }

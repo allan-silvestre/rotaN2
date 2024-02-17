@@ -36,7 +36,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.ags.controlekm.ui.views.models.NewsCardItem
+import com.ags.controlekm.ui.views.news.models.NewsCardItem
 
 @Composable
 fun NewsCard(cardItem: NewsCardItem, modifier: Modifier) {

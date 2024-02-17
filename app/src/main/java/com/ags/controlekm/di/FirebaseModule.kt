@@ -30,8 +30,7 @@ class FirebaseModule {
     @Provides
     fun firebaseCurrentUserRepository(databaseReference: DatabaseReference): FirebaseCurrentUserRepository {
         return FirebaseCurrentUserRepository(
-            FirebaseAuth.getInstance().currentUser?.uid.toString(),
-            databaseReference.child("users")
+            databaseReference.child("users").child(FirebaseAuth.getInstance().currentUser!!.uid)
         )
     }
     @Singleton
@@ -44,5 +43,4 @@ class FirebaseModule {
     fun firebaseAddressRepository(databaseReference: DatabaseReference): FirebaseAddressRepository {
         return FirebaseAddressRepository(databaseReference.child("address"))
     }
-
 }

@@ -17,15 +17,8 @@ class ViewModelModule {
     @Provides
     @ViewModelScoped
     fun loginViewModel(
-        validateFieldsLogin: ValidateFieldsLogin,
-        currentUserRepository: CurrentUserRepository,
-        firebaseRepository: FirebaseCurrentUserRepository
-    ): LoginViewModel{
-        return LoginViewModel(
-            validateFieldsLogin,
-            currentUserRepository,
-            firebaseRepository)
-    }
+        validateFieldsLogin: ValidateFieldsLogin
+    ): LoginViewModel{ return LoginViewModel(validateFieldsLogin) }
     @Provides
     @ViewModelScoped
     fun validateFieldsLogin(): ValidateFieldsLogin {

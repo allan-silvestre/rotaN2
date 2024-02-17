@@ -1,4 +1,4 @@
-package com.ags.controlekm.viewModels.app
+package com.ags.controlekm.viewModels
 
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth

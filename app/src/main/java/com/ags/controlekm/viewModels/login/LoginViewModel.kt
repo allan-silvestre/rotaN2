@@ -27,9 +27,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val validateFieldsLogin: ValidateFieldsLogin,
-    private val repository: CurrentUserRepository,
-    private val firebaseRepository: FirebaseCurrentUserRepository
+    private val validateFieldsLogin: ValidateFieldsLogin
 ) : ViewModel() {
     private var _loading = MutableStateFlow(false)
     val loading = _loading.asStateFlow()
@@ -48,40 +46,21 @@ class LoginViewModel @Inject constructor(
     }
 
     fun login(params: LoginParams) {
-        _loading.value = true
         if (validateFieldsLogin.validateEmailAndPassword(params.email, params.password)) {
             viewModelScope.launch {
-                try {
-                    FirebaseAuth.getInstance()
-                        .signInWithEmailAndPassword(params.email, params.password)
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                viewModelScope.launch {
-                                    launch {
-                                        firebaseRepository.getCurrentUser().collect {
-                                            if (it != null) {
-                                                repository.insert(it)
-                                                firebaseRepository.updateEmailVerification(
-                                                    FirebaseAuth.getInstance().currentUser?.isEmailVerified
-                                                        ?: false
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                                println("logado com sucesso")
-                                _loginResult.value = true
-
-                            } else {
-                                println("dados invalidos")
-                                _loginResult.value = false
-                            }
+                FirebaseAuth.getInstance().signInWithEmailAndPassword(params.email, params.password)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            _loading.value = true
+                            _loginResult.value = task.result.user != null
+                            _showLoginview.value = task.result.user == null
+                            println("ID: ${task.result.user!!.uid} esta logado")
+                        } else {
+                            println("Email ou senha incorretos")
                         }
-                    delay(2000L)
-                    _loading.value = false
-                } catch (e: FirebaseException) {
-                    println(e)
-                }
+                    }
+                delay(2000L)
+                _loading.value = false
             }
         }
     }
