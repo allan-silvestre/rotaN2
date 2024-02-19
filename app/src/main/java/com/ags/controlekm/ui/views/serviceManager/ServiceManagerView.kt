@@ -7,19 +7,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.ags.controlekm.database.models.database.CurrentUser
 import com.ags.controlekm.ui.views.serviceManager.components.EmailVerifieldDialog
 import com.ags.controlekm.ui.views.serviceManager.components.ServiceManagerCard
 import com.ags.controlekm.ui.views.serviceManager.fragments.LastestServicesList
-import com.ags.controlekm.viewModels.CurrentUserViewModel
-import com.ags.controlekm.viewModels.service.ServiceViewModel
+import com.ags.controlekm.ui.viewModels.CurrentUserViewModel
+import com.ags.controlekm.ui.views.serviceManager.viewModel.ServiceViewModel
 
 @Composable
 fun ServiceManagerView(

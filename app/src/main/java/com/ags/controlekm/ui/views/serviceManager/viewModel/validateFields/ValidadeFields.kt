@@ -1,4 +1,4 @@
-package com.ags.controlekm.viewModels.service.validateFields
+package com.ags.controlekm.ui.views.serviceManager.viewModel.validateFields
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

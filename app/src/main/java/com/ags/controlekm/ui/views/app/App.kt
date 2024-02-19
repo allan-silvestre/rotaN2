@@ -3,10 +3,8 @@ package com.ags.controlekm.ui.views.app
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -17,13 +15,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
-import com.ags.controlekm.viewModels.CurrentUserViewModel
 import com.ags.controlekm.navigation.NavHostNavigation
 import com.ags.controlekm.ui.views.app.fragments.BottomBar
 import com.ags.controlekm.ui.views.app.fragments.BottomSheet
 import com.ags.controlekm.ui.views.app.fragments.NavigationDrawer
 import com.ags.controlekm.ui.views.app.fragments.TopBar
-import com.ags.controlekm.viewModels.AppViewModel
+import com.ags.controlekm.ui.views.app.viewModel.AppViewModel
 
 @SuppressLint(
     "UnusedMaterial3ScaffoldPaddingParameter", "CoroutineCreationDuringComposition",

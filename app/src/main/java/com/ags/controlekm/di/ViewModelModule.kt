@@ -1,10 +1,7 @@
 package com.ags.controlekm.di
 
-import com.ags.controlekm.database.firebaseRepositories.FirebaseCurrentUserRepository
-import com.ags.controlekm.database.repositorys.CurrentUserRepository
-import com.ags.controlekm.viewModels.CurrentUserViewModel
-import com.ags.controlekm.viewModels.login.LoginViewModel
-import com.ags.controlekm.viewModels.login.validateFields.ValidateFieldsLogin
+import com.ags.controlekm.ui.views.login.viewModel.LoginViewModel
+import com.ags.controlekm.ui.views.login.viewModel.validateFields.ValidateFieldsLogin
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,7 +15,7 @@ class ViewModelModule {
     @ViewModelScoped
     fun loginViewModel(
         validateFieldsLogin: ValidateFieldsLogin
-    ): LoginViewModel{ return LoginViewModel(validateFieldsLogin) }
+    ): LoginViewModel { return LoginViewModel(validateFieldsLogin) }
     @Provides
     @ViewModelScoped
     fun validateFieldsLogin(): ValidateFieldsLogin {

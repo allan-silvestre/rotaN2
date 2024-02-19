@@ -40,11 +40,11 @@ import androidx.navigation.NavHostController
 import com.ags.controlekm.R
 import com.ags.controlekm.ui.components.textField.FormularioOutlinedTextField
 import com.ags.controlekm.ui.components.textField.FormularioOutlinedTextFieldMenu
-import com.ags.controlekm.viewModels.login.LoginViewModel
+import com.ags.controlekm.ui.views.login.viewModel.LoginViewModel
 import com.ags.controlekm.navigation.navigateSingleTopTo
 import com.ags.controlekm.ui.components.buttons.ButtonDefault
 import com.ags.controlekm.ui.views.loading.LoadingView
-import com.ags.controlekm.viewModels.login.modelsParams.LoginParams
+import com.ags.controlekm.ui.views.login.viewModel.modelsParams.LoginParams
 
 @SuppressLint("CoroutineCreationDuringComposition", "StateFlowValueCalledInComposition")
 @Composable

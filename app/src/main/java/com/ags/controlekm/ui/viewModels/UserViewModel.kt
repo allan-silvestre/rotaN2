@@ -1,4 +1,4 @@
-package com.ags.controlekm.viewModels
+package com.ags.controlekm.ui.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

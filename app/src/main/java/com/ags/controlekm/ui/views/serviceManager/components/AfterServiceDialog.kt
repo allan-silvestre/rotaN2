@@ -20,9 +20,9 @@ import com.ags.controlekm.ui.components.buttons.ButtonText
 import com.ags.controlekm.ui.components.dropDownMenu.SelectAddressDropDownMenu
 import com.ags.controlekm.ui.components.progress.LoadingCircular
 import com.ags.controlekm.ui.components.text.TitleText
-import com.ags.controlekm.viewModels.service.ServiceViewModel
-import com.ags.controlekm.viewModels.service.modelsParams.FinishCurrentServiceAndGenerateNewServiceParams
-import com.ags.controlekm.viewModels.service.modelsParams.StartReturnParams
+import com.ags.controlekm.ui.views.serviceManager.viewModel.ServiceViewModel
+import com.ags.controlekm.ui.views.serviceManager.viewModel.modelsParams.FinishCurrentServiceAndGenerateNewServiceParams
+import com.ags.controlekm.ui.views.serviceManager.viewModel.modelsParams.StartReturnParams
 
 @Composable
 fun AfterServiceDialog(

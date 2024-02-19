@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ags.controlekm.database.models.database.Service
-import com.ags.controlekm.viewModels.service.modelsParams.NewServiceParams
+import com.ags.controlekm.ui.views.serviceManager.viewModel.modelsParams.NewServiceParams
 import com.ags.controlekm.ui.components.buttons.ButtonDefault
 import com.ags.controlekm.ui.components.buttons.ButtonIcon
 import com.ags.controlekm.ui.components.progress.LoadingCircular
@@ -40,8 +40,8 @@ import com.ags.controlekm.ui.components.text.TitleText
 import com.ags.controlekm.ui.views.serviceManager.fragments.InProgress
 import com.ags.controlekm.ui.views.serviceManager.fragments.NewService
 import com.ags.controlekm.ui.views.serviceManager.fragments.Traveling
-import com.ags.controlekm.viewModels.service.ServiceViewModel
-import com.ags.controlekm.viewModels.service.modelsParams.ConfirmArrivalParams
+import com.ags.controlekm.ui.views.serviceManager.viewModel.ServiceViewModel
+import com.ags.controlekm.ui.views.serviceManager.viewModel.modelsParams.ConfirmArrivalParams
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable

@@ -1,4 +1,4 @@
-package com.ags.controlekm.viewModels.service.modelsParams
+package com.ags.controlekm.ui.views.serviceManager.viewModel.modelsParams
 
 data class FinishCurrentServiceAndGenerateNewServiceParams(
     var departureAddress: String,

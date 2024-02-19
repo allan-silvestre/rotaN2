@@ -33,7 +33,7 @@ import coil.request.CachePolicy
 import coil.transform.CircleCropTransformation
 import com.ags.controlekm.R
 import com.ags.controlekm.database.models.database.CurrentUser
-import com.ags.controlekm.viewModels.CurrentUserViewModel
+import com.ags.controlekm.ui.viewModels.CurrentUserViewModel
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 

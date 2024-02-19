@@ -78,7 +78,7 @@ import androidx.navigation.NavHostController
 import com.ags.controlekm.ui.components.dialog.AlertDialogSelectImage
 import com.ags.controlekm.ui.components.textField.FormularioTextField
 import com.ags.controlekm.ui.components.textField.FormularioTextFieldMenu
-import com.ags.controlekm.viewModels.UserViewModel
+import com.ags.controlekm.ui.viewModels.UserViewModel
 import com.ags.controlekm.maskTransformations.MaskVisualTransformation
 import com.ags.controlekm.functions.firebase.uploadImage
 import com.ags.controlekm.functions.validete_format.validateContainsOnlyNumbers

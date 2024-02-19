@@ -1,4 +1,4 @@
-package com.ags.controlekm.viewModels.login.modelsParams
+package com.ags.controlekm.ui.views.login.viewModel.modelsParams
 
 data class LoginParams(
     var email: String,

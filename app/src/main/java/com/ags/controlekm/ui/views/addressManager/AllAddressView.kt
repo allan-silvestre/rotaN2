@@ -32,7 +32,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.ags.controlekm.navigation.navigateSingleTopTo
 import com.ags.controlekm.database.models.database.Address
-import com.ags.controlekm.viewModels.AddressViewModel
+import com.ags.controlekm.ui.views.addressManager.viewModel.AddressViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

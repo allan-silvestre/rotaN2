@@ -1,9 +1,9 @@
-package com.ags.controlekm.viewModels.login
+package com.ags.controlekm.ui.views.login.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ags.controlekm.viewModels.login.modelsParams.LoginParams
-import com.ags.controlekm.viewModels.login.validateFields.ValidateFieldsLogin
+import com.ags.controlekm.ui.views.login.viewModel.modelsParams.LoginParams
+import com.ags.controlekm.ui.views.login.viewModel.validateFields.ValidateFieldsLogin
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay

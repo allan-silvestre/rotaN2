@@ -40,8 +40,7 @@ import coil.compose.rememberImagePainter
 import coil.request.CachePolicy
 import coil.transform.CircleCropTransformation
 import com.ags.controlekm.navigation.navigateSingleTopTo
-import com.ags.controlekm.viewModels.CurrentUserViewModel
-import com.ags.controlekm.viewModels.service.ServiceViewModel
+import com.ags.controlekm.ui.viewModels.CurrentUserViewModel
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 

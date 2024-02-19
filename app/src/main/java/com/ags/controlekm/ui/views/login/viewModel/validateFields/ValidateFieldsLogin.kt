@@ -1,8 +1,7 @@
-package com.ags.controlekm.viewModels.login.validateFields
+package com.ags.controlekm.ui.views.login.viewModel.validateFields
 
 import androidx.lifecycle.ViewModel
 import com.ags.controlekm.functions.validete_format.validateEmailFormat
-import com.ags.controlekm.functions.validete_format.validatePasswordFormat
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 

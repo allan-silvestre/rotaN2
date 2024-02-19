@@ -1,4 +1,4 @@
-package com.ags.controlekm.viewModels.service
+package com.ags.controlekm.ui.views.serviceManager.viewModel
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -9,11 +9,11 @@ import com.ags.controlekm.database.repositorys.CurrentUserRepository
 import com.ags.controlekm.database.models.database.CurrentUser
 import com.ags.controlekm.database.models.database.Service
 import com.ags.controlekm.database.repositorys.ServiceRepository
-import com.ags.controlekm.viewModels.service.modelsParams.ConfirmArrivalParams
-import com.ags.controlekm.viewModels.service.modelsParams.FinishCurrentServiceAndGenerateNewServiceParams
-import com.ags.controlekm.viewModels.service.modelsParams.NewServiceParams
-import com.ags.controlekm.viewModels.service.modelsParams.StartReturnParams
-import com.ags.controlekm.viewModels.service.validateFields.ValidadeFields
+import com.ags.controlekm.ui.views.serviceManager.viewModel.modelsParams.ConfirmArrivalParams
+import com.ags.controlekm.ui.views.serviceManager.viewModel.modelsParams.FinishCurrentServiceAndGenerateNewServiceParams
+import com.ags.controlekm.ui.views.serviceManager.viewModel.modelsParams.NewServiceParams
+import com.ags.controlekm.ui.views.serviceManager.viewModel.modelsParams.StartReturnParams
+import com.ags.controlekm.ui.views.serviceManager.viewModel.validateFields.ValidadeFields
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
