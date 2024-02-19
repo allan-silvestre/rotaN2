@@ -2,10 +2,10 @@ package com.ags.controlekm.ui.views.serviceManager.viewModel.validateFields
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ags.controlekm.database.repositorys.CurrentUserRepository
-import com.ags.controlekm.database.repositorys.ServiceRepository
-import com.ags.controlekm.database.models.database.CurrentUser
-import com.ags.controlekm.database.models.database.Service
+import com.ags.controlekm.database.local.repositories.CurrentUserRepository
+import com.ags.controlekm.database.local.repositories.ServiceRepository
+import com.ags.controlekm.database.models.CurrentUser
+import com.ags.controlekm.database.models.Service
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch

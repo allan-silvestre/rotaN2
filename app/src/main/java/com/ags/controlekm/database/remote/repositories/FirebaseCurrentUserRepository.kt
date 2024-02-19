@@ -1,12 +1,10 @@
-package com.ags.controlekm.database.firebaseRepositories
+package com.ags.controlekm.database.remote.repositories
 
-import com.ags.controlekm.database.models.database.CurrentUser
-import com.google.firebase.auth.FirebaseAuth
+import com.ags.controlekm.database.models.CurrentUser
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow

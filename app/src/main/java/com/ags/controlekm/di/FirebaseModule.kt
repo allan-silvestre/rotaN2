@@ -1,9 +1,9 @@
 package com.ags.controlekm.di
 
-import com.ags.controlekm.database.firebaseRepositories.FirebaseAddressRepository
-import com.ags.controlekm.database.firebaseRepositories.FirebaseCurrentUserRepository
-import com.ags.controlekm.database.firebaseRepositories.FirebaseServiceRepository
-import com.ags.controlekm.database.firebaseRepositories.FirebaseUserRepository
+import com.ags.controlekm.database.remote.repositories.FirebaseAddressRepository
+import com.ags.controlekm.database.remote.repositories.FirebaseCurrentUserRepository
+import com.ags.controlekm.database.remote.repositories.FirebaseServiceRepository
+import com.ags.controlekm.database.remote.repositories.FirebaseUserRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase

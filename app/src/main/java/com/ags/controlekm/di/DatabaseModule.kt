@@ -1,12 +1,12 @@
 package com.ags.controlekm.di
 
 import android.content.Context
-import com.ags.controlekm.database.AppDatabase
-import com.ags.controlekm.database.daos.AddressDao
-import com.ags.controlekm.database.daos.CompanyDao
-import com.ags.controlekm.database.daos.CurrentUserDao
-import com.ags.controlekm.database.daos.ServiceDao
-import com.ags.controlekm.database.daos.UserDao
+import com.ags.controlekm.database.local.AppDatabase
+import com.ags.controlekm.database.local.daos.AddressDao
+import com.ags.controlekm.database.local.daos.CompanyDao
+import com.ags.controlekm.database.local.daos.CurrentUserDao
+import com.ags.controlekm.database.local.daos.ServiceDao
+import com.ags.controlekm.database.local.daos.UserDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

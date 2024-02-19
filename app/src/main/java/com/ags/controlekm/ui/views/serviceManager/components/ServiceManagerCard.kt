@@ -31,7 +31,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.ags.controlekm.database.models.database.Service
+import com.ags.controlekm.database.models.Service
 import com.ags.controlekm.ui.views.serviceManager.viewModel.modelsParams.NewServiceParams
 import com.ags.controlekm.ui.components.buttons.ButtonDefault
 import com.ags.controlekm.ui.components.buttons.ButtonIcon

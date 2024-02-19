@@ -1,7 +1,7 @@
-package com.ags.controlekm.database.repositorys
+package com.ags.controlekm.database.local.repositories
 
-import com.ags.controlekm.database.daos.AddressDao
-import com.ags.controlekm.database.models.database.Address
+import com.ags.controlekm.database.local.daos.AddressDao
+import com.ags.controlekm.database.models.Address
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton

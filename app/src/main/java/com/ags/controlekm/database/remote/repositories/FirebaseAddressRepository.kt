@@ -1,6 +1,6 @@
-package com.ags.controlekm.database.firebaseRepositories
+package com.ags.controlekm.database.remote.repositories
 
-import com.ags.controlekm.database.models.database.User
+import com.ags.controlekm.database.models.Address
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -12,15 +12,15 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class FirebaseUserRepository @Inject constructor(
+class FirebaseAddressRepository @Inject constructor(
     private var databaseReference: DatabaseReference
 ) {
-    suspend fun getAllUser() = callbackFlow<List<User>> {
+    suspend fun getAllAddress() = callbackFlow<List<Address>> {
         val valueEventListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val dataList = mutableListOf<User>()
+                val dataList = mutableListOf<Address>()
                 for (childSnapshot in snapshot.children) {
-                    val data = childSnapshot.getValue(User::class.java)
+                    val data = childSnapshot.getValue(Address::class.java)
                     data?.let { dataList.add(it) }
                 }
                 if (isActive) {
@@ -38,15 +38,15 @@ class FirebaseUserRepository @Inject constructor(
         awaitClose { databaseReference.removeEventListener(valueEventListener) }
     }
 
-    fun insert(user: User) {
-        databaseReference.child(user.id).setValue(user)
+    fun insert(address: Address) {
+        databaseReference.child(address.id).setValue(address)
     }
 
-    fun update(user: User) {
-        databaseReference.child(user.id).setValue(user)
+    fun update(address: Address) {
+        databaseReference.child(address.id).setValue(address)
     }
 
-    fun delete(user: User) {
-        databaseReference.child(user.id).removeValue()
+    fun delete(address: Address) {
+        databaseReference.child(address.id).removeValue()
     }
 }

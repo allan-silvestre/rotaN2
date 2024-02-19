@@ -1,26 +1,30 @@
-package com.ags.controlekm.database.firebaseRepositories
+package com.ags.controlekm.database.remote.repositories
 
-import com.ags.controlekm.database.models.database.Service
+import android.graphics.Bitmap
+import androidx.activity.ComponentActivity
+import com.ags.controlekm.database.models.User
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.storage.storage
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.isActive
+import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class FirebaseServiceRepository @Inject constructor(
-    private val databaseReference: DatabaseReference
+class FirebaseUserRepository @Inject constructor(
+    private var databaseReference: DatabaseReference
 ) {
-    suspend fun getAllServices() = callbackFlow<List<Service>> {
+    suspend fun getAllUser() = callbackFlow<List<User>> {
         val valueEventListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val dataList = mutableListOf<Service>()
+                val dataList = mutableListOf<User>()
                 for (childSnapshot in snapshot.children) {
-                    val data = childSnapshot.getValue(Service::class.java)
+                    val data = childSnapshot.getValue(User::class.java)
                     data?.let { dataList.add(it) }
                 }
                 if (isActive) {
@@ -34,18 +38,19 @@ class FirebaseServiceRepository @Inject constructor(
         }
 
         databaseReference.addValueEventListener(valueEventListener)
+
         awaitClose { databaseReference.removeEventListener(valueEventListener) }
     }
 
-    fun insert(service: Service) {
-        databaseReference.child(service.id).setValue(service)
+    fun insert(user: User) {
+        databaseReference.child(user.id).setValue(user)
     }
 
-    fun update(service: Service) {
-        databaseReference.child(service.id).setValue(service)
+    fun update(user: User) {
+        databaseReference.child(user.id).setValue(user)
     }
 
-    fun delete(service: Service) {
-        databaseReference.child(service.id).removeValue()
+    fun delete(user: User) {
+        databaseReference.child(user.id).removeValue()
     }
 }

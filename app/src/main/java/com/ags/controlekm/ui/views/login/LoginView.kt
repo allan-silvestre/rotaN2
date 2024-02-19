@@ -59,13 +59,13 @@ fun LoginView(
     val loginResult by loginViewModel.loginResult.collectAsState(false)
 
     var email by remember { mutableStateOf("") }
-    var emailError by rememberSaveable { mutableStateOf(true) }
-    var emailErrorMessage by remember { mutableStateOf("") }
+    val emailError by rememberSaveable { mutableStateOf(true) }
+    val emailErrorMessage by remember { mutableStateOf("") }
 
     var password by remember { mutableStateOf("") }
     var passwordVisibility by remember { mutableStateOf(false) }
-    var senhaError by rememberSaveable { mutableStateOf(true) }
-    var senhaErrorMessage by remember { mutableStateOf("") }
+    val senhaError by rememberSaveable { mutableStateOf(true) }
+    val senhaErrorMessage by remember { mutableStateOf("") }
 
     if (loading) {
         LoadingView()

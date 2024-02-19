@@ -2,13 +2,12 @@ package com.ags.controlekm.ui.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ags.controlekm.database.firebaseRepositories.FirebaseCurrentUserRepository
-import com.ags.controlekm.database.models.database.CurrentUser
-import com.ags.controlekm.database.repositorys.CurrentUserRepository
+import com.ags.controlekm.database.remote.repositories.FirebaseCurrentUserRepository
+import com.ags.controlekm.database.models.CurrentUser
+import com.ags.controlekm.database.local.repositories.CurrentUserRepository
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.firstOrNull

@@ -1,6 +1,6 @@
-package com.ags.controlekm.database.firebaseRepositories
+package com.ags.controlekm.database.remote.repositories
 
-import com.ags.controlekm.database.models.database.Address
+import com.ags.controlekm.database.models.Service
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -12,15 +12,15 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class FirebaseAddressRepository @Inject constructor(
-    private var databaseReference: DatabaseReference
+class FirebaseServiceRepository @Inject constructor(
+    private val databaseReference: DatabaseReference
 ) {
-    suspend fun getAllAddress() = callbackFlow<List<Address>> {
+    suspend fun getAllServices() = callbackFlow<List<Service>> {
         val valueEventListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val dataList = mutableListOf<Address>()
+                val dataList = mutableListOf<Service>()
                 for (childSnapshot in snapshot.children) {
-                    val data = childSnapshot.getValue(Address::class.java)
+                    val data = childSnapshot.getValue(Service::class.java)
                     data?.let { dataList.add(it) }
                 }
                 if (isActive) {
@@ -34,19 +34,18 @@ class FirebaseAddressRepository @Inject constructor(
         }
 
         databaseReference.addValueEventListener(valueEventListener)
-
         awaitClose { databaseReference.removeEventListener(valueEventListener) }
     }
 
-    fun insert(address: Address) {
-        databaseReference.child(address.id).setValue(address)
+    fun insert(service: Service) {
+        databaseReference.child(service.id).setValue(service)
     }
 
-    fun update(address: Address) {
-        databaseReference.child(address.id).setValue(address)
+    fun update(service: Service) {
+        databaseReference.child(service.id).setValue(service)
     }
 
-    fun delete(address: Address) {
-        databaseReference.child(address.id).removeValue()
+    fun delete(service: Service) {
+        databaseReference.child(service.id).removeValue()
     }
 }

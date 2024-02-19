@@ -1,7 +1,7 @@
-package com.ags.controlekm.database.repositorys
+package com.ags.controlekm.database.local.repositories
 
-import com.ags.controlekm.database.daos.CurrentUserDao
-import com.ags.controlekm.database.models.database.CurrentUser
+import com.ags.controlekm.database.local.daos.CurrentUserDao
+import com.ags.controlekm.database.models.CurrentUser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext

@@ -80,7 +80,6 @@ import com.ags.controlekm.ui.components.textField.FormularioTextField
 import com.ags.controlekm.ui.components.textField.FormularioTextFieldMenu
 import com.ags.controlekm.ui.viewModels.UserViewModel
 import com.ags.controlekm.maskTransformations.MaskVisualTransformation
-import com.ags.controlekm.functions.firebase.uploadImage
 import com.ags.controlekm.functions.validete_format.validateContainsOnlyNumbers
 import com.ags.controlekm.functions.validete_format.validateContainsOnlyText
 import com.ags.controlekm.functions.validete_format.validateCpfFormat
@@ -172,11 +171,11 @@ fun RegisterUserView(
 
     var nome by remember { mutableStateOf("") }
     var nomeError by remember { mutableStateOf(true) }
-    var nomeErrorMessage by remember { mutableStateOf("") }
+    val nomeErrorMessage by remember { mutableStateOf("") }
 
     var sobrenome by remember { mutableStateOf("") }
     var sobrenomeError by remember { mutableStateOf(true) }
-    var sobrenomeErrorMessage by remember { mutableStateOf("") }
+    val sobrenomeErrorMessage by remember { mutableStateOf("") }
 
     var nascimento by remember { mutableStateOf("") }
     var nascimentoError by remember { mutableStateOf(true) }
@@ -187,14 +186,14 @@ fun RegisterUserView(
     var generoSelected by remember { mutableStateOf("Selecionar") }
     val generoOptions = listOf("Masculino", "Feminino", "Outro")
     var generoError by remember { mutableStateOf(true) }
-    var generoErrorMessage by remember { mutableStateOf("") }
+    val generoErrorMessage by remember { mutableStateOf("") }
 
     // DROP-DOWN MENU PERMISSÕES / NIVEL DE ACESSO
     var nivelAcessoExpanded by remember { mutableStateOf(false) }
     var nivelAcessoSelected by remember { mutableStateOf("Selecionar") }
     val nivelAcessoOptions = listOf("Colaborador", "Coordenador", "Master")
     var nivelAcessoError by remember { mutableStateOf(true) }
-    var nivelAcessoErrorMessage by remember { mutableStateOf("") }
+    val nivelAcessoErrorMessage by remember { mutableStateOf("") }
 
     var matricula by remember { mutableStateOf("") }
     var matriculaError by remember { mutableStateOf(true) }
@@ -219,16 +218,16 @@ fun RegisterUserView(
 
     var cargo by remember { mutableStateOf("") }
     var cargoError by remember { mutableStateOf(true) }
-    var cargoErrorMessage by remember { mutableStateOf("") }
+    val cargoErrorMessage by remember { mutableStateOf("") }
 
     var setor by remember { mutableStateOf("") }
     var setorError by remember { mutableStateOf(true) }
-    var setorErrorMessage by remember { mutableStateOf("") }
+    val setorErrorMessage by remember { mutableStateOf("") }
 
-    var emailList = mutableListOf<String>()
-    var cpfList = mutableListOf<String>()
-    var telefoneList = mutableListOf<String>()
-    var matriculaList = mutableListOf<String>()
+    val emailList = mutableListOf<String>()
+    val cpfList = mutableListOf<String>()
+    val telefoneList = mutableListOf<String>()
+    val matriculaList = mutableListOf<String>()
 
     Column(
         modifier = Modifier
@@ -881,7 +880,7 @@ fun RegisterUserView(
                                                         // TRATAMENTO PARA SALVAR NOVO USUÁRIO
                                                         bitmap.value.let { bitmap ->
                                                             // Chama a função UploadImage dentro de uma coroutine
-                                                            uploadImage(
+                                                            userViewModel.uploadImage(
                                                                 bitmap = bitmap,
                                                                 context = context as ComponentActivity,
                                                                 imgName = AuthResult.user!!.uid,
