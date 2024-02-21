@@ -1,8 +1,12 @@
 package com.ags.controlekm.ui.views.serviceManager.viewModel
 
+import android.content.Context
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.ags.controlekm.database.remote.repositories.FirebaseCurrentUserRepository
 import com.ags.controlekm.database.remote.repositories.FirebaseServiceRepository
 import com.ags.controlekm.database.local.repositories.CurrentUserRepository
@@ -14,8 +18,10 @@ import com.ags.controlekm.ui.views.serviceManager.viewModel.modelsParams.FinishC
 import com.ags.controlekm.ui.views.serviceManager.viewModel.modelsParams.NewServiceParams
 import com.ags.controlekm.ui.views.serviceManager.viewModel.modelsParams.StartReturnParams
 import com.ags.controlekm.ui.views.serviceManager.viewModel.validateFields.ValidadeFields
+import com.ags.controlekm.wm.RemoteInsertNewService
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -34,7 +40,8 @@ class ServiceViewModel @Inject constructor(
     private val currentUserRepository: CurrentUserRepository,
     private val firebaseCurrentUserRepository: FirebaseCurrentUserRepository,
     private val firebaseServiceRepository: FirebaseServiceRepository,
-    private val validadeFields: ValidadeFields
+    private val validadeFields: ValidadeFields,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private var _visibleNewService = MutableStateFlow(false)
@@ -73,7 +80,6 @@ class ServiceViewModel @Inject constructor(
         SharingStarted.WhileSubscribed(),
         Service()
     )
-
     init {
         viewModelScope.launch(Dispatchers.IO) {
             launch {
@@ -107,20 +113,36 @@ class ServiceViewModel @Inject constructor(
             newService.departureKm = params.departureKm
             newService.technicianId = FirebaseAuth.getInstance().currentUser!!.uid
             newService.technicianName = "${currentUser.value.name} ${currentUser.value.lastName}"
-            newService.profileImgTechnician = currentUser.value.image.toString()
+            newService.profileImgTechnician = currentUser.value.image
             newService.statusService = "Em rota"
 
             currentUser.value.lastKm = params.departureKm
+
+
+            val workManager = WorkManager.getInstance(context)
+
+            val inputData = workDataOf("newService" to newService )
+
+            val workRequest = OneTimeWorkRequestBuilder<RemoteInsertNewService>()
+                .setInputData(inputData)
+                .build()
 
             viewModelScope.launch(Dispatchers.IO) {
                 _loading.value = true
                 insert(newService)
                 currentUserRepository.update(currentUser.value)
                 firebaseCurrentUserRepository.updateLastKm(params.departureKm)
+
+                workManager.enqueue(workRequest)
+
                 delay(1000L)
                 _loading.value = false
             }
         }
+    }
+
+    fun remoteNewService() {
+
     }
 
     fun confirmArrival(params: ConfirmArrivalParams) {
@@ -351,21 +373,21 @@ class ServiceViewModel @Inject constructor(
     suspend fun insert(newService: Service) {
         viewModelScope.launch(Dispatchers.IO) {
             serviceRepository.insert(newService)
-            firebaseServiceRepository.insert(newService)
+            //firebaseServiceRepository.insert(newService)
         }
     }
 
     suspend fun update(service: Service) {
         viewModelScope.launch(Dispatchers.IO) {
             serviceRepository.update(service)
-            firebaseServiceRepository.update(service)
+            //firebaseServiceRepository.update(service)
         }
     }
 
     suspend fun delete(service: Service) {
         viewModelScope.launch(Dispatchers.IO) {
             serviceRepository.delete(service)
-            firebaseServiceRepository.delete(service)
+            //firebaseServiceRepository.delete(service)
         }
     }
 }

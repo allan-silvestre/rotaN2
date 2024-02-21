@@ -110,6 +110,9 @@ dependencies {
     // Work manager
     implementation("androidx.work:work-runtime:2.9.0")
 
+    // Gson
+    implementation("com.google.code.gson:gson:2.10")
+
     // Lifecycle
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")

@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -46,6 +47,8 @@ import com.ags.controlekm.ui.views.serviceManager.viewModel.modelsParams.Confirm
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun ServiceManagerCard(serviceViewModel: ServiceViewModel = hiltViewModel<ServiceViewModel>()) {
+
+    val context = LocalContext.current
 
     var date by remember { mutableStateOf("00/00/0000") }
     var time by remember { mutableStateOf("00:00:00") }
@@ -75,6 +78,7 @@ fun ServiceManagerCard(serviceViewModel: ServiceViewModel = hiltViewModel<Servic
     val vInProgress by serviceViewModel.visibleInProgress.collectAsState(false)
 
     val currentService by serviceViewModel.currentService.collectAsStateWithLifecycle(Service())
+
 
     Box(
         modifier = Modifier
@@ -167,7 +171,8 @@ fun ServiceManagerCard(serviceViewModel: ServiceViewModel = hiltViewModel<Servic
                             time,
                             { departureAddress = it },
                             { serviceAddress = it },
-                            { departureKm = it })
+                            { departureKm = it }
+                        )
                     }
                     AnimatedVisibility(vTraveling) {
                         Traveling(contentText.value, date, time) { arrivalKm = it }

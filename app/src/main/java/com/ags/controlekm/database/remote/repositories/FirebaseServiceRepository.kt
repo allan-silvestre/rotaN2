@@ -38,11 +38,11 @@ class FirebaseServiceRepository @Inject constructor(
     }
 
     fun insert(service: Service) {
-        databaseReference.child(service.id).setValue(service)
+        databaseReference.setValue(service)
     }
 
     fun update(service: Service) {
-        databaseReference.child(service.id).setValue(service)
+        databaseReference.setValue(service)
     }
 
     fun delete(service: Service) {
