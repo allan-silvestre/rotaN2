@@ -8,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.Surface
 import androidx.compose.ui.unit.dp
 import com.ags.controlekm.ui.views.app.App
+import com.ags.controlekm.ui.views.loading.Shimmer
 import com.example.compose.AppTheme
 import com.google.firebase.FirebaseApp
 import com.google.firebase.appcheck.ktx.appCheck
@@ -32,6 +33,7 @@ class MainActivity : ComponentActivity() {
                         PlayIntegrityAppCheckProviderFactory.getInstance(),
                     )
                     App()
+                    //Shimmer()
                 }
             }
         }

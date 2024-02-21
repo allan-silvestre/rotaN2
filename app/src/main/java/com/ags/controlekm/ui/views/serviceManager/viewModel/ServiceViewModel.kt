@@ -92,7 +92,6 @@ class ServiceViewModel @Inject constructor(
     }
 
     fun newService(params: NewServiceParams) {
-        // CHECK IF ANY FIELD IS EMPTY
         if (validadeFields.validateFieldsNewService(
                 params.departureAddress,
                 params.serviceAddress,
