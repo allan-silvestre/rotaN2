@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class ValidadeFields @Inject constructor(
+class ValidateFields @Inject constructor(
     private val serviceRepository: ServiceRepository,
     private val currentUserRepository: CurrentUserRepository
 ): ViewModel() {

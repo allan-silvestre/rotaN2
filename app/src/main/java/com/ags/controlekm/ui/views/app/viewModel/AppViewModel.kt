@@ -35,7 +35,7 @@ class AppViewModel @Inject constructor(application: Application): AndroidViewMod
             _showAppbarAndBottomBar.value = it.currentUser != null
         }
     }
-    private fun isNetworkAvailable() {
+    fun isNetworkAvailable():Boolean {
         viewModelScope.launch(Dispatchers.IO) {
             while (true) {
                 val context = getApplication<Application>()
@@ -56,5 +56,6 @@ class AppViewModel @Inject constructor(application: Application): AndroidViewMod
                 kotlinx.coroutines.delay(1000)
             }
         }
+        return _isNetworkAvailable.value
     }
 }

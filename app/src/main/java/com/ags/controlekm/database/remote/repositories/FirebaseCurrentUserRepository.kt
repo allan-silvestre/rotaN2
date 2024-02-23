@@ -34,6 +34,10 @@ class FirebaseCurrentUserRepository @Inject constructor(
         awaitClose { databaseReference.removeEventListener(valueEventListener) }
     }.flowOn(Dispatchers.IO)
 
+    fun update(currentUser: CurrentUser) {
+        databaseReference.setValue(currentUser)
+    }
+
     fun updateEmailVerification(emailIsVerifield: Boolean){
         databaseReference.child("emailVerification").setValue(emailIsVerifield)
     }

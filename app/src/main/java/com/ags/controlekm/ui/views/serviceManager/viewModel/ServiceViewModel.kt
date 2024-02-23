@@ -1,12 +1,12 @@
 package com.ags.controlekm.ui.views.serviceManager.viewModel
 
-import android.content.Context
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.BackoffPolicy
+import androidx.work.Data
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import androidx.work.workDataOf
 import com.ags.controlekm.database.remote.repositories.FirebaseCurrentUserRepository
 import com.ags.controlekm.database.remote.repositories.FirebaseServiceRepository
 import com.ags.controlekm.database.local.repositories.CurrentUserRepository
@@ -17,11 +17,11 @@ import com.ags.controlekm.ui.views.serviceManager.viewModel.modelsParams.Confirm
 import com.ags.controlekm.ui.views.serviceManager.viewModel.modelsParams.FinishCurrentServiceAndGenerateNewServiceParams
 import com.ags.controlekm.ui.views.serviceManager.viewModel.modelsParams.NewServiceParams
 import com.ags.controlekm.ui.views.serviceManager.viewModel.modelsParams.StartReturnParams
-import com.ags.controlekm.ui.views.serviceManager.viewModel.validateFields.ValidadeFields
-import com.ags.controlekm.wm.RemoteInsertNewService
+import com.ags.controlekm.ui.views.serviceManager.viewModel.validateFields.ValidateFields
+import com.ags.controlekm.workers.InsertNewService
 import com.google.firebase.auth.FirebaseAuth
+import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -32,6 +32,8 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.util.UUID
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltViewModel
@@ -40,8 +42,8 @@ class ServiceViewModel @Inject constructor(
     private val currentUserRepository: CurrentUserRepository,
     private val firebaseCurrentUserRepository: FirebaseCurrentUserRepository,
     private val firebaseServiceRepository: FirebaseServiceRepository,
-    private val validadeFields: ValidadeFields,
-    @ApplicationContext private val context: Context
+    private val validateFields: ValidateFields,
+    private val workManager: WorkManager,
 ) : ViewModel() {
 
     private var _visibleNewService = MutableStateFlow(false)
@@ -98,13 +100,14 @@ class ServiceViewModel @Inject constructor(
     }
 
     fun newService(params: NewServiceParams) {
-        if (validadeFields.validateFieldsNewService(
+        if (validateFields.validateFieldsNewService(
                 params.departureAddress,
                 params.serviceAddress,
                 params.departureKm
             )
         ) {
             val newService = Service()
+            val currentUser = currentUser.value
 
             newService.departureDate = params.date
             newService.departureTime = params.time
@@ -112,42 +115,40 @@ class ServiceViewModel @Inject constructor(
             newService.serviceAddress = params.serviceAddress
             newService.departureKm = params.departureKm
             newService.technicianId = FirebaseAuth.getInstance().currentUser!!.uid
-            newService.technicianName = "${currentUser.value.name} ${currentUser.value.lastName}"
-            newService.profileImgTechnician = currentUser.value.image
+            newService.technicianName = "${currentUser.name} ${currentUser.lastName}"
+            newService.profileImgTechnician = currentUser.image
             newService.statusService = "Em rota"
 
-            currentUser.value.lastKm = params.departureKm
-
-
-            val workManager = WorkManager.getInstance(context)
-
-            val inputData = workDataOf("newService" to newService )
-
-            val workRequest = OneTimeWorkRequestBuilder<RemoteInsertNewService>()
-                .setInputData(inputData)
-                .build()
+            currentUser.lastKm = params.departureKm
 
             viewModelScope.launch(Dispatchers.IO) {
                 _loading.value = true
-                insert(newService)
-                currentUserRepository.update(currentUser.value)
-                firebaseCurrentUserRepository.updateLastKm(params.departureKm)
+
+                val newServiceJson = Gson().toJson(newService)
+                val currentUserJson = Gson().toJson(currentUser)
+
+                val inputData = Data.Builder()
+                    .putString("newService", newServiceJson)
+                    .putString("currentUser", currentUserJson)
+                    .build()
+
+                val workRequest = OneTimeWorkRequestBuilder<InsertNewService>()
+                    .setId(UUID.fromString(newService.id))
+                    .setBackoffCriteria(BackoffPolicy.LINEAR, 30, TimeUnit.MINUTES)
+                    .setInputData(inputData)
+                    .build()
 
                 workManager.enqueue(workRequest)
 
-                delay(1000L)
+                delay(2000L)
                 _loading.value = false
             }
         }
     }
 
-    fun remoteNewService() {
-
-    }
-
     fun confirmArrival(params: ConfirmArrivalParams) {
         _loading.value = true
-        if (validadeFields.validateFieldsConfirmArrival(params.arrivalKm)) {
+        if (validateFields.validateFieldsConfirmArrival(params.arrivalKm)) {
             if (currentService.value.statusService == "Em rota") {
                 viewModelScope.launch {
                     try {
@@ -267,7 +268,7 @@ class ServiceViewModel @Inject constructor(
 
     fun finishCurrentServiceAndGenerateNewService(params: FinishCurrentServiceAndGenerateNewServiceParams) {
         // VERIFICA SE ALGUM CAMPO ESTA VAZIO
-        if (validadeFields.validateFieldsFinishCurrentServiceAndGenerateNewService(
+        if (validateFields.validateFieldsFinishCurrentServiceAndGenerateNewService(
                 params.departureAddress,
                 params.serviceAddress,
                 params.departureKm
