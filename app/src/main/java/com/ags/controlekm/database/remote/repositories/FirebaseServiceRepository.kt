@@ -1,6 +1,7 @@
 package com.ags.controlekm.database.remote.repositories
 
 import com.ags.controlekm.database.models.Service
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -22,6 +23,35 @@ class FirebaseServiceRepository @Inject constructor(
                 for (childSnapshot in snapshot.children) {
                     val data = childSnapshot.getValue(Service::class.java)
                     data?.let { dataList.add(it) }
+                }
+                if (isActive) {
+                    trySend(dataList)
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                close(error.toException())
+            }
+        }
+
+        databaseReference.addValueEventListener(valueEventListener)
+        awaitClose { databaseReference.removeEventListener(valueEventListener) }
+    }
+
+    suspend fun getCurrentUserServices() = callbackFlow<List<Service>> {
+        val valueEventListener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val dataList = mutableListOf<Service>()
+                for (childSnapshot in snapshot.children) {
+                    val data = childSnapshot.getValue(Service::class.java)
+                    data?.let {
+                        if (FirebaseAuth.getInstance().currentUser != null) {
+                            when {
+                                data.technicianId.contains(FirebaseAuth.getInstance().currentUser!!.uid) ->
+                                dataList.add(it)
+                            }
+                        }
+                    }
                 }
                 if (isActive) {
                     trySend(dataList)

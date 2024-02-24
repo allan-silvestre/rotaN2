@@ -1,24 +1,29 @@
 package com.ags.controlekm.ui.views.serviceManager.viewModel
 
+import android.app.Application
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.BackoffPolicy
 import androidx.work.Data
+import androidx.work.ExistingWorkPolicy
+import androidx.work.ListenableWorker
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import com.ags.controlekm.database.remote.repositories.FirebaseCurrentUserRepository
-import com.ags.controlekm.database.remote.repositories.FirebaseServiceRepository
 import com.ags.controlekm.database.local.repositories.CurrentUserRepository
+import com.ags.controlekm.database.local.repositories.ServiceRepository
 import com.ags.controlekm.database.models.CurrentUser
 import com.ags.controlekm.database.models.Service
-import com.ags.controlekm.database.local.repositories.ServiceRepository
+import com.ags.controlekm.database.remote.repositories.FirebaseCurrentUserRepository
+import com.ags.controlekm.database.remote.repositories.FirebaseServiceRepository
 import com.ags.controlekm.ui.views.serviceManager.viewModel.modelsParams.ConfirmArrivalParams
 import com.ags.controlekm.ui.views.serviceManager.viewModel.modelsParams.FinishCurrentServiceAndGenerateNewServiceParams
 import com.ags.controlekm.ui.views.serviceManager.viewModel.modelsParams.NewServiceParams
 import com.ags.controlekm.ui.views.serviceManager.viewModel.modelsParams.StartReturnParams
 import com.ags.controlekm.ui.views.serviceManager.viewModel.validateFields.ValidateFields
-import com.ags.controlekm.workers.InsertNewService
+import com.ags.controlekm.workers.serviceManager.CancelService
+import com.ags.controlekm.workers.serviceManager.UpdateService
 import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,8 +38,10 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.UUID
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+
 
 @HiltViewModel
 class ServiceViewModel @Inject constructor(
@@ -44,7 +51,10 @@ class ServiceViewModel @Inject constructor(
     private val firebaseServiceRepository: FirebaseServiceRepository,
     private val validateFields: ValidateFields,
     private val workManager: WorkManager,
-) : ViewModel() {
+    application: Application
+) : AndroidViewModel(application) {
+
+    val tagName = "serviceWork"
 
     private var _visibleNewService = MutableStateFlow(false)
     val visibleNewService = _visibleNewService.asStateFlow()
@@ -75,13 +85,14 @@ class ServiceViewModel @Inject constructor(
                 _currentService.value = it
             }
             emit(_currentService.value)
-            serviceManagerCardControlContent()
+            serviceManagerCardContentControl()
         }
     }.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(),
         Service()
     )
+
     init {
         viewModelScope.launch(Dispatchers.IO) {
             launch {
@@ -89,12 +100,44 @@ class ServiceViewModel @Inject constructor(
                     currentUser.value = it
                 }
             }
-            launch {
-                firebaseServiceRepository.getAllServices().collect { serviceList ->
-                    serviceList.forEach { service ->
-                        serviceRepository.insert(service)
+            verifiedPendentWork(tagName){
+                if(it) {
+                    launch {
+                        firebaseServiceRepository.getCurrentUserServices().collect { servicesList ->
+                            servicesList.forEach { services ->
+                                serviceRepository.insert(services)
+                            }
+                        }
                     }
                 }
+            }
+        }
+    }
+
+    private fun verifiedPendentWork(tag: String, callback: (Boolean) -> Unit) {
+
+        val executor = Executors.newSingleThreadExecutor()
+
+        executor.execute {
+            try {
+                val workInfos = workManager.getWorkInfosByTag(tag).get()
+
+                var pendentWork = false
+
+                for (workInfo in workInfos) {
+                    if (workInfo.state == WorkInfo.State.ENQUEUED ||
+                        workInfo.state == WorkInfo.State.RUNNING) {
+                        // Existem trabalhos pendentes com a tag específica
+                        pendentWork = true
+                        break
+                    }
+                }
+
+                callback.invoke(!pendentWork)
+
+            } catch (e: Exception) {
+                println(e)
+                callback.invoke(false)
             }
         }
     }
@@ -106,6 +149,7 @@ class ServiceViewModel @Inject constructor(
                 params.departureKm
             )
         ) {
+
             val newService = Service()
             val currentUser = currentUser.value
 
@@ -122,152 +166,112 @@ class ServiceViewModel @Inject constructor(
             currentUser.lastKm = params.departureKm
 
             viewModelScope.launch(Dispatchers.IO) {
-                _loading.value = true
+                serviceRepository.update(newService)
+                currentUserRepository.update(currentUser)
 
-                val newServiceJson = Gson().toJson(newService)
-                val currentUserJson = Gson().toJson(currentUser)
-
-                val inputData = Data.Builder()
-                    .putString("newService", newServiceJson)
-                    .putString("currentUser", currentUserJson)
-                    .build()
-
-                val workRequest = OneTimeWorkRequestBuilder<InsertNewService>()
-                    .setId(UUID.fromString(newService.id))
-                    .setBackoffCriteria(BackoffPolicy.LINEAR, 30, TimeUnit.MINUTES)
-                    .setInputData(inputData)
-                    .build()
-
-                workManager.enqueue(workRequest)
-
-                delay(2000L)
-                _loading.value = false
+                registerServiceWorker<UpdateService>(newService, currentUser)
             }
         }
     }
 
     fun confirmArrival(params: ConfirmArrivalParams) {
-        _loading.value = true
+        val currentService = currentService.value
+        val currentUser = currentUser.value
+
         if (validateFields.validateFieldsConfirmArrival(params.arrivalKm)) {
-            if (currentService.value.statusService == "Em rota") {
-                viewModelScope.launch {
-                    try {
-                        currentService.value.dateArrival = params.date
-                        currentService.value.timeArrival = params.time
-                        currentService.value.arrivalKm = params.arrivalKm
-                        currentService.value.kmDriven =
-                            (params.arrivalKm - currentService.value.departureKm)
-                        currentService.value.statusService = "Em andamento"
+            if (currentService.statusService == "Em rota") {
+                currentService.dateArrival = params.date
+                currentService.timeArrival = params.time
+                currentService.arrivalKm = params.arrivalKm
+                currentService.kmDriven = (params.arrivalKm - currentService.departureKm)
+                currentService.statusService = "Em andamento"
 
-                        currentUser.value.lastKm = params.arrivalKm
+                currentUser.lastKm = params.arrivalKm
 
-                        update(currentService.value)
-                        currentUserRepository.update(currentUser.value)
-                        firebaseCurrentUserRepository.updateLastKm(params.arrivalKm)
-                        delay(1000L)
-                        _loading.value = false
-                    } finally {
+                viewModelScope.launch(Dispatchers.IO) {
+                    serviceRepository.update(currentService)
+                    currentUserRepository.update(currentUser)
 
-                    }
-                }
-            } else if (currentService.value.statusService == "Em rota, retornando") {
-                viewModelScope.launch {
-                    try {
-                        currentService.value.dateArrivalReturn = params.date
-                        currentService.value.timeCompletedReturn = params.time
-                        currentService.value.arrivalKm = params.arrivalKm
-                        currentService.value.statusService = "Finalizado"
-                        firebaseCurrentUserRepository.updateLastKm(params.arrivalKm)
-                        currentService.value.kmDriven =
-                            (params.arrivalKm - currentService.value.departureKm)
-
-                        currentUser.value.lastKm = params.arrivalKm
-                        currentUser.value.kmBackup = params.arrivalKm
-
-                        update(currentService.value)
-                        currentUserRepository.update(currentUser.value)
-                        firebaseCurrentUserRepository.updateLastKm(params.arrivalKm)
-                        firebaseCurrentUserRepository.updateKmBackup(params.arrivalKm)
-                        delay(1000L)
-                        _loading.value = false
-                    } finally {
-
-                    }
+                    registerServiceWorker<UpdateService>(currentService, currentUser)
                 }
 
+            } else if (currentService.statusService == "Em rota, retornando") {
+                currentService.dateArrivalReturn = params.date
+                currentService.timeCompletedReturn = params.time
+                currentService.arrivalKm = params.arrivalKm
+                currentService.statusService = "Finalizado"
+                currentService.kmDriven = (params.arrivalKm - currentService.departureKm)
+
+                currentUser.lastKm = params.arrivalKm
+                currentUser.kmBackup = params.arrivalKm
+
+                viewModelScope.launch(Dispatchers.IO) {
+                    serviceRepository.update(currentService)
+                    currentUserRepository.update(currentUser)
+
+                    registerServiceWorker<UpdateService>(currentService, currentUser)
+                }
             }
         }
     }
 
     fun startReturn(params: StartReturnParams) {
-        _loading.value = true
-        viewModelScope.launch {
-            try {
-                val currentService = currentService.value
+        val currentService = currentService.value
+        val currentUser = currentUser.value
 
-                currentService.dateCompletion = params.date
-                currentService.CompletionTime = params.time
+        currentService.dateCompletion = params.date
+        currentService.CompletionTime = params.time
 
-                currentService.description = params.serviceSummary
-                currentService.departureDateToReturn = params.date
-                currentService.startTimeReturn = params.time
-                currentService.addressReturn = params.returnAddress
-                currentService.statusService = "Em rota, retornando"
+        currentService.description = params.serviceSummary
+        currentService.departureDateToReturn = params.date
+        currentService.startTimeReturn = params.time
+        currentService.addressReturn = params.returnAddress
+        currentService.statusService = "Em rota, retornando"
 
-                update(currentService)
+        viewModelScope.launch(Dispatchers.IO) {
+            serviceRepository.update(currentService)
+            currentUserRepository.update(currentUser)
 
-                delay(1000L)
-                _loading.value = false
-            }finally {
-
-            }
+            registerServiceWorker<UpdateService>(currentService, currentUser)
         }
     }
 
     fun cancel() {
-        _loading.value = true
+        if (currentService.value.statusService == "Em rota, retornando") {
+            val currentService = currentService.value
+            val currentUser = currentUser.value
 
-        val currentUser = currentUser.value
-        val currentService = currentService.value
+            // CANCELA VIAGEM DE RETORNO
+            currentService.departureDateToReturn = ""
+            currentService.startTimeReturn = ""
+            currentService.addressReturn = ""
+            currentService.statusService = "Em andamento"
 
-        if (currentService.statusService == "Em rota, retornando") {
+            currentUser.lastKm = currentUser.kmBackup
+
             viewModelScope.launch(Dispatchers.IO) {
-                try {
-                    // CANCELA VIAGEM DE RETORNO
-                    currentService.departureDateToReturn = ""
-                    currentService.startTimeReturn = ""
-                    currentService.addressReturn = ""
-                    currentService.statusService = "Em andamento"
+                serviceRepository.update(currentService)
+                currentUserRepository.update(currentUser)
 
-                    currentUser.lastKm = currentUser.kmBackup
-
-                    update(currentService)
-                    delay(1000L)
-                    _loading.value = false
-                }finally {}
+                registerServiceWorker<UpdateService>(currentService, currentUser)
             }
-        } else {
-            viewModelScope.launch(Dispatchers.IO) {
-                try {
-                    // NO ROOM
-                    // DELETA O ATENDIMENTO ATUAL DA TABELA
-                    delete(Service(currentService.id))
-                    // NO ROOM
-                    // DEFINE O VALOR DO (ULTIMO KM) DO USUÁRIO PARA O ULTIMO INFORMADO AO CONCLUIR A ULTIMA VIAGEM
-                    currentUserRepository.update(currentUser)
-                    // NO FIREBASE
-                    // DEFINE O VALOR DO (ULTIMO KM) DO USUÁRIO PARA O ULTIMO INFORMADO AO CONCLUIR A ULTIMA VIAGEM
-                    firebaseCurrentUserRepository.updateLastKm(currentUser.kmBackup)
 
-                    delay(1000L)
-                    _loading.value = false
-                }finally {}
+        } else {
+            val currentService = currentService.value
+            val currentUser = currentUser.value
+
+            currentUser.lastKm = currentUser.kmBackup
+
+            viewModelScope.launch(Dispatchers.IO) {
+                serviceRepository.delete(currentService)
+                currentUserRepository.update(currentUser)
+
+                registerServiceWorker<CancelService>(currentService, currentUser)
             }
         }
     }
 
     fun finishCurrentServiceAndGenerateNewService(params: FinishCurrentServiceAndGenerateNewServiceParams) {
-        // VERIFICA SE ALGUM CAMPO ESTA VAZIO
         if (validateFields.validateFieldsFinishCurrentServiceAndGenerateNewService(
                 params.departureAddress,
                 params.serviceAddress,
@@ -290,7 +294,7 @@ class ServiceViewModel @Inject constructor(
                         currentUser.kmBackup = currentUser.lastKm
 
                         viewModelScope.launch(Dispatchers.IO) {
-                            update(currentService)
+                            serviceRepository.update(currentService)
                             currentUserRepository.update(currentUser)
                             firebaseCurrentUserRepository.updateKmBackup(currentUser.lastKm)
                         }
@@ -312,7 +316,7 @@ class ServiceViewModel @Inject constructor(
                         currentUser.lastKm = params.departureKm
 
                         viewModelScope.launch(Dispatchers.IO) {
-                            insert(newService)
+                            serviceRepository.insert(newService)
                             currentUserRepository.update(currentUser)
                             firebaseCurrentUserRepository.updateLastKm(params.departureKm)
                         }
@@ -325,7 +329,36 @@ class ServiceViewModel @Inject constructor(
         }
     }
 
-    private fun serviceManagerCardControlContent() {
+    private inline fun <reified T : ListenableWorker> registerServiceWorker(
+        service: Service,
+        currentUser: CurrentUser
+    ) {
+        _loading.value = true
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val inputData = Data.Builder()
+                .putString("service", Gson().toJson(service))
+                .putString("currentUser", Gson().toJson(currentUser))
+                .build()
+
+            val workRequest = OneTimeWorkRequestBuilder<T>()
+                .addTag(tagName)
+                .setBackoffCriteria(BackoffPolicy.LINEAR, 5, TimeUnit.MINUTES)
+                .setInputData(inputData)
+                .build()
+
+            workManager.enqueueUniqueWork(
+                service.id,
+                ExistingWorkPolicy.REPLACE,
+                workRequest
+            )
+
+            delay(2000L)
+            _loading.value = false
+        }
+    }
+
+    private fun serviceManagerCardContentControl() {
         when (currentService.value.statusService) {
             "" -> {
                 _contentText.value = ""
@@ -371,25 +404,5 @@ class ServiceViewModel @Inject constructor(
         }
     }
 
-    suspend fun insert(newService: Service) {
-        viewModelScope.launch(Dispatchers.IO) {
-            serviceRepository.insert(newService)
-            //firebaseServiceRepository.insert(newService)
-        }
-    }
-
-    suspend fun update(service: Service) {
-        viewModelScope.launch(Dispatchers.IO) {
-            serviceRepository.update(service)
-            //firebaseServiceRepository.update(service)
-        }
-    }
-
-    suspend fun delete(service: Service) {
-        viewModelScope.launch(Dispatchers.IO) {
-            serviceRepository.delete(service)
-            //firebaseServiceRepository.delete(service)
-        }
-    }
 }
 

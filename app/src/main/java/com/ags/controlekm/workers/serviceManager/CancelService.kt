@@ -1,4 +1,4 @@
-package com.ags.controlekm.workers
+package com.ags.controlekm.workers.serviceManager
 
 import android.content.Context
 import androidx.hilt.work.HiltWorker
@@ -16,40 +16,31 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 
 @HiltWorker
-class InsertNewService @AssistedInject constructor(
+class CancelService @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted params: WorkerParameters,
-    private val serviceRepository: ServiceRepository,
-    private val currentUserRepository: CurrentUserRepository,
     private val firebaseServiceRepository: FirebaseServiceRepository,
     private val firebaseCurrentUserRepository: FirebaseCurrentUserRepository,
     private val appViewModel: AppViewModel
-): CoroutineWorker(appContext, params) {
+): CoroutineWorker(appContext, params){
     override suspend fun doWork(): Result {
-        val serviceJson = inputData.getString("newService")
+        val serviceJson = inputData.getString("service")
         val currentUserJson = inputData.getString("currentUser")
 
-        val newService = Gson().fromJson(serviceJson, Service::class.java)
+        val service = Gson().fromJson(serviceJson, Service::class.java)
         val currentUser = Gson().fromJson(currentUserJson, CurrentUser::class.java)
 
         return try {
             if(appViewModel.isNetworkAvailable()) {
-                if (newService != null && currentUser != null) {
-                        // IN LOCAL DATABASE
-                        serviceRepository.insert(newService)
-                        currentUserRepository.update(currentUser)
-                        // IN REMOTE DATABASE
-                        firebaseServiceRepository.insert(newService)
-                        firebaseCurrentUserRepository.update(currentUser)
+                if (service != null && currentUser != null) {
+                    firebaseServiceRepository.delete(service)
+                    firebaseCurrentUserRepository.update(currentUser)
                     Result.success()
                 }else {
                     Result.failure()
                 }
             } else {
-                if (newService != null && currentUser != null) {
-                        // INSERT IN LOCAL DATABASE
-                        serviceRepository.insert(newService)
-                        currentUserRepository.update(currentUser)
+                if (service != null && currentUser != null) {
                     Result.retry()
                 } else{
                     Result.failure()
@@ -61,4 +52,3 @@ class InsertNewService @AssistedInject constructor(
         }
     }
 }
-
