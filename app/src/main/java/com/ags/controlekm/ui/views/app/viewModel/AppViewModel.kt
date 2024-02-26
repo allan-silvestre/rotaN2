@@ -8,7 +8,10 @@ import android.os.Build
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ags.controlekm.database.local.repositories.CurrentUserRepository
+import com.ags.controlekm.database.models.CurrentUser
 import com.ags.controlekm.database.models.Service
+import com.ags.controlekm.database.remote.repositories.FirebaseCurrentUserRepository
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,17 +25,48 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class AppViewModel @Inject constructor(application: Application): AndroidViewModel(application) {
+class AppViewModel @Inject constructor(
+    private val firebaseCurrentUserRepository: FirebaseCurrentUserRepository,
+    private val currentUserRepository: CurrentUserRepository,
+    application: Application
+): AndroidViewModel(application) {
     private var _showAppbarAndBottomBar = MutableStateFlow(false)
     val showAppbarAndBottomBar = _showAppbarAndBottomBar.asStateFlow()
 
     private var _isNetworkAvailable = MutableStateFlow(false)
     val isNetworkAvailable = _isNetworkAvailable.asStateFlow()
 
+    val currentUser = flow<CurrentUser> {
+        while (true) {
+            val _currentUser = MutableStateFlow(CurrentUser())
+            currentUserRepository.getCurrentUser()!!.firstOrNull()?.let {
+                _currentUser.value = it
+            }
+            emit(_currentUser.value)
+        }
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(),
+        CurrentUser()
+    )
+
     init {
         isNetworkAvailable()
         FirebaseAuth.getInstance().addAuthStateListener {
             _showAppbarAndBottomBar.value = it.currentUser != null
+            viewModelScope.launch(Dispatchers.IO) {
+                when {
+                    it.currentUser != null -> firebaseCurrentUserRepository.getCurrentUser().collect{
+                        currentUserRepository.insert(it)
+                        firebaseCurrentUserRepository.updateEmailVerification(
+                            FirebaseAuth.getInstance().currentUser!!.isEmailVerified
+                        )
+                    }
+
+                    it.currentUser == null -> currentUserRepository.deleteCurrentUser()
+
+                }
+            }
         }
     }
     fun isNetworkAvailable():Boolean {

@@ -40,7 +40,7 @@ import coil.compose.rememberImagePainter
 import coil.request.CachePolicy
 import coil.transform.CircleCropTransformation
 import com.ags.controlekm.navigation.navigateSingleTopTo
-import com.ags.controlekm.ui.viewModels.CurrentUserViewModel
+import com.ags.controlekm.ui.views.app.viewModel.AppViewModel
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
@@ -49,10 +49,10 @@ import kotlinx.coroutines.launch
 fun NavigationDrawer(
     navController: NavHostController,
     drawerState: DrawerState,
-    currentUserViewModel: CurrentUserViewModel = hiltViewModel<CurrentUserViewModel>(),
+    appViewModel: AppViewModel = hiltViewModel<AppViewModel>()
 ) {
     val scope = rememberCoroutineScope()
-    val currentUser by currentUserViewModel.currentUser.collectAsStateWithLifecycle()
+    val currentUser by appViewModel.currentUser.collectAsStateWithLifecycle()
 
     val currentUserImage = rememberImagePainter(
         data = currentUser.image,

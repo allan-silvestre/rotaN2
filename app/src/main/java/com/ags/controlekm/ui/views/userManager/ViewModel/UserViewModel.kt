@@ -1,4 +1,4 @@
-package com.ags.controlekm.ui.viewModels
+package com.ags.controlekm.ui.views.userManager.ViewModel
 
 import android.graphics.Bitmap
 import androidx.activity.ComponentActivity

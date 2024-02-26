@@ -2,7 +2,6 @@ package com.ags.controlekm.ui.views.app.fragments
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,12 +10,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Wifi
-import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material.icons.outlined.Wifi
 import androidx.compose.material.icons.outlined.WifiOff
-import androidx.compose.material.icons.rounded.Wifi
-import androidx.compose.material.icons.rounded.WifiOff
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -43,7 +38,6 @@ import coil.request.CachePolicy
 import coil.transform.CircleCropTransformation
 import com.ags.controlekm.R
 import com.ags.controlekm.database.models.CurrentUser
-import com.ags.controlekm.ui.viewModels.CurrentUserViewModel
 import com.ags.controlekm.ui.views.app.viewModel.AppViewModel
 import kotlinx.coroutines.launch
 
@@ -53,11 +47,10 @@ import kotlinx.coroutines.launch
 fun TopBar(
     drawerState: DrawerState,
     actionsOnClick: () -> Unit,
-    currentUserViewModel: CurrentUserViewModel = hiltViewModel<CurrentUserViewModel>(),
     appViewModel: AppViewModel = hiltViewModel<AppViewModel>()
 ) {
     val scope = rememberCoroutineScope()
-    val currentUser by currentUserViewModel.currentUser.collectAsState(CurrentUser())
+    val currentUser by appViewModel.currentUser.collectAsState(CurrentUser())
 
     val isNetworkAvailable by appViewModel.isNetworkAvailable.collectAsStateWithLifecycle()
 

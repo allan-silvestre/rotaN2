@@ -9,7 +9,6 @@ import kotlin.math.absoluteValue
 class MaskVisualTransformation(private val mask: String) : VisualTransformation {
 
     private val specialSymbolsIndices = mask.indices.filter { mask[it] != '#' }
-
     override fun filter(text: AnnotatedString): TransformedText {
         var out = ""
         var maskIndex = 0

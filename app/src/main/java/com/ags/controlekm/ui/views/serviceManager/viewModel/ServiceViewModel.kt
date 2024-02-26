@@ -37,7 +37,6 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.util.UUID
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -100,7 +99,7 @@ class ServiceViewModel @Inject constructor(
                     currentUser.value = it
                 }
             }
-            verifiedPendentWork(tagName){
+            verifyPendentWork(tagName){
                 if(it) {
                     launch {
                         firebaseServiceRepository.getCurrentUserServices().collect { servicesList ->
@@ -110,34 +109,6 @@ class ServiceViewModel @Inject constructor(
                         }
                     }
                 }
-            }
-        }
-    }
-
-    private fun verifiedPendentWork(tag: String, callback: (Boolean) -> Unit) {
-
-        val executor = Executors.newSingleThreadExecutor()
-
-        executor.execute {
-            try {
-                val workInfos = workManager.getWorkInfosByTag(tag).get()
-
-                var pendentWork = false
-
-                for (workInfo in workInfos) {
-                    if (workInfo.state == WorkInfo.State.ENQUEUED ||
-                        workInfo.state == WorkInfo.State.RUNNING) {
-                        // Existem trabalhos pendentes com a tag específica
-                        pendentWork = true
-                        break
-                    }
-                }
-
-                callback.invoke(!pendentWork)
-
-            } catch (e: Exception) {
-                println(e)
-                callback.invoke(false)
             }
         }
     }
@@ -285,7 +256,6 @@ class ServiceViewModel @Inject constructor(
             val newService = Service()
 
             viewModelScope.launch {
-                try {
                     // FINISH THE CURRENT SERVICE
                     delay(1000L)
                     launch {
@@ -296,7 +266,8 @@ class ServiceViewModel @Inject constructor(
                         viewModelScope.launch(Dispatchers.IO) {
                             serviceRepository.update(currentService)
                             currentUserRepository.update(currentUser)
-                            firebaseCurrentUserRepository.updateKmBackup(currentUser.lastKm)
+
+                            registerServiceWorker<UpdateService>(currentService, currentUser)
                         }
                     }
 
@@ -316,15 +287,14 @@ class ServiceViewModel @Inject constructor(
                         currentUser.lastKm = params.departureKm
 
                         viewModelScope.launch(Dispatchers.IO) {
-                            serviceRepository.insert(newService)
+                            serviceRepository.update(newService)
                             currentUserRepository.update(currentUser)
-                            firebaseCurrentUserRepository.updateLastKm(params.departureKm)
+
+                            registerServiceWorker<UpdateService>(newService, currentUser)
                         }
                     }
                     delay(3000L)
                     _loading.value = false
-                } finally {
-                }
             }
         }
     }
@@ -400,6 +370,34 @@ class ServiceViewModel @Inject constructor(
                 _visibleTraveling.value = false
                 _visibleInProgress.value = true
                 _visibleButtonCancel.value = true
+            }
+        }
+    }
+
+    private fun verifyPendentWork(tag: String, callback: (Boolean) -> Unit) {
+
+        val executor = Executors.newSingleThreadExecutor()
+
+        executor.execute {
+            try {
+                val workInfos = workManager.getWorkInfosByTag(tag).get()
+
+                var pendentWork = false
+
+                for (workInfo in workInfos) {
+                    if (workInfo.state == WorkInfo.State.ENQUEUED ||
+                        workInfo.state == WorkInfo.State.RUNNING) {
+                        // Existem trabalhos pendentes com a tag específica
+                        pendentWork = true
+                        break
+                    }
+                }
+
+                callback.invoke(!pendentWork)
+
+            } catch (e: Exception) {
+                println(e)
+                callback.invoke(false)
             }
         }
     }
