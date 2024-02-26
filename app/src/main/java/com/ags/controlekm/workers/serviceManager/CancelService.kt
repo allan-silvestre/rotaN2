@@ -1,6 +1,9 @@
 package com.ags.controlekm.workers.serviceManager
 
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -21,7 +24,6 @@ class CancelService @AssistedInject constructor(
     @Assisted params: WorkerParameters,
     private val firebaseServiceRepository: FirebaseServiceRepository,
     private val firebaseCurrentUserRepository: FirebaseCurrentUserRepository,
-    private val appViewModel: AppViewModel
 ): CoroutineWorker(appContext, params){
     override suspend fun doWork(): Result {
         val serviceJson = inputData.getString("service")
@@ -31,7 +33,7 @@ class CancelService @AssistedInject constructor(
         val currentUser = Gson().fromJson(currentUserJson, CurrentUser::class.java)
 
         return try {
-            if(appViewModel.isNetworkAvailable()) {
+            if(isNetworkAvailable()) {
                 if (service != null && currentUser != null) {
                     firebaseServiceRepository.delete(service)
                     firebaseCurrentUserRepository.update(currentUser)
@@ -51,4 +53,21 @@ class CancelService @AssistedInject constructor(
             Result.failure()
         }
     }
+
+    private fun isNetworkAvailable(): Boolean {
+        val connectivityManager =
+            applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        val networkCapabilities = connectivityManager.activeNetwork
+        val activeNetwork =
+            connectivityManager.getNetworkCapabilities(networkCapabilities)
+
+        return when {
+            activeNetwork?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true -> true
+            activeNetwork?.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) == true -> true
+            activeNetwork?.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) == true -> true
+            else -> false
+        }
+    }
+
 }

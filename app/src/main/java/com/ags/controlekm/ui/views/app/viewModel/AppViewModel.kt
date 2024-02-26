@@ -4,18 +4,17 @@ import android.app.Application
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.os.Build
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ags.controlekm.database.local.repositories.CurrentUserRepository
 import com.ags.controlekm.database.models.CurrentUser
-import com.ags.controlekm.database.models.Service
 import com.ags.controlekm.database.remote.repositories.FirebaseCurrentUserRepository
 import com.google.firebase.auth.FirebaseAuth
-import kotlinx.coroutines.CoroutineScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,13 +22,16 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.lang.ref.WeakReference
 import javax.inject.Inject
 
+@HiltViewModel
 class AppViewModel @Inject constructor(
-    private val firebaseCurrentUserRepository: FirebaseCurrentUserRepository,
     private val currentUserRepository: CurrentUserRepository,
+    private val firebaseCurrentUserRepository: FirebaseCurrentUserRepository,
     application: Application
 ): AndroidViewModel(application) {
+
     private var _showAppbarAndBottomBar = MutableStateFlow(false)
     val showAppbarAndBottomBar = _showAppbarAndBottomBar.asStateFlow()
 

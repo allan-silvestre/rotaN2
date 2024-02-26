@@ -11,6 +11,7 @@ import androidx.work.ListenableWorker
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
+import androidx.work.await
 import com.ags.controlekm.database.local.repositories.CurrentUserRepository
 import com.ags.controlekm.database.local.repositories.ServiceRepository
 import com.ags.controlekm.database.models.CurrentUser
@@ -37,23 +38,22 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-
 
 @HiltViewModel
 class ServiceViewModel @Inject constructor(
     private val serviceRepository: ServiceRepository,
     private val currentUserRepository: CurrentUserRepository,
-    private val firebaseCurrentUserRepository: FirebaseCurrentUserRepository,
     private val firebaseServiceRepository: FirebaseServiceRepository,
     private val validateFields: ValidateFields,
     private val workManager: WorkManager,
     application: Application
 ) : AndroidViewModel(application) {
 
-    val tagName = "serviceWork"
+    private val tagName = "serviceWork"
 
     private var _visibleNewService = MutableStateFlow(false)
     val visibleNewService = _visibleNewService.asStateFlow()
@@ -99,16 +99,28 @@ class ServiceViewModel @Inject constructor(
                     currentUser.value = it
                 }
             }
-            verifyPendentWork(tagName){
-                if(it) {
-                    launch {
-                        firebaseServiceRepository.getCurrentUserServices().collect { servicesList ->
-                            servicesList.forEach { services ->
-                                serviceRepository.insert(services)
-                            }
+            launch {
+                if (!verifyPendentWork(tagName)) {
+                    firebaseServiceRepository.getCurrentUserServices().collect { servicesList ->
+                        servicesList.forEach { services ->
+                            serviceRepository.insert(services)
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private suspend fun verifyPendentWork(tag: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val workInfos = workManager.getWorkInfosByTag(tag).get()
+                return@withContext workInfos.any {
+                    it.state == WorkInfo.State.ENQUEUED || it.state == WorkInfo.State.RUNNING
+                }
+            } catch (e: Exception) {
+                println(e)
+                return@withContext false
             }
         }
     }
@@ -137,7 +149,7 @@ class ServiceViewModel @Inject constructor(
             currentUser.lastKm = params.departureKm
 
             viewModelScope.launch(Dispatchers.IO) {
-                serviceRepository.update(newService)
+                serviceRepository.insert(newService)
                 currentUserRepository.update(currentUser)
 
                 registerServiceWorker<UpdateService>(newService, currentUser)
@@ -249,82 +261,48 @@ class ServiceViewModel @Inject constructor(
                 params.departureKm
             )
         ) {
-            _loading.value = true
 
             val currentUser = currentUser.value
             val currentService = currentService.value
             val newService = Service()
 
             viewModelScope.launch {
-                    // FINISH THE CURRENT SERVICE
-                    delay(1000L)
-                    launch {
-                        currentService.statusService = "Finalizado"
+                // FINISH THE CURRENT SERVICE
+                launch {
+                    currentService.statusService = "Finalizado"
 
-                        currentUser.kmBackup = currentUser.lastKm
+                    currentUser.kmBackup = currentUser.lastKm
 
-                        viewModelScope.launch(Dispatchers.IO) {
-                            serviceRepository.update(currentService)
-                            currentUserRepository.update(currentUser)
+                    viewModelScope.launch(Dispatchers.IO) {
+                        serviceRepository.update(currentService)
+                        currentUserRepository.update(currentUser)
 
-                            registerServiceWorker<UpdateService>(currentService, currentUser)
-                        }
+                        registerServiceWorker<UpdateService>(currentService, currentUser)
                     }
+                }
 
-                    // START A NEW SERVICE
-                    delay(2000L)
-                    launch {
-                        newService.departureDate = params.date
-                        newService.departureTime = params.time
-                        newService.departureAddress = params.departureAddress
-                        newService.serviceAddress = params.serviceAddress
-                        newService.departureKm = params.departureKm
-                        newService.technicianId = currentUser.id
-                        newService.technicianName = "${currentUser.name} ${currentUser.lastName}"
-                        newService.profileImgTechnician = currentUser.image
-                        newService.statusService = "Em rota"
+                // START A NEW SERVICE
+                launch {
+                    newService.departureDate = params.date
+                    newService.departureTime = params.time
+                    newService.departureAddress = params.departureAddress
+                    newService.serviceAddress = params.serviceAddress
+                    newService.departureKm = params.departureKm
+                    newService.technicianId = currentUser.id
+                    newService.technicianName = "${currentUser.name} ${currentUser.lastName}"
+                    newService.profileImgTechnician = currentUser.image
+                    newService.statusService = "Em rota"
 
-                        currentUser.lastKm = params.departureKm
+                    currentUser.lastKm = params.departureKm
 
-                        viewModelScope.launch(Dispatchers.IO) {
-                            serviceRepository.update(newService)
-                            currentUserRepository.update(currentUser)
+                    viewModelScope.launch(Dispatchers.IO) {
+                        serviceRepository.insert(newService)
+                        currentUserRepository.update(currentUser)
 
-                            registerServiceWorker<UpdateService>(newService, currentUser)
-                        }
+                        registerServiceWorker<UpdateService>(newService, currentUser)
                     }
-                    delay(3000L)
-                    _loading.value = false
+                }
             }
-        }
-    }
-
-    private inline fun <reified T : ListenableWorker> registerServiceWorker(
-        service: Service,
-        currentUser: CurrentUser
-    ) {
-        _loading.value = true
-
-        viewModelScope.launch(Dispatchers.IO) {
-            val inputData = Data.Builder()
-                .putString("service", Gson().toJson(service))
-                .putString("currentUser", Gson().toJson(currentUser))
-                .build()
-
-            val workRequest = OneTimeWorkRequestBuilder<T>()
-                .addTag(tagName)
-                .setBackoffCriteria(BackoffPolicy.LINEAR, 5, TimeUnit.MINUTES)
-                .setInputData(inputData)
-                .build()
-
-            workManager.enqueueUniqueWork(
-                service.id,
-                ExistingWorkPolicy.REPLACE,
-                workRequest
-            )
-
-            delay(2000L)
-            _loading.value = false
         }
     }
 
@@ -374,31 +352,32 @@ class ServiceViewModel @Inject constructor(
         }
     }
 
-    private fun verifyPendentWork(tag: String, callback: (Boolean) -> Unit) {
+    private inline fun <reified T : ListenableWorker> registerServiceWorker(
+        service: Service,
+        currentUser: CurrentUser
+    ) {
+        _loading.value = true
 
-        val executor = Executors.newSingleThreadExecutor()
+        viewModelScope.launch(Dispatchers.IO) {
+            val inputData = Data.Builder()
+                .putString("service", Gson().toJson(service))
+                .putString("currentUser", Gson().toJson(currentUser))
+                .build()
 
-        executor.execute {
-            try {
-                val workInfos = workManager.getWorkInfosByTag(tag).get()
+            val workRequest = OneTimeWorkRequestBuilder<T>()
+                .addTag(tagName)
+                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 10, TimeUnit.SECONDS)
+                .setInputData(inputData)
+                .build()
 
-                var pendentWork = false
+            workManager.enqueueUniqueWork(
+                service.id,
+                ExistingWorkPolicy.REPLACE,
+                workRequest
+            )
 
-                for (workInfo in workInfos) {
-                    if (workInfo.state == WorkInfo.State.ENQUEUED ||
-                        workInfo.state == WorkInfo.State.RUNNING) {
-                        // Existem trabalhos pendentes com a tag específica
-                        pendentWork = true
-                        break
-                    }
-                }
-
-                callback.invoke(!pendentWork)
-
-            } catch (e: Exception) {
-                println(e)
-                callback.invoke(false)
-            }
+            delay(2000L)
+            _loading.value = false
         }
     }
 

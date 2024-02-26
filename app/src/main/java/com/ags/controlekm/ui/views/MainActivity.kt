@@ -33,7 +33,6 @@ class MainActivity : ComponentActivity() {
                         PlayIntegrityAppCheckProviderFactory.getInstance(),
                     )
                     App()
-                    //Shimmer()
                 }
             }
         }

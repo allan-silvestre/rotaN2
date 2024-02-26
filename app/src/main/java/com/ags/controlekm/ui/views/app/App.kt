@@ -28,9 +28,7 @@ import com.ags.controlekm.ui.views.app.viewModel.AppViewModel
     "UnrememberedMutableState"
 )
 @Composable
-fun App(
-    appViewModel: AppViewModel = hiltViewModel<AppViewModel>()
-) {
+fun App(appViewModel: AppViewModel = hiltViewModel<AppViewModel>()) {
     val navController = rememberNavController()
 
     val itemsVisible by appViewModel.showAppbarAndBottomBar.collectAsState()
