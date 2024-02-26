@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import com.ags.controlekm.R
 import com.ags.controlekm.ui.components.dropDownMenu.SelectAddressDropDownMenu
 
 @Composable
@@ -14,15 +16,17 @@ fun NewService(
     serviceAddress: (String) -> Unit,
     departureKm: (String) -> Unit,
 ) {
+    val context = LocalContext.current
+
     Column(modifier = Modifier.fillMaxWidth()) {
         SelectAddressDropDownMenu(
-            labelAddress = "De (Local de saída)",
+            labelAddress = context.getString(R.string.departure_address_label),
             visibleAddress = true,
             SelectedAddres = {departureAddress(it)},
         )
         SelectAddressDropDownMenu(
-            labelAddress = "Para (Local do atendimento)",
-            labelKm = "KM de saída",
+            labelAddress = context.getString(R.string.arrival_address_label),
+            labelKm = context.getString(R.string.departure_km_label),
             data = date,
             time = time,
             visibleAddress = true,
