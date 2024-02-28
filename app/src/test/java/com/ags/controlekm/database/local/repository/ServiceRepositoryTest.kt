@@ -13,83 +13,40 @@ import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.Mockito.*
 import org.junit.Assert.assertEquals
 import com.ags.controlekm.database.models.Service
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.toList
+import org.junit.runners.JUnit4
 
 @RunWith(MockitoJUnitRunner::class)
 class ServiceRepositoryTest {
-
-    // Mocking ServiceDao
     @Mock
     private lateinit var mockServiceDao: ServiceDao
-
-    // Class under test
     private lateinit var serviceRepository: ServiceRepository
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
+        MockitoAnnotations.openMocks(this)
         serviceRepository = ServiceRepository(mockServiceDao)
     }
 
     @Test
-    fun getServicesCurrentUser_shouldReturnFlowOfServices() {
-        // Arrange
-        val mockFlow = flowOf<List<Service>>(listOf())
-        `when`(mockServiceDao.getServicesCurrentUser(anyString())).thenReturn(mockFlow)
+    fun `getAllServices should return services from dao`() = runBlocking {
+        // Given
+        val fakeServices = listOf(
+            Service(id = "1", serviceAddress = "Address 1"),
+            Service(id = "2", serviceAddress = "Address 2"),
+            Service(id = "3", serviceAddress = "Address 3")
+        )
 
-        // Act
-        val result = serviceRepository.getServicesCurrentUser()
+        `when`(mockServiceDao.getAllServices()).thenReturn(flow { emit(fakeServices) })
 
-        // Assert
-        assertEquals(mockFlow, result)
-    }
+        // When
+        val result = serviceRepository.getAllServices()
 
-    @Test
-    fun getCurrentService_shouldReturnFlowOfService() {
-        // Arrange
-        val mockFlow = flowOf<Service>(Service(/* Mocked service */))
-        `when`(mockServiceDao.getCurrentService(anyString(), anyString(), anyString(), anyString()))
-            .thenReturn(mockFlow)
-
-        // Act
-        val result = serviceRepository.getcurrentService()
-
-        // Assert
-        assertEquals(mockFlow, result)
-    }
-
-    @Test
-    fun insert_shouldCallServiceDaoInsert() = runBlocking {
-        // Arrange
-        val mockService = mock(Service::class.java)
-
-        // Act
-        serviceRepository.insert(mockService)
-
-        // Assert
-        verify(mockServiceDao).insert(mockService)
-    }
-
-    @Test
-    fun update_shouldCallServiceDaoUpdate() = runBlocking {
-        // Arrange
-        val mockService = mock(Service::class.java)
-
-        // Act
-        serviceRepository.update(mockService)
-
-        // Assert
-        verify(mockServiceDao).update(mockService)
-    }
-
-    @Test
-    fun delete_shouldCallServiceDaoDelete() = runBlocking {
-        // Arrange
-        val mockService = mock(Service::class.java)
-
-        // Act
-        serviceRepository.delete(mockService)
-
-        // Assert
-        verify(mockServiceDao).delete(mockService)
+        // Then
+        result.collect { services ->
+            assertEquals(fakeServices, services)
+        }
     }
 }

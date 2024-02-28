@@ -11,12 +11,10 @@ import androidx.work.ListenableWorker
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import androidx.work.await
 import com.ags.controlekm.database.local.repositories.CurrentUserRepository
 import com.ags.controlekm.database.local.repositories.ServiceRepository
 import com.ags.controlekm.database.models.CurrentUser
 import com.ags.controlekm.database.models.Service
-import com.ags.controlekm.database.remote.repositories.FirebaseCurrentUserRepository
 import com.ags.controlekm.database.remote.repositories.FirebaseServiceRepository
 import com.ags.controlekm.ui.views.serviceManager.viewModel.modelsParams.ConfirmArrivalParams
 import com.ags.controlekm.ui.views.serviceManager.viewModel.modelsParams.FinishCurrentServiceAndGenerateNewServiceParams
@@ -39,7 +37,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -74,13 +71,13 @@ class ServiceViewModel @Inject constructor(
     private val _loading = mutableStateOf(false)
     val loading get() = _loading
 
-    var servicesCurrentUser: Flow<List<Service>> = serviceRepository.getServicesCurrentUser()
     var currentUser = MutableStateFlow(CurrentUser())
+    var servicesCurrentUser: Flow<List<Service>> = serviceRepository.getServicesCurrentUser(currentUser.value.id)
 
     val currentService = flow<Service> {
         while (true) {
             val _currentService = MutableStateFlow(Service())
-            serviceRepository.getcurrentService()!!.firstOrNull()?.let {
+            serviceRepository.getCurrentService(currentUser.value.id)!!.firstOrNull()?.let {
                 _currentService.value = it
             }
             emit(_currentService.value)

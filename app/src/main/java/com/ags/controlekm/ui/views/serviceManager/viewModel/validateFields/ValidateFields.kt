@@ -23,7 +23,7 @@ class ValidateFields @Inject constructor(
                 currentUserRepository.getCurrentUser()!!.firstOrNull()?.let {
                     currentUser = it
                 }
-                serviceRepository.getcurrentService()!!.firstOrNull()?.let {
+                serviceRepository.getCurrentService(currentUser.id)!!.firstOrNull()?.let {
                     currentService = it
                 }
             }
