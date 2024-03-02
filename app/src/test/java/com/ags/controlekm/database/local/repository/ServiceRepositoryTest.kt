@@ -13,9 +13,11 @@ import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.Mockito.*
 import org.junit.Assert.assertEquals
 import com.ags.controlekm.database.models.Service
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
-import org.mockito.kotlin.whenever
 
 @RunWith(MockitoJUnitRunner::class)
 class ServiceRepositoryTest {
@@ -77,4 +79,43 @@ class ServiceRepositoryTest {
 
         verifyNoMoreInteractions(mockServiceDao)
     }
+
+    @Test
+    fun `getCurrentService should return service in pending`() = runBlocking {
+        // Configuração do cenário de teste
+        val currentUserId = "user_01"
+        val statusExpected = "Em rota"
+        val services = listOf(
+            Service(id = "1", technicianId = "user_01", statusService = statusExpected),
+            Service(id = "2", technicianId = "user_01", statusService = "Completed"),
+            Service(id = "3", technicianId = "user_02", statusService = "Completed"),
+            Service(id = "4", technicianId = "user_03", statusService = "Completed")
+        )
+
+        `when`(mockServiceDao.getCurrentService(
+            currentUserId,
+            "Em rota",
+            "Em andamento",
+            "Em rota, retornando"))
+            .thenReturn(flowOf(services.find { it.statusService == statusExpected }) as Flow<Service>?)
+
+        val result = serviceRepository.getCurrentService(currentUserId)
+
+        val expected = services.filter { it.statusService == statusExpected }
+
+        assertNotNull(result)
+
+        result!!.collect{
+            assertEquals(expected, listOf(it))
+        }
+
+        verify(mockServiceDao).getCurrentService(
+            currentUserId,
+            "Em rota",
+            "Em andamento",
+            "Em rota, retornando")
+
+        verifyNoMoreInteractions(mockServiceDao)
+    }
+
 }

@@ -37,7 +37,6 @@ fun ServiceManagerView(
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            Text(serviceViewModel.currentUser.value.id)
             ServiceManagerCard()
 
             Spacer(modifier = Modifier.height(16.dp))
