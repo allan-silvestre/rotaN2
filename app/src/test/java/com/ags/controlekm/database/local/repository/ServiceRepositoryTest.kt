@@ -97,11 +97,11 @@ class ServiceRepositoryTest {
             "Em rota",
             "Em andamento",
             "Em rota, retornando"))
-            .thenReturn(flowOf(services.find { it.statusService == statusExpected }) as Flow<Service>?)
+            .thenReturn(flowOf(services.find { it.statusService == statusExpected && it.technicianId == currentUserId }) as Flow<Service>?)
 
         val result = serviceRepository.getCurrentService(currentUserId)
 
-        val expected = services.filter { it.statusService == statusExpected }
+        val expected = services.filter { it.statusService == statusExpected && it.technicianId == currentUserId }
 
         assertNotNull(result)
 
