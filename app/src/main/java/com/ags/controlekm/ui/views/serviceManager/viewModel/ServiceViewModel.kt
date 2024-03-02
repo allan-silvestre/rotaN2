@@ -32,8 +32,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -72,7 +74,8 @@ class ServiceViewModel @Inject constructor(
     val loading get() = _loading
 
     var currentUser = MutableStateFlow(CurrentUser())
-    var servicesCurrentUser: Flow<List<Service>> = serviceRepository.getServicesCurrentUser(currentUser.value.id)
+
+    var servicesCurrentUser: Flow<List<Service>> = flowOf(emptyList())
 
     val currentService = flow<Service> {
         while (true) {
@@ -92,8 +95,11 @@ class ServiceViewModel @Inject constructor(
     init {
         viewModelScope.launch(Dispatchers.IO) {
             launch {
-                currentUserRepository.getCurrentUser()!!.firstOrNull()?.let {
-                    currentUser.value = it
+                currentUserRepository.getCurrentUser()!!.firstOrNull()?.let { currentUserData ->
+                    currentUser.value = currentUserData
+                    serviceRepository.getServicesCurrentUser(currentUser.value.id).collect{ listServicesCurrentUser ->
+                        servicesCurrentUser = flowOf(listServicesCurrentUser)
+                    }
                 }
             }
             launch {
