@@ -1,4 +1,4 @@
-# <h2>N2+ (EM DESENVOLVIMENTO)<h2>
+# <h2>N2+<h2>
 
 <h4>
 Projeto de controle de rota de equipe de suporte N2.<br><br>
